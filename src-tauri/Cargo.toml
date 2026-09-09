@@ -28,6 +28,7 @@ statasmon-protocol = { workspace = true }
 statasmon-core = { workspace = true }
 statasmon-device = { workspace = true }
 statasmon-device-fake = { workspace = true }
+statasmon-device-android = { workspace = true }
 parking_lot = { workspace = true }
 tracing-subscriber = { workspace = true }
 

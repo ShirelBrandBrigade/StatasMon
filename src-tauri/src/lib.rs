@@ -9,17 +9,51 @@ use std::sync::Arc;
 
 use parking_lot::Mutex;
 use statasmon_core::{Engine, EngineConfig};
+use statasmon_device_android::adb::{AdbDiscovery, AdbLocation};
 use statasmon_device_fake::FakeDiscovery;
 use tauri::Manager;
 
 use state::{AppState, SourceMode};
 
+/// `STATASMON_SOURCE=fake` (what `pnpm dev:mock` sets) runs the fake
+/// devices; `real`, `auto` or unset attach the real providers.
 fn source_mode() -> SourceMode {
     match std::env::var("STATASMON_SOURCE").as_deref() {
-        Ok("real") => SourceMode::Real,
-        // Real providers arrive in Phases 2–4; until then the fake is the default.
-        _ => SourceMode::Fake,
+        Ok("fake") => SourceMode::Fake,
+        _ => SourceMode::Real,
     }
+}
+
+/// Attach the Android discovery. When adb is missing the discovery keeps
+/// re-running the locator, so the device appears once platform-tools is
+/// installed; the hint is logged here (surfacing it on the bus needs an
+/// engine-side notice API, see the step 2.2 report).
+fn attach_android(engine: &Engine) {
+    let engine = engine.clone();
+    tauri::async_runtime::spawn(async move {
+        match statasmon_device_android::adb::locate().await {
+            AdbLocation::Found {
+                path,
+                source,
+                version,
+            } => tracing::info!(
+                adb = %path.display(),
+                ?source,
+                version = version.map(|v| v.version).unwrap_or_default(),
+                "android: adb located"
+            ),
+            AdbLocation::Missing { hint } => {
+                tracing::error!(code = "adb_not_found", hint = %hint, "android: adb not found");
+                engine.notice(statasmon_protocol::Message::Error {
+                    device_id: None,
+                    code: statasmon_protocol::ErrorCode::AdbNotFound,
+                    message: "adb was not found on this computer".to_owned(),
+                    hint: Some(hint),
+                });
+            }
+        }
+        engine.attach_discovery(Box::new(AdbDiscovery::from_locator()));
+    });
 }
 
 fn init_tracing() {
@@ -52,7 +86,10 @@ pub fn run() {
                     Some(handle)
                 }
                 SourceMode::Real => {
-                    tracing::warn!("device source: real (no providers implemented yet)");
+                    attach_android(&engine);
+                    tracing::info!(
+                        "device source: real (android over adb; iOS arrives in Phase 3)"
+                    );
                     None
                 }
             };

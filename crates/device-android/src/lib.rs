@@ -21,6 +21,10 @@ pub mod samplers;
 pub mod shell;
 pub mod source;
 
+pub use adb::{AdbDiscovery, AdbHandle, AdbLocation, AdbServer, locate};
+pub use info::read_info;
+pub use probe::Probe;
 pub use shell::fixture::FixtureShell;
 pub use shell::process::ProcessShell;
 pub use shell::{Shell, ShellError, ShellStream};
+pub use source::{AndroidSource, SourceSeed};

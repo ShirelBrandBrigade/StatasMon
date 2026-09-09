@@ -178,6 +178,8 @@ struct Inner {
     ingress: EventSink,
     tasks: Mutex<Vec<JoinHandle<()>>>,
     shut_down: parking_lot::Mutex<bool>,
+    /// Startup / global notices (e.g. adb not found) replayed to late subscribers.
+    notices: parking_lot::Mutex<Vec<Message>>,
 }
 
 /// The session engine. Cheap to clone; all clones share one state.
@@ -209,6 +211,7 @@ impl Engine {
             ingress,
             tasks: Mutex::new(Vec::new()),
             shut_down: Mutex::new(false),
+            notices: parking_lot::Mutex::new(Vec::new()),
         });
         let engine = Self { inner };
         let ingress = tokio::spawn(engine.clone().ingress_loop(rx));
@@ -539,6 +542,26 @@ impl Engine {
             pid: None,
             process: None,
         });
+    }
+
+    /// Publish a message that is not tied to a device source (startup errors,
+    /// tool problems). Kept (last 20) so a UI that subscribes later still
+    /// sees it; see [`Engine::notices`].
+    pub fn notice(&self, message: Message) {
+        {
+            let mut n = self.inner.notices.lock();
+            n.push(message.clone());
+            if n.len() > 20 {
+                let drop = n.len() - 20;
+                n.drain(..drop);
+            }
+        }
+        self.publish(message);
+    }
+
+    /// Notices published so far with [`Engine::notice`], oldest first.
+    pub fn notices(&self) -> Vec<Message> {
+        self.inner.notices.lock().clone()
     }
 
     fn publish(&self, message: Message) {

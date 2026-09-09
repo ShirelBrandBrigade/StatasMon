@@ -59,3 +59,25 @@ forwarded as `Samples`/`Cores`/`Processes`/`Log`; `Info`, `Capabilities`,
 `DeviceState`, `Event`, `Error`, `Headline` and `Session` always flow.
 Consequences: the UI can show live numbers with a "paused" badge; storage
 (Phase 5) follows the same gate.
+
+## ADR-009 · 2026-09-09 · Android transport is the adb binary as a subprocess
+Status: accepted; supersedes the client-crate part of ADR-005 (the
+"adb found on the machine or downloaded with consent, reuse a running
+server" part stands). Context: step 2.1–2.2 needed a transport now. A
+Rust host-protocol client (`adb_client`) adds a dependency that must track
+adb's USB, TLS-PSK and per-OEM quirks, while the adb binary is already
+required for the server. Measured on the Galaxy Tab S8: ~50 ms per
+`adb -s <serial> shell …` call on macOS, and every tick batches its
+commands into one `sh -c`, so the overhead is one process spawn per
+cadence per tick. Decision: `ProcessShell` (spawn `adb shell`), device
+tracking by polling `adb devices -l` every 2 s, `adb pair`/`adb connect`
+for wireless; the server port is whatever adb uses (`ANDROID_ADB_SERVER_PORT`
+is inherited, so a second server never fights Android Studio). The connect
+probe is one batched command with sentinel sections and never enumerates
+`/sys/class/thermal` (9 s on Samsung). Core-type heuristic: the cpufreq
+policy group with the lowest `cpuinfo_max_freq` is "efficiency", every
+other policy is "performance" (1+3+4 Snapdragon → 4P + 4E). Consequences:
+zero new crates; a native host-protocol client (`host:track-devices`,
+persistent shells) is a later optimisation behind the same `Shell` trait;
+`nproc` is not used for core counts because it honours the shell's cpuset
+(6 of 8 on the Tab S8) — `/sys/devices/system/cpu/possible` is.

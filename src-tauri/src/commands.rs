@@ -49,6 +49,9 @@ type CmdResult<T> = Result<T, CommandError>;
 #[tauri::command]
 pub fn subscribe(state: State<'_, AppState>, channel: Channel<Message>) -> CmdResult<()> {
     let engine = state.engine.clone();
+    for notice in engine.notices() {
+        let _ = channel.send(notice);
+    }
     // Replay current state so the UI never starts empty.
     for summary in engine.devices() {
         if let Some(snap) = engine.snapshot(&summary.id) {

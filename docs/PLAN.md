@@ -296,10 +296,12 @@ Acceptance: the Overview matches AD-1 on the fake device; perf budgets met.
 ### Phase 2 — Android provider (real hardware first, because it is simplest)
 2.1 adb locator: installed adb, `~/Downloads/platform-tools` for dev,
     first-run download with terms acceptance; server reuse/own port ·
-    core-android · unit tests with a stub server.
+    core-android · unit tests with a stub server · done 2026-09-09
+    (locator + server + polling discovery; the first-run download itself
+    is deferred to 6.6 Settings, the managed path and hint exist).
 2.2 Device tracking, probe, `CapabilitySet`, `DeviceInfo` (all getprop and
     proc fields, SoC name mapping) · core-android · fixtures from the
-    user's Android device.
+    user's Android device · done 2026-09-09.
 2.3 1 s batch sampler: `/proc/stat` per core, cpufreq, meminfo, loadavg,
     `/proc/net/dev`; parsers with fixture tests · core-android.
 2.4 2–5 s sampler: `dumpsys battery` + power_supply sysfs, process
@@ -309,7 +311,9 @@ Acceptance: the Overview matches AD-1 on the fake device; perf budgets met.
     (opt-in), foreground app · core-android.
 2.6 logcat stream → `LogEntry`, `--pid` per-app filter, LMK kill and crash
     events, dropbox crash/ANR fetch · core-android.
-2.7 Wireless pairing dialog (`adb pair`/`connect`, mDNS list) · ui + core.
+2.7 Wireless pairing dialog (`adb pair`/`connect`, mDNS list) · ui + core
+    · core done 2026-09-09 (`AdbHandle::pair/connect`, `DeviceAction::AdbPair/
+    AdbConnect`); dialog + mDNS list pending (ui).
 Acceptance: the Overview runs live on a real Android device with every
 FEATURES.md field either filled or dashed with a reason.
 
