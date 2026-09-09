@@ -36,6 +36,122 @@ pub trait Shell: Send + Sync + std::fmt::Debug {
     async fn stream(&self, cmd: &str) -> Result<ShellStream, ShellError>;
 }
 
+pub mod process {
+    //! A `Shell` that spawns the adb binary per command (`adb -s <serial>
+    //! shell <cmd>`). ~50 ms overhead per call on macOS, which is fine when
+    //! every tick batches its commands into one `sh -c` invocation.
+
+    use std::path::{Path, PathBuf};
+    use std::process::Stdio;
+    use std::sync::Arc;
+    use std::time::Duration;
+
+    use async_trait::async_trait;
+    use tokio::process::Command;
+
+    use super::{Shell, ShellError, ShellStream};
+
+    #[derive(Debug, Clone)]
+    pub struct ProcessShell {
+        adb: Arc<PathBuf>,
+        serial: String,
+    }
+
+    impl ProcessShell {
+        pub fn new(adb: impl AsRef<Path>, serial: impl Into<String>) -> Self {
+            Self {
+                adb: Arc::new(adb.as_ref().to_path_buf()),
+                serial: serial.into(),
+            }
+        }
+
+        pub fn adb_path(&self) -> &Path {
+            &self.adb
+        }
+
+        fn command(&self, args: &[&str]) -> Command {
+            let mut c = Command::new(&*self.adb);
+            c.arg("-s").arg(&self.serial).args(args);
+            c.stdin(Stdio::null())
+                .stdout(Stdio::piped())
+                .stderr(Stdio::piped());
+            c.kill_on_drop(true);
+            c
+        }
+
+        /// Run a non-shell adb subcommand (`pair`, `connect`, `bugreport`…).
+        pub async fn adb(&self, args: &[&str], timeout_ms: u64) -> Result<String, ShellError> {
+            let mut c = Command::new(&*self.adb);
+            c.args(args)
+                .stdin(Stdio::null())
+                .stdout(Stdio::piped())
+                .stderr(Stdio::piped());
+            c.kill_on_drop(true);
+            let out = tokio::time::timeout(Duration::from_millis(timeout_ms), c.output())
+                .await
+                .map_err(|_| ShellError::Timeout(timeout_ms))??;
+            let mut text = String::from_utf8_lossy(&out.stdout).into_owned();
+            if !out.stderr.is_empty() {
+                text.push_str(&String::from_utf8_lossy(&out.stderr));
+            }
+            Ok(text)
+        }
+    }
+
+    #[async_trait]
+    impl Shell for ProcessShell {
+        fn serial(&self) -> &str {
+            &self.serial
+        }
+
+        async fn exec(&self, cmd: &str, timeout_ms: u64) -> Result<String, ShellError> {
+            let mut c = self.command(&["shell", cmd]);
+            let out = tokio::time::timeout(Duration::from_millis(timeout_ms), c.output())
+                .await
+                .map_err(|_| ShellError::Timeout(timeout_ms))??;
+            let stderr = String::from_utf8_lossy(&out.stderr);
+            if stderr.contains("device")
+                && (stderr.contains("not found") || stderr.contains("offline"))
+            {
+                return Err(ShellError::DeviceGone(self.serial.clone()));
+            }
+            let mut text = String::from_utf8_lossy(&out.stdout).into_owned();
+            if !stderr.is_empty() {
+                text.push_str(&stderr);
+            }
+            Ok(text)
+        }
+
+        async fn stream(&self, cmd: &str) -> Result<ShellStream, ShellError> {
+            let mut child = self.command(&["shell", cmd]).spawn()?;
+            let stdout = child
+                .stdout
+                .take()
+                .ok_or_else(|| ShellError::Server("no stdout".into()))?;
+            // Keep the child alive as long as the stream is read.
+            Ok(Box::pin(ChildStream {
+                stdout,
+                _child: child,
+            }))
+        }
+    }
+
+    struct ChildStream {
+        stdout: tokio::process::ChildStdout,
+        _child: tokio::process::Child,
+    }
+
+    impl tokio::io::AsyncRead for ChildStream {
+        fn poll_read(
+            mut self: std::pin::Pin<&mut Self>,
+            cx: &mut std::task::Context<'_>,
+            buf: &mut tokio::io::ReadBuf<'_>,
+        ) -> std::task::Poll<std::io::Result<()>> {
+            std::pin::Pin::new(&mut self.stdout).poll_read(cx, buf)
+        }
+    }
+}
+
 pub mod fixture {
     //! A `Shell` that replays `fixtures/android/<device>/<name>.txt` files.
     //! Commands are matched by the `cmd` recorded in `manifest.json`; unknown

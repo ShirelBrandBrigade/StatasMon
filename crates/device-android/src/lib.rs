@@ -21,4 +21,6 @@ pub mod samplers;
 pub mod shell;
 pub mod source;
 
+pub use shell::fixture::FixtureShell;
+pub use shell::process::ProcessShell;
 pub use shell::{Shell, ShellError, ShellStream};
