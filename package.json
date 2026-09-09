@@ -20,7 +20,7 @@
     "test": "pnpm -r --if-present test",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
     "e2e": "pnpm --filter @statasmon/desktop e2e",
-    "protocol:gen": "cargo test -p statasmon-protocol --features ts-export export_bindings",
+    "protocol:gen": "cargo test -p statasmon-protocol && node scripts/gen-protocol-index.mjs",
     "plan": "python3 scripts/render-plan.py .plan.html"
   },
   "devDependencies": {

@@ -5,8 +5,12 @@ edition.workspace = true
 license.workspace = true
 publish.workspace = true
 rust-version.workspace = true
+description = "The one data contract between device providers, the core and the UI"
 
 [dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+ts-rs = { workspace = true }
 
 [lints]
 workspace = true
