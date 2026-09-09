@@ -18,6 +18,7 @@
 
 pub mod battery;
 pub mod crash;
+pub mod error;
 pub mod info;
 pub mod lockdown;
 pub mod muxd;
@@ -26,3 +27,5 @@ pub mod pcap;
 pub mod source;
 pub mod storage;
 pub mod thermal;
+
+pub use error::IosError;
