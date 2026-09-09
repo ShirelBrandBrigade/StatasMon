@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
@@ -6,6 +7,9 @@ const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
   plugins: [react({ compiler: true }), tailwindcss()],
+  define: {
+    __FIXTURE_DIR__: JSON.stringify(resolve(__dirname, "../../fixtures/fake")),
+  },
   clearScreen: false,
   server: {
     port: 1420,
