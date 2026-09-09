@@ -1,7 +1,9 @@
 import { Button, cx, Icon } from "@statasmon/ui";
+import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { commands } from "../bridge/commands";
 import { useAppStore } from "../store/app";
+import { AddDeviceDialog } from "./AddDeviceDialog";
 import { DeviceCard } from "./DeviceCard";
 import { forgetDetached, useDetached } from "./detached";
 import { deviceIcon } from "./format";
@@ -18,6 +20,7 @@ export function Sidebar({ view }: { view: ViewId }) {
     })),
   );
   const detached = useDetached().filter((d) => !(d.id in devices));
+  const [addOpen, setAddOpen] = useState(false);
 
   return (
     <aside className="side">
@@ -61,15 +64,15 @@ export function Sidebar({ view }: { view: ViewId }) {
         <button
           type="button"
           className="add-device"
-          title="Real devices arrive in Phase 2"
-          aria-describedby="add-device-hint"
+          style={{ cursor: "pointer" }}
+          aria-haspopup="dialog"
+          aria-expanded={addOpen}
+          onClick={() => setAddOpen(true)}
         >
           <Icon name="plus" size={12} strokeWidth={3} />
           Add a device
         </button>
-        <span id="add-device-hint" hidden>
-          Real devices arrive in Phase 2
-        </span>
+        <AddDeviceDialog open={addOpen} onClose={() => setAddOpen(false)} />
       </div>
 
       <nav className="side-group" aria-label="Views">

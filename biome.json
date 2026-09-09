@@ -13,7 +13,8 @@
       "!**/generated",
       "!**/src-tauri/gen",
       "!design-mockups",
-      "!docs"
+      "!docs",
+      "!fixtures"
     ]
   },
   "formatter": {

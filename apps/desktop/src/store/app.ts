@@ -3,6 +3,7 @@ import type {
   ConnectionState,
   DeviceInfo,
   DeviceSummary,
+  ErrorCode,
   Headline,
   MetricId,
   SessionState,
@@ -30,12 +31,34 @@ export interface DeviceEntry {
   errorCount: number;
 }
 
+/** A core `error` message surfaced to the user (Notices stack, EmptyState). */
+export interface Notice {
+  id: string;
+  code: ErrorCode;
+  message: string;
+  hint?: string;
+  deviceId?: string;
+  /** `Date.now()` when it was pushed. */
+  at: number;
+}
+
+export type NoticeInput = Omit<Notice, "id" | "at"> & { at?: number };
+
+/** Only the most recent notices are kept. */
+export const NOTICE_LIMIT = 20;
+
+let noticeSeq = 0;
+
 interface AppState {
   devices: Record<string, DeviceEntry>;
   order: string[];
   activeDeviceId?: string;
   range: Range;
   streamKind: "tauri" | "replay" | "none";
+  notices: Notice[];
+  /** Appends a notice (dropping the oldest past `NOTICE_LIMIT`) and returns its id. */
+  pushNotice(n: NoticeInput): string;
+  dismissNotice(id: string): void;
   upsertDevice(summary: DeviceSummary): void;
   removeDevice(id: string): void;
   patchDevice(id: string, patch: Partial<DeviceEntry>): void;
@@ -60,6 +83,18 @@ export const useAppStore = create<AppState>((set) => ({
   activeDeviceId: undefined,
   range: "5m",
   streamKind: "none",
+  notices: [],
+  pushNotice: (n) => {
+    noticeSeq += 1;
+    const id = `notice-${noticeSeq}`;
+    const notice: Notice = { ...n, id, at: n.at ?? Date.now() };
+    set((s) => ({ notices: [...s.notices, notice].slice(-NOTICE_LIMIT) }));
+    return id;
+  },
+  dismissNotice: (id) =>
+    set((s) =>
+      s.notices.some((n) => n.id === id) ? { notices: s.notices.filter((n) => n.id !== id) } : s,
+    ),
   upsertDevice: (summary) =>
     set((s) => {
       const existing = s.devices[summary.id];
@@ -103,5 +138,5 @@ export const useAppStore = create<AppState>((set) => ({
   setActive: (id) => set({ activeDeviceId: id }),
   setRange: (range) => set({ range }),
   setStreamKind: (streamKind) => set({ streamKind }),
-  reset: () => set({ devices: {}, order: [], activeDeviceId: undefined }),
+  reset: () => set({ devices: {}, order: [], activeDeviceId: undefined, notices: [] }),
 }));

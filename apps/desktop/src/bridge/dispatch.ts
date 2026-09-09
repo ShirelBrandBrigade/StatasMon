@@ -61,6 +61,12 @@ export function dispatch(m: Message): void {
         const d = s.devices[m.device_id];
         if (d) s.patchDevice(m.device_id, { errorCount: d.errorCount + 1 });
       }
+      s.pushNotice({
+        code: m.code,
+        message: m.message,
+        hint: m.hint ?? undefined,
+        deviceId: m.device_id ?? undefined,
+      });
       console.warn(`[core] ${m.code}: ${m.message}${m.hint ? ` — ${m.hint}` : ""}`);
       break;
     }

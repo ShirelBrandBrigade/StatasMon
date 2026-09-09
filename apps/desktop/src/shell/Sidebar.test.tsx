@@ -42,7 +42,7 @@ test("lists every device with its transport · state line and switches the activ
   expect(list.getByText("Studio iPad")).toBeInTheDocument();
   expect(list.getByText("Galaxy Tab S8")).toBeInTheDocument();
   expect(list.getAllByText("USB · recording")).toHaveLength(2);
-  expect(list.getByText("ADB · recording")).toBeInTheDocument();
+  expect(list.getByText("Wi-Fi ADB · recording")).toBeInTheDocument();
   expect(cards[0]).toHaveAttribute("aria-pressed", "true");
 
   fireEvent.click(cards[1]);

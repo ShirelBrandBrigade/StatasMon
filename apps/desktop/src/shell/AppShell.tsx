@@ -2,6 +2,7 @@ import { type ReactNode, useEffect } from "react";
 import { commands } from "../bridge/commands";
 import { useAppStore } from "../store/app";
 import { showExportNote } from "./exportNote";
+import { Notices } from "./Notices";
 import type { ViewId } from "./routes";
 import { Sidebar } from "./Sidebar";
 
@@ -13,9 +14,10 @@ function inTextInput(target: EventTarget | null): boolean {
 }
 
 /**
- * Sidebar + scrolling main column on the mesh ground. Global keys: `M` adds
- * a mark to the active session, ⌘/Ctrl+E raises the Export note. `Space` is
- * reserved for the log card and is deliberately not bound here.
+ * Sidebar + scrolling main column on the mesh ground, with the Notices stack
+ * floating over the main column. Global keys: `M` adds a mark to the active
+ * session, ⌘/Ctrl+E raises the Export note. `Space` is reserved for the log
+ * card and is deliberately not bound here.
  */
 export function AppShell({ view, children }: { view: ViewId; children: ReactNode }) {
   useEffect(() => {
@@ -46,6 +48,7 @@ export function AppShell({ view, children }: { view: ViewId; children: ReactNode
     <div className="app app-mesh">
       <Sidebar view={view} />
       <main className="main">{children}</main>
+      <Notices />
     </div>
   );
 }
