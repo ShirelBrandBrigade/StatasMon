@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getStream, startBridge } from "./bridge";
 import { dispatchedCount } from "./bridge/dispatch";
+import { ExportDialog } from "./export/ExportDialog";
 import { Gallery } from "./gallery/Gallery";
 import {
   BatteryCard,
@@ -13,6 +14,7 @@ import {
 import { LogCard } from "./overview/log";
 import { NetworkCard } from "./overview/network";
 import { Overview, type OverviewSlots } from "./overview/Overview";
+import { SessionsScreen } from "./sessions/SessionsScreen";
 import { AppShell } from "./shell/AppShell";
 import { ComingSoon } from "./shell/ComingSoon";
 import { EmptyState } from "./shell/EmptyState";
@@ -77,13 +79,16 @@ export function App() {
   const view = viewFromHash(hash);
   return (
     <AppShell view={view}>
-      {!hasDevice ? (
+      {view === "sessions" ? (
+        <SessionsScreen />
+      ) : !hasDevice ? (
         <EmptyState />
       ) : view === "overview" ? (
         <Overview slots={OVERVIEW_SLOTS} />
       ) : (
         <ComingSoon view={view} />
       )}
+      <ExportDialog />
     </AppShell>
   );
 }

@@ -1,10 +1,22 @@
 import "./NetworkCard.css";
-import { formatValue, type Unit, unitSuffix } from "@statasmon/protocol";
+import {
+  type EventKind,
+  formatValue,
+  type Mark,
+  type StoredEvent,
+  type Unit,
+  unitSuffix,
+} from "@statasmon/protocol";
 import { Card, Dash, MetricFigure, seriesColor } from "@statasmon/ui";
-import type { ReactNode } from "react";
-import { type ChartSeries, TimeSeriesChart } from "../../charts/TimeSeriesChart";
+import { type ReactNode, useMemo } from "react";
+import {
+  type ChartMarker,
+  type ChartSeries,
+  type MarkerTone,
+  TimeSeriesChart,
+} from "../../charts/TimeSeriesChart";
 import { useSeriesData } from "../../charts/useSeriesData";
-import { useCapability, useLatest, useRangeMs } from "../../hooks/useDevice";
+import { useCapability, useDevice, useLatest, useRangeMs } from "../../hooks/useDevice";
 
 const CHART_HEIGHT = 90;
 const BPS = { unit: "bits_per_sec" } as const;
@@ -19,6 +31,41 @@ const SERIES: ChartSeries[] = [
 ];
 
 const formatBps = (v: number) => formatValue(BPS, v);
+
+/** Events that earn a line on the chart, with their tone (docs/PLAN.md 5.3). */
+const EVENT_TONE: Partial<Record<EventKind, MarkerTone>> = {
+  thermal_change: "warn",
+  memory_warning: "warn",
+  jetsam: "warn",
+  lmk_kill: "warn",
+  crash: "bad",
+  anr: "bad",
+  mark: "info",
+};
+
+const EVENT_LABEL: Partial<Record<EventKind, string>> = {
+  thermal_change: "Thermal",
+  memory_warning: "Memory",
+  jetsam: "Jetsam",
+  lmk_kill: "LMK kill",
+  crash: "Crash",
+  anr: "ANR",
+};
+
+/** Marks (info) and the interesting events as chart markers, oldest → newest. */
+export function chartMarkers(
+  marks: readonly Mark[],
+  events: readonly StoredEvent[],
+): ChartMarker[] {
+  const out: ChartMarker[] = marks.map((m) => ({ tsMs: m.ts_ms, label: m.label, tone: "info" }));
+  for (const e of events) {
+    const tone = EVENT_TONE[e.kind];
+    if (!tone) continue;
+    const label = e.kind === "mark" ? e.detail : (EVENT_LABEL[e.kind] ?? e.kind);
+    out.push({ tsMs: e.ts_ms, label: e.process ? `${label} · ${e.process}` : label, tone });
+  }
+  return out.sort((a, b) => a.tsMs - b.tsMs);
+}
 
 /** Typographic minus for negative readings (dBm). */
 const minus = (text: string) => text.replace(/^-/, "−");
@@ -68,11 +115,16 @@ export function NetworkCard({ deviceId }: { deviceId: string }) {
 
   const windowMs = useRangeMs();
   const data = useSeriesData(deviceId, "net.rx_bps", "net.tx_bps");
+  const entry = useDevice(deviceId);
+  const marks = entry?.session?.marks;
+  const events = entry?.events;
+  const markers = useMemo(() => chartMarkers(marks ?? [], events ?? []), [marks, events]);
 
   const subtitle = (
     <span data-testid="net-subtitle">
       Wi-Fi · {rssi === undefined ? <Dash reason={why(wifi)} /> : minus(formatValue(DBM, rssi))} ·{" "}
       {latency === undefined ? <Dash reason={why(throughput)} /> : formatValue(MS, latency)}
+      {data.loadingHistory ? <span data-testid="net-history-note"> · loading history…</span> : null}
     </span>
   );
 
@@ -140,6 +192,7 @@ export function NetworkCard({ deviceId }: { deviceId: string }) {
           className="sm-net-chart"
           name="Download and upload throughput over time"
           series={SERIES}
+          markers={markers}
           data={data}
           height={CHART_HEIGHT}
           windowMs={windowMs}

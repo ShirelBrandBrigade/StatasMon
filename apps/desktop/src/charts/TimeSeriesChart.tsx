@@ -1,5 +1,6 @@
 import "uplot/dist/uPlot.min.css";
 import "./chart.css";
+import { toneColor } from "@statasmon/ui";
 import { type CSSProperties, useEffect, useRef } from "react";
 import uPlot from "uplot";
 import { resolveCssColor, resolveToken, withAlpha } from "./cssColor";
@@ -16,8 +17,21 @@ export interface ChartSeries {
   endpoint?: boolean;
 }
 
+export type MarkerTone = "info" | "warn" | "bad" | "neutral";
+
+/** A mark or event drawn as a 1px vertical line with a label chip (docs/PLAN.md 5.3). */
+export interface ChartMarker {
+  tsMs: number;
+  label: string;
+  tone: MarkerTone;
+}
+
 export interface TimeSeriesChartProps {
   series: ChartSeries[];
+  /** Marks and events; at most `MAX_MARKERS` (the newest in view) are drawn. */
+  markers?: ChartMarker[];
+  /** Formats x-axis labels and the tooltip time; defaults to the local wall clock. */
+  xFormat?: (sec: number, withSeconds: boolean) => string;
   /** Timestamps in ms plus one value column per series (NaN = gap). Arrays may be reused between updates. */
   data: ChartData;
   height: number;
@@ -53,6 +67,16 @@ const Y_AXIS_GAP = 6;
 const Y_HEADROOM = 1.15;
 const EMPTY_SPAN_S = 60;
 const TIP_GAP = 10;
+/** Markers drawn at most per chart (the newest ones inside the visible range). */
+export const MAX_MARKERS = 12;
+/** Cursor distance (CSS px) within which the tooltip names the nearest marker. */
+const MARKER_TIP_PX = 6;
+const MARKER_CHIP_PAD = 4;
+const MARKER_CHIP_H = 14;
+const MARKER_CHIP_RADIUS = 4;
+const MARKER_CHIP_ALPHA = 0.18;
+const MARKER_TONES: readonly MarkerTone[] = ["info", "warn", "bad", "neutral"];
+const NO_MARKERS: ChartMarker[] = [];
 
 interface Theme {
   dim: string;
@@ -65,14 +89,17 @@ interface Live {
   data: ChartData;
   windowMs: number | undefined;
   yFormat: (value: number) => string;
+  xFormat: (sec: number, withSeconds: boolean) => string;
   yMin: number | "auto";
   series: ChartSeries[];
+  markers: ChartMarker[];
 }
 
 interface Tooltip {
   root: HTMLDivElement;
   time: HTMLDivElement;
   values: HTMLSpanElement[];
+  marker: HTMLDivElement;
 }
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
@@ -82,6 +109,16 @@ export function formatClock(sec: number, withSeconds = false): string {
   const d = new Date(sec * 1000);
   const hm = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
   return withSeconds ? `${hm}:${pad2(d.getSeconds())}` : hm;
+}
+
+/** Elapsed-time label for an x value in seconds since a session start: `m:ss` or `h:mm:ss`. */
+export function formatElapsedAxis(sec: number, withSeconds = true): string {
+  const total = Math.max(0, Math.round(sec));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (!withSeconds && h === 0) return `${m}:${pad2(s)}`;
+  return h > 0 ? `${h}:${pad2(m)}:${pad2(s)}` : `${m}:${pad2(s)}`;
 }
 
 function defaultFormat(value: number): string {
@@ -108,6 +145,10 @@ function createTooltip(series: ChartSeries[], colors: string[]): Tooltip {
   const time = document.createElement("div");
   time.className = "sm-chart-tip-time mono";
   root.appendChild(time);
+  const marker = document.createElement("div");
+  marker.className = "sm-chart-tip-marker";
+  marker.hidden = true;
+  root.appendChild(marker);
   const values = series.map((s, i) => {
     const row = document.createElement("div");
     row.className = "sm-chart-tip-row";
@@ -122,7 +163,94 @@ function createTooltip(series: ChartSeries[], colors: string[]): Tooltip {
     root.appendChild(row);
     return value;
   });
-  return { root, time, values };
+  return { root, time, values, marker };
+}
+
+/** The newest `MAX_MARKERS` markers inside the visible x range, oldest → newest. */
+export function visibleMarkers(markers: readonly ChartMarker[], minSec: number, maxSec: number) {
+  const inRange = markers.filter((m) => m.tsMs / 1000 >= minSec && m.tsMs / 1000 <= maxSec);
+  inRange.sort((a, b) => a.tsMs - b.tsMs);
+  return inRange.length > MAX_MARKERS ? inRange.slice(-MAX_MARKERS) : inRange;
+}
+
+function roundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  const rr = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
+/**
+ * 1px vertical line per marker across the plot area plus a tinted label chip
+ * at the top (mono, `--fs-axis`), flipped to the left of the line when it
+ * would leave the plot. Colors are the tone tokens resolved at mount.
+ */
+function drawMarkers(
+  u: uPlot,
+  markers: readonly ChartMarker[],
+  tones: Record<MarkerTone, string>,
+  font: string,
+) {
+  if (markers.length === 0) return;
+  const { min, max } = u.scales.x;
+  if (min == null || max == null) return;
+  const shown = visibleMarkers(markers, min, max);
+  if (shown.length === 0) return;
+  const pr = uPlot.pxRatio;
+  const ctx = u.ctx;
+  const { left, top, width, height } = u.bbox;
+  ctx.save();
+  ctx.font = font;
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "left";
+  for (const m of shown) {
+    const x = Math.round(u.valToPos(m.tsMs / 1000, "x", true));
+    if (!Number.isFinite(x)) continue;
+    const color = tones[m.tone];
+    ctx.fillStyle = color;
+    ctx.fillRect(x, top, Math.max(1, Math.round(pr)), height);
+    const textW = ctx.measureText(m.label).width;
+    const w = textW + MARKER_CHIP_PAD * 2 * pr;
+    const h = MARKER_CHIP_H * pr;
+    const cx = x + w > left + width ? x - w - pr : x + pr;
+    roundedRect(ctx, cx, top, w, h, MARKER_CHIP_RADIUS * pr);
+    ctx.fillStyle = withAlpha(color, MARKER_CHIP_ALPHA);
+    ctx.fill();
+    ctx.fillStyle = color;
+    ctx.fillText(m.label, cx + MARKER_CHIP_PAD * pr, top + h / 2);
+  }
+  ctx.restore();
+}
+
+/** The marker closest to the cursor (CSS px) when within `MARKER_TIP_PX`. */
+function markerNear(
+  u: uPlot,
+  markers: readonly ChartMarker[],
+  left: number,
+): ChartMarker | undefined {
+  const { min, max } = u.scales.x;
+  if (min == null || max == null) return undefined;
+  let best: ChartMarker | undefined;
+  let bestDist = MARKER_TIP_PX;
+  for (const m of visibleMarkers(markers, min, max)) {
+    const d = Math.abs(u.valToPos(m.tsMs / 1000, "x") - left);
+    if (d <= bestDist) {
+      best = m;
+      bestDist = d;
+    }
+  }
+  return best;
 }
 
 /** Endpoint dots (radius 4, `--bg` stroke 2px) on the newest point of each flagged series. */
@@ -158,12 +286,14 @@ function buildOptions(
   live: { current: Live },
   theme: Theme,
   colors: string[],
+  tones: Record<MarkerTone, string>,
   tip: Tooltip | null,
 ): uPlot.Options {
   const series = live.current.series;
   const fills = series.map((s) => Boolean(s.fill));
   const endpoints = series.map((s) => Boolean(s.endpoint));
   const fmt = (v: number) => live.current.yFormat(v);
+  const xfmt = (sec: number, withSeconds: boolean) => live.current.xFormat(sec, withSeconds);
   let ySize = Y_AXIS_MIN_SIZE;
   const gridLine = { show: true, stroke: theme.grid, width: 1 };
   const noLine = { show: false };
@@ -225,7 +355,7 @@ function buildOptions(
         border: noLine,
         grid: gridLine,
         values: (_u, splits, _axisIdx, _foundSpace, foundIncr) =>
-          splits.map((s) => formatClock(s, foundIncr < 60)),
+          splits.map((s) => xfmt(s, foundIncr < 60)),
       },
       {
         stroke: theme.dim,
@@ -266,7 +396,12 @@ function buildOptions(
       })),
     ],
     hooks: {
-      draw: [(u) => drawEndpoints(u, colors, endpoints, theme.bg)],
+      draw: [
+        (u) => {
+          drawEndpoints(u, colors, endpoints, theme.bg);
+          drawMarkers(u, live.current.markers, tones, theme.font);
+        },
+      ],
       setCursor: tip
         ? [
             (u) => {
@@ -276,11 +411,15 @@ function buildOptions(
                 tip.root.hidden = true;
                 return;
               }
-              tip.time.textContent = formatClock(t, true);
+              tip.time.textContent = xfmt(t, true);
               for (let i = 0; i < tip.values.length; i += 1) {
                 const v = u.data[i + 1]?.[idx];
                 tip.values[i].textContent = v == null ? "—" : fmt(v);
               }
+              const near = markerNear(u, live.current.markers, left);
+              tip.marker.hidden = near === undefined;
+              tip.marker.textContent = near ? near.label : "";
+              tip.marker.dataset.tone = near ? near.tone : "";
               const w = u.over.clientWidth;
               if (w > 0 && left > w / 2) {
                 tip.root.style.left = "";
@@ -305,6 +444,8 @@ function buildOptions(
  */
 export function TimeSeriesChart({
   series,
+  markers = NO_MARKERS,
+  xFormat = formatClock,
   data,
   height,
   yFormat = defaultFormat,
@@ -320,11 +461,11 @@ export function TimeSeriesChart({
   const hostRef = useRef<HTMLDivElement>(null);
   const plotRef = useRef<uPlot | null>(null);
   const alignedRef = useRef<uPlot.AlignedData | undefined>(undefined);
-  const live = useRef<Live>({ data, windowMs, yFormat, yMin, series });
+  const live = useRef<Live>({ data, windowMs, yFormat, xFormat, yMin, series, markers });
 
   // Latest props for uPlot callbacks; declared first so it runs before the effects below.
   useEffect(() => {
-    live.current = { data, windowMs, yFormat, yMin, series };
+    live.current = { data, windowMs, yFormat, xFormat, yMin, series, markers };
   });
 
   const seriesKey = series
@@ -339,8 +480,11 @@ export function TimeSeriesChart({
     const theme = readTheme(host);
     const current = live.current.series;
     const colors = current.map((s) => resolveCssColor(s.color, host));
+    const tones = Object.fromEntries(
+      MARKER_TONES.map((t) => [t, resolveCssColor(toneColor(t), host)]),
+    ) as Record<MarkerTone, string>;
     const tip = hover ? createTooltip(current, colors) : null;
-    const opts = buildOptions(host, height, hover, live, theme, colors, tip);
+    const opts = buildOptions(host, height, hover, live, theme, colors, tones, tip);
     const u = new uPlot(opts, toAlignedData(live.current.data, alignedRef.current), host);
     alignedRef.current = u.data;
     if (tip) u.over.appendChild(tip.root);
@@ -371,6 +515,15 @@ export function TimeSeriesChart({
     alignedRef.current = toAlignedData(data, alignedRef.current);
     u.setData(alignedRef.current);
   }, [data, windowMs]);
+
+  // Markers change rarely (a mark or an event); repaint without rebuilding paths.
+  // The mount-time draw already includes them, so the first run is skipped.
+  const markersSeen = useRef(markers);
+  useEffect(() => {
+    if (markersSeen.current === markers) return;
+    markersSeen.current = markers;
+    plotRef.current?.redraw(false);
+  }, [markers]);
 
   const label = name ?? `${series.map((s) => s.label).join(" and ")}${unit ? ` in ${unit}` : ""}`;
   return (

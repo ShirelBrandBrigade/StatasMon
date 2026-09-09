@@ -2,6 +2,7 @@ import type { MetricId } from "@statasmon/protocol";
 import { useMemo, useRef } from "react";
 import type uPlot from "uplot";
 import { useMetricSeries } from "../hooks/useDevice";
+import { useHistory } from "./useHistory";
 
 /**
  * Chart input: timestamps in ms (oldest → newest) and one value column per
@@ -110,17 +111,40 @@ export function toAlignedData(data: ChartData, out?: uPlot.AlignedData): uPlot.A
   return res as unknown as uPlot.AlignedData;
 }
 
+export interface SeriesData extends ChartData {
+  /** Older points are being fetched from the store for the part of the range the buffer lacks. */
+  loadingHistory: boolean;
+}
+
+/** `history` (all older than `live`) followed by `live`; `live` itself when there is no history. */
+export function prependHistory(history: SeriesInput | undefined, live: SeriesInput): SeriesInput {
+  if (!history || history.t.length === 0) return live;
+  const cut = live.t.length > 0 ? live.t[0] : Number.POSITIVE_INFINITY;
+  let n = history.t.length;
+  while (n > 0 && history.t[n - 1] >= cut) n -= 1;
+  if (n === 0) return live;
+  return {
+    t: history.t.slice(0, n).concat(live.t),
+    v: history.v.slice(0, n).concat(live.v),
+  };
+}
+
 /**
  * Two metrics of one device as chart data, limited to the selected range.
  * Returns a new wrapper object per update (so effects keyed on it fire) around
- * arrays that are reused in place.
+ * arrays that are reused in place. When the range reaches past the live
+ * buffer and a session is recording, older points come from the store
+ * (`useHistory`) and are merged in front of the live ones; the live path is
+ * untouched while the buffer suffices.
  */
-export function useSeriesData(deviceId: string | undefined, a: MetricId, b: MetricId): ChartData {
+export function useSeriesData(deviceId: string | undefined, a: MetricId, b: MetricId): SeriesData {
   const sa = useMetricSeries(deviceId, a);
   const sb = useMetricSeries(deviceId, b);
+  const history = useHistory(deviceId, [a, b]);
   const out = useRef<ChartData>({ t: [], v: [[], []] });
   return useMemo(() => {
-    const o = alignSeries([sa, sb], out.current);
-    return { t: o.t, v: o.v };
-  }, [sa, sb]);
+    const [ha, hb] = history.series;
+    const o = alignSeries([prependHistory(ha, sa), prependHistory(hb, sb)], out.current);
+    return { t: o.t, v: o.v, loadingHistory: history.loading };
+  }, [sa, sb, history]);
 }

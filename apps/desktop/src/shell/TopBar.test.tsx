@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { dispatch } from "../bridge/dispatch";
 import { synthesize } from "../bridge/synthetic";
+import { useExportStore } from "../export/exportStore";
 import { useAppStore } from "../store/app";
 import { telemetry } from "../store/telemetry";
 import { resetExportNote } from "./exportNote";
@@ -44,13 +45,12 @@ test("falls back to a waiting sentence before the first headline", () => {
   );
 });
 
-test("Export shows a note for two seconds", () => {
-  vi.useFakeTimers();
+test("Export opens the Export dialog for this device", () => {
   render(<TopBar deviceId="fake:iphone" />);
+  expect(useExportStore.getState().open).toBe(false);
   fireEvent.click(screen.getByRole("button", { name: "Export" }));
-  expect(screen.getByRole("status")).toHaveTextContent("Export arrives in Phase 5");
-  act(() => {
-    vi.advanceTimersByTime(2100);
-  });
-  expect(screen.queryByRole("status")).toBeNull();
+  expect(useExportStore.getState().open).toBe(true);
+  expect(useExportStore.getState().preset).toEqual({ deviceId: "fake:iphone" });
+  resetExportNote();
+  expect(useExportStore.getState().open).toBe(false);
 });

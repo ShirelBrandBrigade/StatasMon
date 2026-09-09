@@ -15,7 +15,7 @@ function entry(state: DeviceSummary["state"], transport: DeviceSummary["transpor
     transport,
     state,
   };
-  const e: DeviceEntry = { summary, latest: {}, eventCount: 0, errorCount: 0 };
+  const e: DeviceEntry = { summary, latest: {}, eventCount: 0, errorCount: 0, events: [] };
   return e;
 }
 

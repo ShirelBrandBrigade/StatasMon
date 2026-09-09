@@ -1,7 +1,7 @@
 import { Button, Pill, Segment } from "@statasmon/ui";
+import { openExportDialog } from "../export/exportStore";
 import { useDevice } from "../hooks/useDevice";
 import { type Range, useAppStore } from "../store/app";
-import { showExportNote, useExportNote } from "./exportNote";
 
 export const RANGE_OPTIONS = [
   { value: "live", label: "Live" },
@@ -16,7 +16,6 @@ export function TopBar({ deviceId }: { deviceId: string }) {
   const entry = useDevice(deviceId);
   const range = useAppStore((s) => s.range);
   const setRange = useAppStore((s) => s.setRange);
-  const note = useExportNote();
   const headline = entry?.headline;
   const model = entry?.summary.model_name ?? "device";
 
@@ -37,14 +36,14 @@ export function TopBar({ deviceId }: { deviceId: string }) {
       </div>
       <div className="hd-tools">
         <Segment name="Range" options={RANGE_OPTIONS} value={range} onChange={setRange} />
-        <Button variant="primary" icon="download" onClick={showExportNote}>
+        <Button
+          variant="primary"
+          icon="download"
+          aria-haspopup="dialog"
+          onClick={() => openExportDialog({ deviceId })}
+        >
           Export
         </Button>
-        {note ? (
-          <span className="hd-note" role="status">
-            Export arrives in Phase 5
-          </span>
-        ) : null}
       </div>
     </header>
   );

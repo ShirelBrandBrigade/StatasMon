@@ -7,6 +7,7 @@ import type {
   Headline,
   MetricId,
   SessionState,
+  StoredEvent,
 } from "@statasmon/protocol";
 import { create } from "zustand";
 
@@ -29,6 +30,19 @@ export interface DeviceEntry {
   lastSampleMs?: number;
   eventCount: number;
   errorCount: number;
+  /** The newest `event` messages (oldest → newest), capped at `EVENT_LIMIT`. */
+  events: StoredEvent[];
+}
+
+/** Only the newest events are kept per device. */
+export const EVENT_LIMIT = 500;
+
+/** The latest `progress` message of one background task (exports). */
+export interface TaskProgress {
+  pct: number;
+  message: string;
+  /** `Date.now()` when it arrived. */
+  at: number;
 }
 
 /** A core `error` message surfaced to the user (Notices stack, EmptyState). */
@@ -56,6 +70,11 @@ interface AppState {
   range: Range;
   streamKind: "tauri" | "replay" | "none";
   notices: Notice[];
+  /** Latest progress per task id (`Message::Progress`). */
+  progress: Record<string, TaskProgress>;
+  /** Appends an event to the device (dropping the oldest past `EVENT_LIMIT`). */
+  pushEvent(id: string, event: StoredEvent): void;
+  setProgress(taskId: string, pct: number, message: string): void;
   /** Appends a notice (dropping the oldest past `NOTICE_LIMIT`) and returns its id. */
   pushNotice(n: NoticeInput): string;
   dismissNotice(id: string): void;
@@ -75,6 +94,7 @@ const empty = (summary: DeviceSummary): DeviceEntry => ({
   latest: {},
   eventCount: 0,
   errorCount: 0,
+  events: [],
 });
 
 export const useAppStore = create<AppState>((set) => ({
@@ -84,6 +104,21 @@ export const useAppStore = create<AppState>((set) => ({
   range: "5m",
   streamKind: "none",
   notices: [],
+  progress: {},
+  pushEvent: (id, event) =>
+    set((s) => {
+      const d = s.devices[id];
+      if (!d) return s;
+      const events = d.events.length >= EVENT_LIMIT ? d.events.slice(-(EVENT_LIMIT - 1)) : d.events;
+      return {
+        devices: {
+          ...s.devices,
+          [id]: { ...d, events: [...events, event], eventCount: d.eventCount + 1 },
+        },
+      };
+    }),
+  setProgress: (taskId, pct, message) =>
+    set((s) => ({ progress: { ...s.progress, [taskId]: { pct, message, at: Date.now() } } })),
   pushNotice: (n) => {
     noticeSeq += 1;
     const id = `notice-${noticeSeq}`;
@@ -138,5 +173,6 @@ export const useAppStore = create<AppState>((set) => ({
   setActive: (id) => set({ activeDeviceId: id }),
   setRange: (range) => set({ range }),
   setStreamKind: (streamKind) => set({ streamKind }),
-  reset: () => set({ devices: {}, order: [], activeDeviceId: undefined, notices: [] }),
+  reset: () =>
+    set({ devices: {}, order: [], activeDeviceId: undefined, notices: [], progress: {} }),
 }));

@@ -51,11 +51,15 @@ export function dispatch(m: Message): void {
       telemetry.logsFor(m.device_id).push(m.entries);
       telemetry.notify(m.device_id, "log");
       break;
-    case "event": {
-      const d = s.devices[m.device_id];
-      if (d) s.patchDevice(m.device_id, { eventCount: d.eventCount + 1 });
+    case "event":
+      s.pushEvent(m.device_id, {
+        ts_ms: m.ts_ms,
+        kind: m.kind,
+        detail: m.detail,
+        pid: m.pid,
+        process: m.process,
+      });
       break;
-    }
     case "error": {
       if (m.device_id) {
         const d = s.devices[m.device_id];
@@ -71,6 +75,7 @@ export function dispatch(m: Message): void {
       break;
     }
     case "progress":
+      s.setProgress(m.task_id, m.pct, m.message);
       break;
   }
 }

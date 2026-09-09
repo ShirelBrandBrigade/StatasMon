@@ -1,10 +1,11 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { dispatch } from "../../bridge/dispatch";
+import { useExportStore } from "../../export/exportStore";
 import { useAppStore } from "../../store/app";
 import { useLogFilterStore } from "../../store/logFilter";
 import { telemetry } from "../../store/telemetry";
-import { EXPORT_NOTE_MS, LogCard } from "./LogCard";
+import { LogCard } from "./LogCard";
 import { mockupEntries } from "./testEntries";
 
 const ID = "fake:iphone";
@@ -161,14 +162,17 @@ test("clicking a row toggles its selection and the footer counts it", () => {
   expect(row).not.toHaveClass("is-selected");
 });
 
-test("Export shows the Phase 5 note for two seconds", () => {
-  vi.useFakeTimers();
+test("Export opens the export dialog scoped to the filter, or to the selection", () => {
   seed();
   render(<LogCard deviceId={ID} initialItemCount={7} />);
+  fireEvent.click(button("Export log (.log, .json)"));
+  expect(useExportStore.getState().open).toBe(true);
+  expect(useExportStore.getState().preset.scope).toBe("filter");
+  useExportStore.getState().close();
+  fireEvent.click(screen.getAllByRole("option")[0]);
   fireEvent.click(button("Export selection (.log, .json)"));
-  expect(screen.getByRole("status")).toHaveTextContent("Export arrives in Phase 5");
-  act(() => vi.advanceTimersByTime(EXPORT_NOTE_MS + 1));
-  expect(screen.queryByText("Export arrives in Phase 5")).not.toBeInTheDocument();
+  expect(useExportStore.getState().preset.scope).toBe("selection");
+  expect(useExportStore.getState().preset.seqs?.length).toBe(1);
 });
 
 test("shows a Dash with the reason when the device cannot provide logs", () => {

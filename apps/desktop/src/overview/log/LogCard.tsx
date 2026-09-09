@@ -1,14 +1,8 @@
 import type { LogEntry, LogLevel } from "@statasmon/protocol";
 import { Button, Card, cx, Dash, levelMeta, toneColor } from "@statasmon/ui";
-import {
-  type CSSProperties,
-  type KeyboardEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, type KeyboardEvent, useCallback, useRef, useState } from "react";
 import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
+import { openExportDialog } from "../../export/exportStore";
 import { useCapability } from "../../hooks/useDevice";
 import { ALL_LEVELS, useLogFilter, useLogFilterActions } from "../../store/logFilter";
 import { formatCount, plural } from "./format";
@@ -21,7 +15,6 @@ const TOP_PROCESSES = 4;
 /** Row height estimate for Virtuoso before it measures (5px padding + 16px line). */
 const ROW_HEIGHT = 26;
 /** How long the "Export arrives in Phase 5" note stays visible. */
-export const EXPORT_NOTE_MS = 2000;
 
 const LEVEL_LETTER: Record<LogLevel, string> = {
   debug: "D",
@@ -63,13 +56,6 @@ export function LogCard({ deviceId, className, style, initialItemCount }: LogCar
   const [atBottom, setAtBottom] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
   const [selected, setSelected] = useState<ReadonlySet<number>>(() => new Set());
-  const [exportNote, setExportNote] = useState(false);
-
-  useEffect(() => {
-    if (!exportNote) return undefined;
-    const t = setTimeout(() => setExportNote(false), EXPORT_NOTE_MS);
-    return () => clearTimeout(t);
-  }, [exportNote]);
 
   const jumpToLatest = useCallback(() => {
     listRef.current?.scrollToIndex({ index: "LAST", align: "end" });
@@ -142,18 +128,19 @@ export function LogCard({ deviceId, className, style, initialItemCount }: LogCar
           <span>{plural(selected.size, "selected")}</span>
         </>
       ) : null}
-      {exportNote ? (
-        <span className="log-note" role="status">
-          Export arrives in Phase 5
-        </span>
-      ) : null}
       <Button
         size="sm"
         icon="download"
         className="log-foot-export"
-        onClick={() => setExportNote(true)}
+        onClick={() =>
+          openExportDialog(
+            selected.size > 0
+              ? { deviceId, scope: "selection", seqs: [...selected], format: "log" }
+              : { deviceId, scope: "filter", format: "log" },
+          )
+        }
       >
-        Export selection (.log, .json)
+        {selected.size > 0 ? "Export selection (.log, .json)" : "Export log (.log, .json)"}
       </Button>
     </>
   );

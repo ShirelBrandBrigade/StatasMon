@@ -57,6 +57,35 @@
   font-size: var(--fs-axis);
 }
 
+.sm-chart-tip-marker {
+  padding: 1px 6px;
+  border-radius: var(--r-pill);
+  font-family: var(--font-mono);
+  font-size: var(--fs-axis);
+  font-weight: 600;
+  background: var(--neutral-tint);
+  color: var(--mut);
+}
+
+.sm-chart-tip-marker[hidden] {
+  display: none;
+}
+
+.sm-chart-tip-marker[data-tone="info"] {
+  background: var(--cyan-tint);
+  color: var(--cyan);
+}
+
+.sm-chart-tip-marker[data-tone="warn"] {
+  background: var(--amber-tint);
+  color: var(--amber);
+}
+
+.sm-chart-tip-marker[data-tone="bad"] {
+  background: var(--red-tint);
+  color: var(--red);
+}
+
 .sm-chart-tip-row {
   display: flex;
   align-items: center;

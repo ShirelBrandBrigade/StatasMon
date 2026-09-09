@@ -1,6 +1,6 @@
 import type { IconName } from "@statasmon/ui";
 
-/** Every view in the sidebar nav (docs/PLAN.md §3.12). Only Overview is built in Phase 1. */
+/** Every view in the sidebar nav (docs/PLAN.md §3.12). Overview (Phase 1) and Sessions (Phase 5) are built; the rest arrive in Phase 6. */
 export const VIEWS = [
   { id: "overview", label: "Overview", icon: "overview" },
   { id: "performance", label: "Performance", icon: "performance" },

@@ -6,7 +6,7 @@ import { synthesize } from "../bridge/synthetic";
 import { useAppStore } from "../store/app";
 import { telemetry } from "../store/telemetry";
 import { formatElapsed } from "./format";
-import { RecordingCard } from "./RecordingCard";
+import { MARK_PROMPT_MS, RecordingCard } from "./RecordingCard";
 
 vi.mock("../bridge/commands", () => ({
   commands: {
@@ -50,8 +50,31 @@ test("shows Recording, a ticking elapsed time and the entry count; Pause calls t
   fireEvent.click(screen.getByRole("button", { name: "Pause" }));
   expect(commands.pauseSession).toHaveBeenCalledWith("fake:iphone");
 
+  // Mark opens a label prompt; Enter confirms the (edited) label.
   fireEvent.click(screen.getByRole("button", { name: "Mark" }));
+  const input = screen.getByRole("textbox", { name: "Mark label" });
+  expect(input).toHaveValue("Mark 1");
+  expect(input).toHaveFocus();
+  fireEvent.change(input, { target: { value: "Opened FieldKit" } });
+  fireEvent.keyDown(input, { key: "Enter" });
+  expect(commands.mark).toHaveBeenCalledWith("fake:iphone", "Opened FieldKit");
+  expect(screen.queryByRole("textbox", { name: "Mark label" })).toBeNull();
+});
+
+test("the mark prompt confirms itself after 3 s and Escape cancels it", () => {
+  render(<RecordingCard deviceId="fake:iphone" />);
+  fireEvent.click(screen.getByRole("button", { name: "Mark" }));
+  expect(screen.getByRole("textbox", { name: "Mark label" })).toBeInTheDocument();
+  act(() => {
+    vi.advanceTimersByTime(MARK_PROMPT_MS);
+  });
   expect(commands.mark).toHaveBeenCalledWith("fake:iphone", "Mark 1");
+  expect(screen.queryByRole("textbox", { name: "Mark label" })).toBeNull();
+
+  fireEvent.click(screen.getByRole("button", { name: "Mark" }));
+  fireEvent.keyDown(screen.getByRole("textbox", { name: "Mark label" }), { key: "Escape" });
+  expect(screen.queryByRole("textbox", { name: "Mark label" })).toBeNull();
+  expect(commands.mark).toHaveBeenCalledTimes(1);
 });
 
 test("resyncs to the elapsed_ms the core reports and stops ticking when paused", () => {

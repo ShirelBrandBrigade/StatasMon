@@ -1,0 +1,214 @@
+/*
+ * Sessions screen (docs/PLAN.md 5.5): list on the left, read-only detail on
+ * the right, store stats in the list footer. Tokens only.
+ */
+
+.sess {
+  display: grid;
+  grid-template-columns: minmax(380px, 440px) minmax(0, 1fr);
+  gap: var(--gap-card);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.sess-list-card,
+.sess-detail-card {
+  min-height: 0;
+}
+
+.sess-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.sess-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 11px;
+  padding: 10px 8px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  font-size: var(--fs-body);
+}
+
+.sess-row.is-on {
+  background: var(--card);
+  border-color: var(--edge);
+}
+
+.sess-row:not(.is-on):hover {
+  background: var(--row-alt);
+}
+
+.sess-row-ic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-ctl);
+  background: var(--grid);
+  color: var(--mut);
+}
+
+.sess-row.is-on .sess-row-ic {
+  color: var(--cyan);
+}
+
+.sess-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sess-row-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sess-row-head > b {
+  font-weight: 700;
+  font-size: var(--fs-body-lg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sess-row-head > span {
+  color: var(--mut);
+  white-space: nowrap;
+}
+
+.sess-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  color: var(--mut);
+  font-size: var(--fs-subtitle);
+}
+
+.sess-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.sess-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg);
+}
+
+.sess-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-stack);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.sess-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--gap-card);
+}
+
+.sess-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-body);
+  color: var(--mut);
+}
+
+.sess-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+}
+
+.sess-select {
+  box-sizing: border-box;
+  height: 32px;
+  min-width: 160px;
+  padding: 0 8px;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-ctl);
+  background: var(--card);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+}
+
+.sess-select:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: -1px;
+}
+
+.sess-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.sess-timeline > li {
+  display: grid;
+  grid-template-columns: 76px 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px;
+  border-radius: var(--r-inner);
+  font-size: var(--fs-body);
+}
+
+.sess-timeline > li:nth-child(even) {
+  background: var(--row-alt);
+}
+
+.sess-timeline time {
+  color: var(--dim);
+  font-size: var(--fs-log);
+}
+
+.sess-timeline .sess-timeline-detail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sess-timeline .sess-timeline-detail > span {
+  color: var(--dim);
+}
+
+.sess-empty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  color: var(--mut);
+  font-size: var(--fs-support);
+  text-align: center;
+}
+
+.sess-note {
+  color: var(--dim);
+  font-size: var(--fs-subtitle);
+}
