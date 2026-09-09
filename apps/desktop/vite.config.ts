@@ -8,7 +8,7 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig({
   plugins: [react({ compiler: true }), tailwindcss()],
   define: {
-    __FIXTURE_DIR__: JSON.stringify(resolve(__dirname, "../../fixtures/fake")),
+    __FIXTURE_DIR__: JSON.stringify(resolve(import.meta.dirname, "../../fixtures/fake")),
   },
   resolve: { dedupe: ["react", "react-dom"] },
   clearScreen: false,

@@ -1,0 +1,81 @@
+/*
+ * TimeSeriesChart: DOM parts of the uPlot chart (crosshair, hover points,
+ * tooltip). Canvas colors are resolved from the same tokens at mount.
+ * No literal colors here; nothing animates (charts append, never ease).
+ */
+
+.sm-chart {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.sm-chart .uplot {
+  width: 100%;
+  font-family: var(--font-mono);
+  line-height: 1;
+}
+
+.sm-chart .u-cursor-x {
+  border-right: 1px solid var(--edge);
+}
+
+.sm-chart .u-cursor-y {
+  border-bottom: 1px solid var(--edge);
+}
+
+.sm-chart .u-select {
+  display: none;
+}
+
+.sm-chart-tip {
+  position: absolute;
+  top: 4px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 8px;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-inner);
+  background: var(--bg);
+  box-shadow: var(--shadow-card);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: var(--fs-label);
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.sm-chart-tip[hidden] {
+  display: none;
+}
+
+.sm-chart-tip-time {
+  color: var(--dim);
+  font-size: var(--fs-axis);
+}
+
+.sm-chart-tip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sm-chart-tip-row > i {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.sm-chart-tip-row > span:first-of-type {
+  color: var(--mut);
+}
+
+.sm-chart-tip-value {
+  margin-left: auto;
+  padding-left: 10px;
+  color: var(--fg);
+}

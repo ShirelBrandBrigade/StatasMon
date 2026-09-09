@@ -1,0 +1,42 @@
+/* NetworkCard layout (docs/design-reference: the Network card). Tokens only. */
+
+.sm-net-figures {
+  display: flex;
+  gap: 22px;
+  align-items: flex-start;
+}
+
+.sm-net-figure {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sm-net-figure > .sm-figure-caption {
+  margin-top: 2px;
+}
+
+.sm-net-side {
+  margin-left: auto;
+  font-size: var(--fs-subtitle);
+  color: var(--mut);
+  text-align: right;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.sm-net-chart {
+  margin-top: auto;
+}
+
+.sm-net-chart-off {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: auto;
+  border: 1px dashed var(--edge);
+  border-radius: var(--r-inner);
+  color: var(--dim);
+  font-size: var(--fs-subtitle);
+}

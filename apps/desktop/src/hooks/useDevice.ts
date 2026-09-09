@@ -1,5 +1,5 @@
-import type { Capability, MetricId } from "@statasmon/protocol";
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import type { Capability, CoreSample, MetricId, ProcessRow } from "@statasmon/protocol";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { type DeviceEntry, RANGE_MS, useAppStore } from "../store/app";
 import { type TelemetryKind, telemetry } from "../store/telemetry";
@@ -45,54 +45,84 @@ export function useRangeMs(): number | undefined {
 
 /**
  * Subscribes to telemetry updates of `kinds` for a device, throttled to one
- * render per animation frame. Returns a counter that changes on each update;
- * read the actual data from `telemetry` inside the component.
+ * render per animation frame. Returns a counter that changes on each update.
+ * Prefer `useTelemetryValue` for reading data: the React Compiler memoizes
+ * on the dependencies it can see, so a `useMemo` keyed on this counter alone
+ * is NOT enough to recompute.
  */
 export function useTelemetryTick(deviceId: string | undefined, kinds: TelemetryKind[]): number {
-  const [tick, setTick] = useState(0);
-  const pending = useRef(false);
-  const kindKey = kinds.join(",");
-  useEffect(() => {
-    if (!deviceId) return undefined;
-    const wanted = new Set(kindKey.split(","));
-    return telemetry.subscribe((id, kind) => {
-      if (id !== deviceId || !wanted.has(kind) || pending.current) return;
-      pending.current = true;
-      requestAnimationFrame(() => {
-        pending.current = false;
-        setTick((t) => t + 1);
-      });
-    });
-  }, [deviceId, kindKey]);
+  const tick = useTelemetryValue(deviceId, kinds, () => Date.now());
   return tick;
 }
+
+/**
+ * Reads a value derived from the mirror buffers and re-reads it (at most
+ * once per animation frame) whenever telemetry of `kinds` arrives for the
+ * device, or when `deps` change. `read` may close over anything; the latest
+ * version is always used.
+ */
+export function useTelemetryValue<T>(
+  deviceId: string | undefined,
+  kinds: TelemetryKind[],
+  read: () => T,
+  deps: readonly unknown[] = [],
+): T {
+  const readRef = useRef(read);
+  readRef.current = read;
+  const [value, setValue] = useState<T>(read);
+  const kindKey = kinds.join(",");
+  useEffect(() => {
+    setValue(() => readRef.current());
+    if (!deviceId) return undefined;
+    const wanted = new Set(kindKey.split(","));
+    let pending = false;
+    let cancelled = false;
+    const unsubscribe = telemetry.subscribe((id, kind) => {
+      if (id !== deviceId || !wanted.has(kind) || pending) return;
+      pending = true;
+      requestAnimationFrame(() => {
+        pending = false;
+        if (!cancelled) setValue(() => readRef.current());
+      });
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, [deviceId, kindKey, ...deps]);
+  return value;
+}
+
+const EMPTY_SERIES = { t: [] as number[], v: [] as number[] };
 
 /** Time series of one metric (oldest → newest) limited to the current range. */
 export function useMetricSeries(
   deviceId: string | undefined,
   metric: MetricId,
 ): { t: number[]; v: number[] } {
-  const tick = useTelemetryTick(deviceId, ["samples"]);
   const windowMs = useRangeMs();
-  return useMemo(() => {
-    if (!deviceId) return { t: [], v: [] };
-    return telemetry.metricsFor(deviceId).window(metric, windowMs);
-    // `tick` is the invalidation signal for data that lives outside React.
-  }, [deviceId, metric, windowMs, tick]);
+  return useTelemetryValue(
+    deviceId,
+    ["samples"],
+    () => (deviceId ? telemetry.metricsFor(deviceId).window(metric, windowMs) : EMPTY_SERIES),
+    [metric, windowMs],
+  );
 }
 
+const EMPTY_CORES: CoreSample[] = [];
+const EMPTY_PROCESSES: ProcessRow[] = [];
+
 /** Newest per-core sample for a device. */
-export function useCores(deviceId: string | undefined) {
-  const tick = useTelemetryTick(deviceId, ["cores"]);
-  return useMemo(() => (deviceId ? (telemetry.cores.get(deviceId) ?? []) : []), [deviceId, tick]);
+export function useCores(deviceId: string | undefined): CoreSample[] {
+  return useTelemetryValue(deviceId, ["cores"], () =>
+    deviceId ? (telemetry.cores.get(deviceId) ?? EMPTY_CORES) : EMPTY_CORES,
+  );
 }
 
 /** Newest process table for a device. */
-export function useProcesses(deviceId: string | undefined) {
-  const tick = useTelemetryTick(deviceId, ["processes"]);
-  return useMemo(
-    () => (deviceId ? (telemetry.processes.get(deviceId) ?? []) : []),
-    [deviceId, tick],
+export function useProcesses(deviceId: string | undefined): ProcessRow[] {
+  return useTelemetryValue(deviceId, ["processes"], () =>
+    deviceId ? (telemetry.processes.get(deviceId) ?? EMPTY_PROCESSES) : EMPTY_PROCESSES,
   );
 }
 

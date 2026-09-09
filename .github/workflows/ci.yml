@@ -26,3 +26,8 @@ jobs:
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace
       - run: pnpm --filter @statasmon/desktop build
+      - if: runner.os == 'macOS'
+        run: pnpm --filter @statasmon/desktop exec playwright install --with-deps chromium
+      - if: runner.os == 'macOS'
+        run: pnpm --filter @statasmon/desktop e2e
+        env: { CI: "1" }

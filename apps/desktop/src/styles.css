@@ -9,3 +9,436 @@ body {
   color: var(--fg);
   font-family: var(--font-ui);
 }
+
+/* ---------------------------------------------------------------------- */
+/* App shell (Phase 1.1): sidebar + scrolling main column, lifted from     */
+/* docs/design-reference/dark-glass.css. Tokens only.                       */
+/* ---------------------------------------------------------------------- */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+  min-width: 1180px;
+  min-height: 720px;
+  overflow: hidden;
+}
+
+/* Sidebar: 250px, fixed; only the device list may scroll. */
+.side {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 0 0 var(--sidebar-w);
+  width: var(--sidebar-w);
+  height: 100%;
+  padding: var(--pad-page-y) 16px;
+  border-right: 1px solid var(--edge);
+  background: var(--side);
+  backdrop-filter: blur(var(--blur-side));
+  -webkit-backdrop-filter: blur(var(--blur-side));
+  box-sizing: border-box;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 8px;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--fg);
+}
+
+.brand > i {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--cyan), var(--vio));
+}
+
+.side-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.side-h {
+  margin: 0;
+  padding: 0 8px;
+}
+
+.dev-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.dev {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.dev.is-on {
+  background: var(--card);
+  border-color: var(--edge);
+  box-shadow: var(--shadow-device);
+}
+
+.dev:not(.is-on):hover {
+  background: var(--row-alt);
+}
+
+.dev:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: -2px;
+}
+
+.dev.is-detached {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.dev-ic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-ctl);
+  background: var(--grid);
+  color: var(--mut);
+}
+
+.dev.is-on .dev-ic {
+  color: var(--cyan);
+}
+
+.dev-txt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.dev-txt > b {
+  display: block;
+  font-weight: 700;
+  font-size: var(--fs-body-lg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dev-txt > span {
+  font-size: var(--fs-subtitle);
+  color: var(--mut);
+  white-space: nowrap;
+}
+
+.dev-st {
+  margin-left: auto;
+}
+
+.add-device {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: var(--r-ctl);
+  background: transparent;
+  color: var(--dim);
+  font-family: var(--font-ui);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: help;
+}
+
+.add-device:hover,
+.add-device:focus-visible {
+  color: var(--mut);
+  outline: none;
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--r-ctl);
+  color: var(--mut);
+  font-weight: 600;
+  font-size: var(--fs-body-lg);
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  color: var(--fg);
+}
+
+.nav-item.is-on {
+  background: var(--card);
+  border-color: var(--edge);
+  color: var(--fg);
+}
+
+.nav-item:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: -2px;
+}
+
+/* RecordingCard, pinned to the bottom of the sidebar. */
+.rec {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding: 12px;
+  border: 1px solid var(--edge);
+  border-radius: 13px;
+  background: var(--card);
+}
+
+.rec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rec-head > b {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-title);
+  font-weight: 700;
+}
+
+.rec-head .sm-dot {
+  width: 8px;
+  height: 8px;
+}
+
+.rec-unplug {
+  width: 28px;
+  height: 28px;
+  margin: -4px 0;
+}
+
+.rec-meta {
+  font-size: var(--fs-body);
+  color: var(--mut);
+}
+
+.rec-pb {
+  display: flex;
+  gap: 6px;
+}
+
+.rec-pb > .sm-btn {
+  flex: 1;
+}
+
+/* Main column: scrolls; the sidebar does not. */
+.main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: var(--gap-card);
+  min-width: 0;
+  min-height: 0;
+  padding: var(--pad-page-y) var(--pad-page-x);
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+/* Headline row */
+.hd {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gap-card);
+  flex-shrink: 0;
+}
+
+.hd-text {
+  min-width: 0;
+}
+
+.hd h1 {
+  margin: 0;
+  font-size: var(--fs-headline);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.hd p {
+  margin: 5px 0 0;
+  max-width: 64ch;
+  color: var(--mut);
+  font-size: var(--fs-support);
+  line-height: 1.5;
+}
+
+.hd-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.hd-tools {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-card);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.hd-note {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-inner);
+  background: var(--card);
+  color: var(--mut);
+  font-size: var(--fs-subtitle);
+  white-space: nowrap;
+  backdrop-filter: blur(var(--blur-card));
+  -webkit-backdrop-filter: blur(var(--blur-card));
+}
+
+/* Overview grid */
+.ov-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap-card);
+  flex-shrink: 0;
+}
+
+.ov-row2 {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: var(--gap-card);
+  min-height: 0;
+  flex-shrink: 0;
+}
+
+.ov-slot {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.ov-slot[data-slot="log"] {
+  flex: 1 1 auto;
+  min-height: 240px;
+}
+
+.ov-slot:not(.ov-placeholder) > * {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.ov-placeholder {
+  min-height: 118px;
+}
+
+.ov-placeholder-title {
+  color: var(--dim);
+}
+
+/* Empty state and placeholder pages */
+.empty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-card {
+  max-width: 44ch;
+  text-align: center;
+  padding: 28px 32px;
+}
+
+.empty-card h1 {
+  margin: 0;
+  font-size: var(--fs-headline);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.empty-card p {
+  margin: 0;
+  color: var(--mut);
+  font-size: var(--fs-support);
+  line-height: 1.5;
+}
+
+.dev-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hd-pills {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Short windows (down to the 720px minimum): tighten the sidebar so three devices, the nav and the RecordingCard all fit without scrolling. */
+@media (max-height: 780px) {
+  .side {
+    gap: 12px;
+  }
+
+  .nav-item {
+    min-height: 30px;
+    padding: 4px 12px;
+  }
+
+  .dev {
+    padding: 7px 10px;
+  }
+}

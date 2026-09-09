@@ -11,6 +11,8 @@ import { synthesize } from "./synthetic";
 
 declare const __FIXTURE_DIR__: string;
 
+const SEQ_PER_LOOP = 10_000_000;
+
 interface Timed {
   at: number;
   message: Message;
@@ -60,7 +62,7 @@ export function createReplayStream(opts: { fixture?: string; speed?: number } = 
     const step = () => {
       const now = (performance.now() - startedAt) * speed;
       while (i < items.length && items[i].at + loop * loopMs <= now) {
-        emit(state.rebase(items[i].message, loop * loopMs));
+        emit(state.rebase(items[i].message, loop * loopMs, loop));
         i += 1;
       }
       if (i >= items.length) {
@@ -114,11 +116,17 @@ class ReplayState {
   logs = new Map<string, Message[]>();
   samples = new Map<string, { ts_ms: number; values: Record<string, number> }[]>();
   sessions = new Map<string, SessionState>();
-  rebase(m: Message, offset: number): Message {
-    if (offset === 0) return m;
+  /** Shifts timestamps (and log sequence numbers) for the n-th loop of the fixture. */
+  rebase(m: Message, offset: number, loop = 0): Message {
+    if (offset === 0 && loop === 0) return m;
     if ("ts_ms" in m) return { ...m, ts_ms: m.ts_ms + offset } as Message;
-    if (m.type === "log")
-      return { ...m, entries: m.entries.map((e) => ({ ...e, ts_ms: e.ts_ms + offset })) };
+    if (m.type === "log") {
+      const seqOffset = loop * SEQ_PER_LOOP;
+      return {
+        ...m,
+        entries: m.entries.map((e) => ({ ...e, ts_ms: e.ts_ms + offset, seq: e.seq + seqOffset })),
+      };
+    }
     return m;
   }
 

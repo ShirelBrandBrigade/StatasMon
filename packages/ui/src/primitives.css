@@ -91,6 +91,7 @@
 }
 
 .sm-legend em {
+  white-space: nowrap;
   font-style: normal;
   color: var(--fg);
 }

@@ -44,6 +44,15 @@ in one dark "glass" dashboard. Read these files before doing anything:
 - **Design rules.** Use tokens, never literal colors in components. Numbers
   in the mono face with tabular figures. Every value carries its unit.
   Status is color + label. Charts are drawn to scale with real axes.
+- **React Compiler is on.** It memoizes on the dependencies it can see in a
+  callback body and ignores manual `useMemo`/`useEffect` dependency lists.
+  Data that lives outside React (the telemetry mirror) must be read through
+  `useTelemetryValue` / `useCores` / `useProcesses` / `useMetricSeries` in
+  `apps/desktop/src/hooks/useDevice.ts`, never through a `useMemo` keyed on
+  an invalidation counter. Tests must dispatch data both before and after
+  render to catch this.
+- **Two React copies break hooks.** `packages/ui` lists react as a peer;
+  Vite dedupes `react`/`react-dom` in `apps/desktop/vite.config.ts`. Keep it.
 
 ## Stack (decided; see docs/DECISIONS.md and docs/research/stack.md)
 Tauri 2 + Rust core (tokio, `idevice` for iOS, `adb_client` + adb binary

@@ -1,0 +1,106 @@
+/*
+ * Layout for the Overview metric cards (docs/DESIGN-SYSTEM.md "MetricCard").
+ * Structure only: every color, size and radius is a token from tokens.css.
+ */
+
+/* Ring on the left, detail block on the right (mockup `.ring`). */
+.ov-ring-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ov-ring-wrap {
+  display: block;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.ov-ring-wrap[data-unavailable="true"] {
+  cursor: help;
+}
+
+.ov-detail {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Mono footnote under a detail block ("load 1m 2.70"). */
+.ov-note {
+  font-size: var(--fs-axis);
+  color: var(--dim);
+  line-height: 1.4;
+}
+
+/* Label + Dash row for a block the platform cannot provide. */
+.ov-empty {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-body);
+  color: var(--mut);
+}
+
+.ov-age {
+  white-space: nowrap;
+}
+
+/* Top apps rows (mockup `.pr`). */
+.ov-proc {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-body);
+}
+
+.ov-proc > li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ov-proc b {
+  flex-shrink: 0;
+  width: 118px;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ov-bar {
+  flex: 1;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--bar-track);
+}
+
+.ov-bar > i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--cyan);
+}
+
+.ov-proc em {
+  width: 46px;
+  font-style: normal;
+  font-size: var(--fs-subtitle);
+  color: var(--mut);
+  text-align: right;
+}
+
+/* Thermal sparkline sits at the bottom of the card, full width. */
+.ov-spark {
+  display: block;
+  width: 100%;
+  margin-top: auto;
+}

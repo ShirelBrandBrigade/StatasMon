@@ -1,0 +1,385 @@
+import "uplot/dist/uPlot.min.css";
+import "./chart.css";
+import { type CSSProperties, useEffect, useRef } from "react";
+import uPlot from "uplot";
+import { resolveCssColor, resolveToken, withAlpha } from "./cssColor";
+import { type ChartData, toAlignedData } from "./useSeriesData";
+
+export interface ChartSeries {
+  id: string;
+  label: string;
+  /** A token reference such as `var(--cyan)`; resolved once at mount. */
+  color: string;
+  /** Gradient area under the line (series color at .35 → 0 alpha). */
+  fill?: boolean;
+  /** Mark the newest point with a dot outlined in `--bg`. */
+  endpoint?: boolean;
+}
+
+export interface TimeSeriesChartProps {
+  series: ChartSeries[];
+  /** Timestamps in ms plus one value column per series (NaN = gap). Arrays may be reused between updates. */
+  data: ChartData;
+  height: number;
+  /** Formats y values for the axis and the tooltip; include the unit. */
+  yFormat?: (value: number) => string;
+  /** Visible x range: [newest − windowMs, newest]. Undefined = all data (session). */
+  windowMs?: number;
+  /** Lower bound of the y axis; "auto" follows the data. */
+  yMin?: number | "auto";
+  /** Unit of the y values, for the accessible description. */
+  unit?: string;
+  /** Accessible name. */
+  name?: string;
+  /** Crosshair + hover tooltip; on by default. */
+  hover?: boolean;
+  /** Receives the uPlot instance (tests, perf harness). */
+  instanceRef?: { current: uPlot | null };
+  className?: string;
+  style?: CSSProperties;
+}
+
+const LINE_WIDTH = 2;
+const FILL_ALPHA_TOP = 0.35;
+const FILL_ALPHA_BOTTOM = 0;
+const DOT_RADIUS = 4;
+const DOT_STROKE = 2;
+const HOVER_POINT_SIZE = 7;
+const PAD_TOP = 6;
+const PAD_RIGHT = 8;
+const X_AXIS_SIZE = 18;
+const Y_AXIS_MIN_SIZE = 32;
+const Y_AXIS_GAP = 6;
+const Y_HEADROOM = 1.15;
+const EMPTY_SPAN_S = 60;
+const TIP_GAP = 10;
+
+interface Theme {
+  dim: string;
+  grid: string;
+  bg: string;
+  font: string;
+}
+
+interface Live {
+  data: ChartData;
+  windowMs: number | undefined;
+  yFormat: (value: number) => string;
+  yMin: number | "auto";
+  series: ChartSeries[];
+}
+
+interface Tooltip {
+  root: HTMLDivElement;
+  time: HTMLDivElement;
+  values: HTMLSpanElement[];
+}
+
+const pad2 = (n: number) => String(n).padStart(2, "0");
+
+/** Local wall-clock label for a timestamp in seconds: HH:MM, or HH:MM:SS. */
+export function formatClock(sec: number, withSeconds = false): string {
+  const d = new Date(sec * 1000);
+  const hm = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  return withSeconds ? `${hm}:${pad2(d.getSeconds())}` : hm;
+}
+
+function defaultFormat(value: number): string {
+  return value.toLocaleString("en-US", { maximumFractionDigits: 1 });
+}
+
+/** Axis + tooltip styling resolved from tokens at mount (canvas cannot read `var()`). */
+function readTheme(el: Element): Theme {
+  const mono = resolveToken("--font-mono", el) || "ui-monospace, monospace";
+  const size = resolveToken("--fs-axis", el) || "10.5px";
+  return {
+    dim: resolveToken("--dim", el),
+    grid: resolveToken("--grid", el),
+    bg: resolveToken("--bg", el),
+    font: `${size} ${mono}`,
+  };
+}
+
+function createTooltip(series: ChartSeries[], colors: string[]): Tooltip {
+  const root = document.createElement("div");
+  root.className = "sm-chart-tip";
+  root.hidden = true;
+  root.setAttribute("role", "status");
+  const time = document.createElement("div");
+  time.className = "sm-chart-tip-time mono";
+  root.appendChild(time);
+  const values = series.map((s, i) => {
+    const row = document.createElement("div");
+    row.className = "sm-chart-tip-row";
+    const mark = document.createElement("i");
+    mark.style.background = colors[i];
+    mark.setAttribute("aria-hidden", "true");
+    const label = document.createElement("span");
+    label.textContent = s.label;
+    const value = document.createElement("span");
+    value.className = "sm-chart-tip-value mono";
+    row.append(mark, label, value);
+    root.appendChild(row);
+    return value;
+  });
+  return { root, time, values };
+}
+
+/** Endpoint dots (radius 4, `--bg` stroke 2px) on the newest point of each flagged series. */
+function drawEndpoints(u: uPlot, colors: string[], flags: boolean[], bg: string) {
+  const pr = uPlot.pxRatio;
+  const ctx = u.ctx;
+  const xs = u.data[0];
+  for (let i = 1; i < u.series.length; i += 1) {
+    if (!flags[i - 1]) continue;
+    const ys = u.data[i];
+    let idx = ys.length - 1;
+    while (idx >= 0 && ys[idx] == null) idx -= 1;
+    if (idx < 0) continue;
+    const x = u.valToPos(xs[idx] as number, "x", true);
+    const y = u.valToPos(ys[idx] as number, "y", true);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, DOT_RADIUS * pr, 0, Math.PI * 2);
+    ctx.fillStyle = colors[i - 1];
+    ctx.fill();
+    ctx.lineWidth = DOT_STROKE * pr;
+    ctx.strokeStyle = bg;
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function buildOptions(
+  host: HTMLElement,
+  height: number,
+  hover: boolean,
+  live: { current: Live },
+  theme: Theme,
+  colors: string[],
+  tip: Tooltip | null,
+): uPlot.Options {
+  const series = live.current.series;
+  const fills = series.map((s) => Boolean(s.fill));
+  const endpoints = series.map((s) => Boolean(s.endpoint));
+  const fmt = (v: number) => live.current.yFormat(v);
+  let ySize = Y_AXIS_MIN_SIZE;
+  const gridLine = { show: true, stroke: theme.grid, width: 1 };
+  const noLine = { show: false };
+
+  return {
+    width: Math.max(1, Math.round(host.clientWidth) || 320),
+    height,
+    legend: { show: false },
+    padding: [PAD_TOP, PAD_RIGHT, 0, 0],
+    cursor: hover
+      ? {
+          x: true,
+          y: true,
+          drag: { x: false, y: false, setScale: false },
+          focus: { prox: -1 },
+          points: {
+            size: HOVER_POINT_SIZE,
+            width: DOT_STROKE,
+            stroke: (_u, i) => colors[i - 1],
+            fill: () => theme.bg,
+          },
+        }
+      : { show: false },
+    scales: {
+      x: {
+        time: true,
+        range: (_u, min, max) => {
+          const w = live.current.windowMs;
+          if (!Number.isFinite(max)) {
+            const now = Date.now() / 1000;
+            return [now - (w ?? EMPTY_SPAN_S * 1000) / 1000, now];
+          }
+          if (w === undefined) {
+            return Number.isFinite(min) && min < max ? [min, max] : [max - EMPTY_SPAN_S, max];
+          }
+          return [max - w / 1000, max];
+        },
+      },
+      y: {
+        range: (_u, min, max) => {
+          const top = Number.isFinite(max) && max > 0 ? max * Y_HEADROOM : 1;
+          const yMin = live.current.yMin;
+          if (yMin === "auto") {
+            const bottom = Number.isFinite(min) ? Math.min(min, top) : 0;
+            return [bottom === top ? bottom - 1 : bottom, top];
+          }
+          return [yMin, Math.max(top, yMin + 1)];
+        },
+      },
+    },
+    axes: [
+      {
+        stroke: theme.dim,
+        font: theme.font,
+        size: X_AXIS_SIZE,
+        gap: 4,
+        space: 64,
+        ticks: noLine,
+        border: noLine,
+        grid: gridLine,
+        values: (_u, splits, _axisIdx, _foundSpace, foundIncr) =>
+          splits.map((s) => formatClock(s, foundIncr < 60)),
+      },
+      {
+        stroke: theme.dim,
+        font: theme.font,
+        gap: Y_AXIS_GAP,
+        space: 26,
+        ticks: noLine,
+        border: noLine,
+        grid: gridLine,
+        values: (_u, splits) => splits.map((v) => fmt(v)),
+        size: (u, values, _axisIdx, cycleNum) => {
+          if (cycleNum > 1 || !values || values.length === 0) return ySize;
+          u.ctx.font = theme.font;
+          let w = 0;
+          for (const v of values) w = Math.max(w, u.ctx.measureText(String(v)).width);
+          ySize = Math.max(Y_AXIS_MIN_SIZE, Math.ceil(w) + Y_AXIS_GAP + 2);
+          return ySize;
+        },
+      },
+    ],
+    series: [
+      {},
+      ...series.map((s, i) => ({
+        label: s.label,
+        stroke: colors[i],
+        width: LINE_WIDTH,
+        spanGaps: false,
+        points: { show: false },
+        fill: fills[i]
+          ? (u: uPlot) => {
+              const { top, height: h } = u.bbox;
+              const g = u.ctx.createLinearGradient(0, top, 0, top + h);
+              g.addColorStop(0, withAlpha(colors[i], FILL_ALPHA_TOP));
+              g.addColorStop(1, withAlpha(colors[i], FILL_ALPHA_BOTTOM));
+              return g;
+            }
+          : undefined,
+      })),
+    ],
+    hooks: {
+      draw: [(u) => drawEndpoints(u, colors, endpoints, theme.bg)],
+      setCursor: tip
+        ? [
+            (u) => {
+              const { idx, left } = u.cursor;
+              const t = idx == null ? undefined : u.data[0][idx];
+              if (idx == null || left == null || left < 0 || t == null) {
+                tip.root.hidden = true;
+                return;
+              }
+              tip.time.textContent = formatClock(t, true);
+              for (let i = 0; i < tip.values.length; i += 1) {
+                const v = u.data[i + 1]?.[idx];
+                tip.values[i].textContent = v == null ? "—" : fmt(v);
+              }
+              const w = u.over.clientWidth;
+              if (w > 0 && left > w / 2) {
+                tip.root.style.left = "";
+                tip.root.style.right = `${Math.round(w - left + TIP_GAP)}px`;
+              } else {
+                tip.root.style.right = "";
+                tip.root.style.left = `${Math.round(left + TIP_GAP)}px`;
+              }
+              tip.root.hidden = false;
+            },
+          ]
+        : [],
+    },
+  };
+}
+
+/**
+ * Streaming time-series chart on ONE uPlot instance per mount. Data updates go
+ * through `setData` only (never a re-create, never an explicit redraw); the
+ * scales re-range through their `range` functions. There is no animation, so
+ * `prefers-reduced-motion` needs no special case.
+ */
+export function TimeSeriesChart({
+  series,
+  data,
+  height,
+  yFormat = defaultFormat,
+  windowMs,
+  yMin = 0,
+  unit,
+  name,
+  hover = true,
+  instanceRef,
+  className,
+  style,
+}: TimeSeriesChartProps) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const plotRef = useRef<uPlot | null>(null);
+  const alignedRef = useRef<uPlot.AlignedData | undefined>(undefined);
+  const live = useRef<Live>({ data, windowMs, yFormat, yMin, series });
+
+  // Latest props for uPlot callbacks; declared first so it runs before the effects below.
+  useEffect(() => {
+    live.current = { data, windowMs, yFormat, yMin, series };
+  });
+
+  const seriesKey = series
+    .map((s) => `${s.id}|${s.label}|${s.color}|${s.fill ? 1 : 0}|${s.endpoint ? 1 : 0}`)
+    .join(";");
+
+  // Create once per (series layout, height, hover); destroy on unmount.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `seriesKey` is the content key for `series` (read through `live`), so an equal array does not re-create the chart.
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return undefined;
+    const theme = readTheme(host);
+    const current = live.current.series;
+    const colors = current.map((s) => resolveCssColor(s.color, host));
+    const tip = hover ? createTooltip(current, colors) : null;
+    const opts = buildOptions(host, height, hover, live, theme, colors, tip);
+    const u = new uPlot(opts, toAlignedData(live.current.data, alignedRef.current), host);
+    alignedRef.current = u.data;
+    if (tip) u.over.appendChild(tip.root);
+    plotRef.current = u;
+    if (instanceRef) instanceRef.current = u;
+
+    let ro: ResizeObserver | undefined;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver((entries) => {
+        const w = Math.round(entries[0]?.contentRect.width ?? 0);
+        if (w > 0 && w !== u.width) u.setSize({ width: w, height });
+      });
+      ro.observe(host);
+    }
+    return () => {
+      ro?.disconnect();
+      u.destroy();
+      plotRef.current = null;
+      if (instanceRef) instanceRef.current = null;
+    };
+  }, [seriesKey, height, hover, instanceRef]);
+
+  // Data and window updates: setData only (the x range function reads `windowMs` from `live`).
+  useEffect(() => {
+    const u = plotRef.current;
+    if (!u) return;
+    live.current.windowMs = windowMs;
+    alignedRef.current = toAlignedData(data, alignedRef.current);
+    u.setData(alignedRef.current);
+  }, [data, windowMs]);
+
+  const label = name ?? `${series.map((s) => s.label).join(" and ")}${unit ? ` in ${unit}` : ""}`;
+  return (
+    <div
+      ref={hostRef}
+      className={className ? `sm-chart ${className}` : "sm-chart"}
+      role="img"
+      aria-label={label}
+      style={{ height, ...style }}
+    />
+  );
+}

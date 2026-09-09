@@ -1,6 +1,6 @@
 # StatasMon — development plan
 
-Status line (keep current): **Phase 0 done · Phase 1 in progress (1.1) · 2026-09-09 · plan v1.1**
+Status line (keep current): **Phases 0–1 done · Phase 2 next (2.1) · 2026-09-09 · plan v1.1**
 
 This is the working document for the lead session and every sub-agent. It
 says what we are building, what the platforms can actually provide, the
@@ -279,18 +279,18 @@ Acceptance: fake device streams into a token-styled placeholder screen on
 both OSes from CI artifacts.
 
 ### Phase 1 — Overview screen on the fake device
-1.1 App shell: sidebar with multi-device list, nav, RecordingCard,
+1.1 App shell: sidebar with multi-device list, nav, RecordingCard, · done 2026-09-09
     headline, range segment, export button · ui.
 1.2 Metric cards: CPU (ring + core bars), Memory (ring + stack), Storage,
-    Battery · ui.
+    Battery · ui · done 2026-09-09.
 1.3 Network card with uPlot area chart (down/up), packets, totals ·
-    ui · 3,600-point stream at 1 Hz under 4 ms/frame.
-1.4 Thermal and Top apps cards · ui.
-1.5 Log card: Virtuoso, follow-tail, level and app filters, fault
+    ui · 3,600-point stream at 1 Hz under 4 ms/frame · done 2026-09-09.
+1.4 Thermal and Top apps cards · ui · done 2026-09-09.
+1.5 Log card: Virtuoso, follow-tail, level and app filters, fault · done 2026-09-09
     highlight, Rust-side filtering and paging · ui + core.
 1.6 Multi-device: three fake devices at once, switching, per-device
-    recording state, detach/reattach · core + ui.
-1.7 Playwright suite for the Overview · qa.
+    recording state, detach/reattach · core + ui · done 2026-09-09.
+1.7 Playwright suite for the Overview · qa · done 2026-09-09.
 Acceptance: the Overview matches AD-1 on the fake device; perf budgets met.
 
 ### Phase 2 — Android provider (real hardware first, because it is simplest)
