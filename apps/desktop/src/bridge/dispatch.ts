@@ -2,8 +2,11 @@ import type { Message } from "@statasmon/protocol";
 import { useAppStore } from "../store/app";
 import { telemetry } from "../store/telemetry";
 
+export let dispatchedCount = 0;
+
 /** Applies one core message to the React store and the mirror buffers. */
 export function dispatch(m: Message): void {
+  dispatchedCount += 1;
   const s = useAppStore.getState();
   switch (m.type) {
     case "device_attached":

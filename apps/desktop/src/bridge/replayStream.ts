@@ -35,7 +35,7 @@ export function createReplayStream(opts: { fixture?: string; speed?: number } = 
   }
 
   async function load(): Promise<Timed[]> {
-    const name = opts.fixture ?? "warm-30s.jsonl";
+    const name = opts.fixture ?? "session-3dev-30s.jsonl";
     try {
       const res = await fetch(`/@fs${__FIXTURE_DIR__}/${name}`);
       if (!res.ok) throw new Error(String(res.status));

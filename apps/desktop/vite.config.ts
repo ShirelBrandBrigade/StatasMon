@@ -10,6 +10,7 @@ export default defineConfig({
   define: {
     __FIXTURE_DIR__: JSON.stringify(resolve(__dirname, "../../fixtures/fake")),
   },
+  resolve: { dedupe: ["react", "react-dom"] },
   clearScreen: false,
   server: {
     port: 1420,

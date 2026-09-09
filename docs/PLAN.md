@@ -1,6 +1,6 @@
 # StatasMon — development plan
 
-Status line (keep current): **Phase 0 in progress (0.3–0.6) · 2026-09-09 · plan v1.1**
+Status line (keep current): **Phase 0 done · Phase 1 in progress (1.1) · 2026-09-09 · plan v1.1**
 
 This is the working document for the lead session and every sub-agent. It
 says what we are building, what the platforms can actually provide, the
@@ -268,7 +268,7 @@ Each step: deliverable · owner role · verification. Mark done with a date.
     emits all event kinds.
 0.4 `crates/core`: scheduler, bus, ring buffers, rules engine v1 · core · done 2026-09-09
     unit tests for buffers and rules.
-0.5 `src-tauri`: commands + channels wired to core; `pnpm dev:mock` shows
+0.5 `src-tauri`: commands + channels wired to core; `pnpm dev:mock` shows · done 2026-09-09
     events in a debug panel · core + ui · manual + Vitest on the client
     buffer mirror.
 0.6 `packages/ui`: tokens from DESIGN-SYSTEM.md, fonts bundled, primitives · done 2026-09-09
