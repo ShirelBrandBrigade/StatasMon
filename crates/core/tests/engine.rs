@@ -142,6 +142,7 @@ async fn quiet_scenario_streams_every_kind_and_fills_the_snapshot() {
     let now = statasmon_device::now_ms();
     let hist = engine
         .history(&statasmon_protocol::HistoryQuery {
+            session_id: None,
             device_id: "fake:iphone".into(),
             metric: MetricId::CpuTotal,
             from_ms: now - 10_000,

@@ -35,6 +35,8 @@ impl Default for SamplingConfig {
 #[ts(export)]
 pub struct LogFilter {
     pub device_id: DeviceId,
+    /// A stored session to query instead of the live device.
+    pub session_id: Option<String>,
     /// Process names or app ids; empty = all.
     pub processes: Vec<String>,
     /// Empty = all levels.
@@ -60,6 +62,8 @@ pub struct LogPage {
 #[ts(export)]
 pub struct HistoryQuery {
     pub device_id: DeviceId,
+    /// A stored session to query instead of the live ring buffer.
+    pub session_id: Option<String>,
     pub metric: MetricId,
     pub from_ms: i64,
     pub to_ms: i64,
@@ -128,4 +132,57 @@ pub enum DeviceAction {
         host: String,
         port: u16,
     },
+}
+
+/// One row of the Sessions screen (docs/FEATURES.md §0, §10).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct SessionSummary {
+    pub id: String,
+    pub device_id: DeviceId,
+    pub device_name: String,
+    pub model_name: String,
+    pub platform: crate::device::Platform,
+    pub started_at_ms: i64,
+    pub ended_at_ms: Option<i64>,
+    pub elapsed_ms: i64,
+    pub sample_count: u64,
+    pub log_count: u64,
+    pub event_count: u64,
+    pub mark_count: u64,
+    pub size_bytes: u64,
+    /// True while the device is still recording into this session.
+    pub live: bool,
+}
+
+/// A stored event row.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct StoredEvent {
+    pub ts_ms: i64,
+    pub kind: crate::message::EventKind,
+    pub detail: String,
+    pub pid: Option<u32>,
+    pub process: Option<String>,
+}
+
+/// Everything needed to open a stored session in the UI.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct SessionDetail {
+    pub summary: SessionSummary,
+    pub info: Option<crate::device::DeviceInfo>,
+    pub marks: Vec<crate::status::Mark>,
+    pub events: Vec<StoredEvent>,
+    /// Metrics that have at least one sample in this session.
+    pub metrics: Vec<MetricId>,
+}
+
+/// Result of an export.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct ExportResult {
+    pub path: String,
+    pub bytes: u64,
+    pub entries: u64,
 }
