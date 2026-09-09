@@ -24,13 +24,40 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["app", "dmg", "nsis", "msi"],
+    "createUpdaterArtifacts": true,
+    "publisher": "StatasMon",
+    "homepage": "https://github.com/ShirelBrandBrigade/StatasMon",
+    "copyright": "© 2026 StatasMon",
+    "category": "DeveloperTool",
+    "shortDescription": "Live monitor for iPhone, iPad and Android devices",
+    "longDescription": "StatasMon connects to iPhones, iPads and Android devices at the same time, records everything they report every second (CPU per core, memory, thermal state, battery, storage, network, processes, logs, crashes, device information) and shows it in one dashboard with sessions and exports. Nothing leaves your computer unless you export it.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "macOS": {
+      "minimumSystemVersion": "12.0"
+    },
+    "windows": {
+      "webviewInstallMode": { "type": "downloadBootstrapper", "silent": true },
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/ShirelBrandBrigade/StatasMon/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEYzNzQxNTU4QzNGMjMxRDMKUldUVE1mTERXQlYwODR0UmZLZVd3UWpFNkZNUFNpN1dTWTY2akVyVEhkMGVkZEwwUWl6RUx2OWEK",
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

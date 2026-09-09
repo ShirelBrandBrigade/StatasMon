@@ -12,8 +12,9 @@ use statasmon_protocol::{
     SessionSummary, Settings,
 };
 use statasmon_store::StoreStats;
-use tauri::State;
 use tauri::ipc::Channel;
+use tauri::{AppHandle, Manager, State};
+use tauri_plugin_updater::UpdaterExt;
 
 use crate::settings;
 use crate::state::AppState;
@@ -402,4 +403,240 @@ fn fake_control(state: &AppState, device_id: &str, detach: bool) -> CmdResult<()
 #[tauri::command]
 pub fn ui_report(message: String) {
     tracing::info!(target: "ui", "{message}");
+}
+
+// ---- Updates (Phase 7.4, ADR-015) ------------------------------------------
+//
+// The check runs on the user's explicit opt-in (Settings → "Check for
+// updates on launch") or on an explicit command; nothing is ever downloaded
+// or installed without `install_update`. The plugin verifies the minisign
+// signature against `plugins.updater.pubkey` before installing.
+
+/// What `check_for_update` answers.
+#[derive(Debug, Clone, Serialize)]
+pub struct UpdateStatus {
+    pub available: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notes: Option<String>,
+}
+
+/// Task id of the update notices and download progress.
+pub const UPDATE_TASK: &str = "update";
+
+/// A repository owner left as a placeholder marks an unconfigured endpoint.
+const ENDPOINT_PLACEHOLDER: &str = "OWNER";
+
+/// True when the endpoints are real (non-empty, no placeholder) and a public
+/// key is present; anything else means "updater not configured".
+fn updater_usable(endpoints: &[&str], pubkey: &str) -> bool {
+    !endpoints.is_empty()
+        && endpoints
+            .iter()
+            .all(|e| !e.trim().is_empty() && !e.contains(ENDPOINT_PLACEHOLDER))
+        && !pubkey.trim().is_empty()
+}
+
+/// Refuse to touch the network unless `plugins.updater` in tauri.conf.json
+/// carries a real endpoint and a public key (docs/RELEASE.md §5).
+fn updater_configured(app: &AppHandle) -> CmdResult<()> {
+    let cfg = app.config().plugins.0.get("updater");
+    let endpoints: Vec<&str> = cfg
+        .and_then(|c| c.get("endpoints"))
+        .and_then(serde_json::Value::as_array)
+        .map(|a| a.iter().filter_map(serde_json::Value::as_str).collect())
+        .unwrap_or_default();
+    let pubkey = cfg
+        .and_then(|c| c.get("pubkey"))
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or("");
+    if updater_usable(&endpoints, pubkey) {
+        Ok(())
+    } else {
+        Err(CommandError::unsupported(
+            "Updates are not configured in this build",
+            "Set plugins.updater.endpoints and pubkey in src-tauri/tauri.conf.json (docs/RELEASE.md §5).",
+        ))
+    }
+}
+
+fn update_error(what: &str, e: tauri_plugin_updater::Error) -> CommandError {
+    CommandError {
+        code: ErrorCode::Io,
+        message: format!("{what}: {e}"),
+        hint: Some(
+            "Check the network connection; the release endpoint is on github.com.".to_owned(),
+        ),
+    }
+}
+
+/// First line of the release notes, trimmed to 120 characters, for the
+/// notice text; a fixed phrase when there are none.
+fn notes_summary(body: Option<&str>) -> String {
+    let line = body
+        .and_then(|b| b.lines().map(str::trim).find(|l| !l.is_empty()))
+        .unwrap_or("see the release notes");
+    let mut s: String = line.chars().take(120).collect();
+    if line.chars().count() > 120 {
+        s.push('…');
+    }
+    s
+}
+
+/// Ask the release endpoint once. A user action, so it runs regardless of
+/// the launch setting; rejects with `unsupported` when the build has no
+/// updater configured.
+#[tauri::command]
+pub async fn check_for_update(app: AppHandle) -> CmdResult<UpdateStatus> {
+    updater_configured(&app)?;
+    let updater = app
+        .updater()
+        .map_err(|e| update_error("Updater unavailable", e))?;
+    match updater
+        .check()
+        .await
+        .map_err(|e| update_error("Update check failed", e))?
+    {
+        Some(update) => {
+            tracing::info!(version = %update.version, current = %update.current_version, "update available");
+            Ok(UpdateStatus {
+                available: true,
+                version: Some(update.version),
+                notes: update.body,
+            })
+        }
+        None => {
+            tracing::info!("update check: up to date");
+            Ok(UpdateStatus {
+                available: false,
+                version: None,
+                notes: None,
+            })
+        }
+    }
+}
+
+/// Download, verify and install the latest release, then relaunch. Guarded
+/// by the "Check for updates on launch" setting (ADR-015): with it off the
+/// app never contacts the network. Progress arrives as `Message::Progress`
+/// with `task_id = "update"`.
+#[tauri::command]
+pub async fn install_update(app: AppHandle, state: State<'_, AppState>) -> CmdResult<()> {
+    updater_configured(&app)?;
+    let enabled = state.settings.lock().update_check;
+    if !enabled {
+        return Err(CommandError::unsupported(
+            "Updates are turned off",
+            "Turn on \"Check for updates on launch\" in Settings first.",
+        ));
+    }
+    let engine = state.engine.clone();
+    let updater = app
+        .updater()
+        .map_err(|e| update_error("Updater unavailable", e))?;
+    let Some(update) = updater
+        .check()
+        .await
+        .map_err(|e| update_error("Update check failed", e))?
+    else {
+        return Err(CommandError::unsupported(
+            "No update available",
+            "This is the latest version.",
+        ));
+    };
+    let version = update.version.clone();
+    let label = format!("Downloading v{version}…");
+    engine.progress(UPDATE_TASK, 0.0, &label);
+    let mut received: u64 = 0;
+    let progress_engine = engine.clone();
+    update
+        .download_and_install(
+            |chunk, total| {
+                received += chunk as u64;
+                let pct = total
+                    .filter(|t| *t > 0)
+                    .map_or(0.0, |t| received as f32 / t as f32 * 100.0);
+                progress_engine.progress(UPDATE_TASK, pct, &label);
+            },
+            || engine.progress(UPDATE_TASK, 100.0, &format!("Installing v{version}…")),
+        )
+        .await
+        .map_err(|e| {
+            engine.progress(UPDATE_TASK, 100.0, &format!("Update failed: {e}"));
+            update_error("Update failed", e)
+        })?;
+    tracing::info!(version = %version, "update installed; relaunching");
+    app.restart()
+}
+
+/// The launch-time check (only called when `settings.update_check` is on):
+/// announces a new version as a kept notice so a UI that subscribes later
+/// still sees it; never downloads.
+pub fn spawn_startup_check(app: AppHandle) {
+    tauri::async_runtime::spawn(async move {
+        if let Err(e) = updater_configured(&app) {
+            tracing::info!(reason = %e.message, "launch update check skipped");
+            return;
+        }
+        let engine = app.state::<AppState>().engine.clone();
+        let result = match app.updater() {
+            Ok(updater) => updater.check().await,
+            Err(e) => Err(e),
+        };
+        match result {
+            Ok(Some(update)) => {
+                tracing::info!(version = %update.version, current = %update.current_version, "update available");
+                engine.notice(Message::Progress {
+                    task_id: UPDATE_TASK.to_owned(),
+                    pct: 100.0,
+                    message: format!(
+                        "Update available: v{} ({})",
+                        update.version,
+                        notes_summary(update.body.as_deref())
+                    ),
+                });
+            }
+            Ok(None) => tracing::info!("launch update check: up to date"),
+            Err(e) => tracing::warn!(error = %e, "launch update check failed"),
+        }
+    });
+}
+
+#[cfg(test)]
+mod update_tests {
+    use super::*;
+
+    #[test]
+    fn placeholder_or_missing_config_is_not_usable() {
+        assert!(!updater_usable(&[], "key"));
+        assert!(!updater_usable(
+            &["https://github.com/OWNER/StatasMon/releases/latest/download/latest.json"],
+            "key"
+        ));
+        assert!(!updater_usable(&["https://example.com/latest.json"], "  "));
+        assert!(!updater_usable(
+            &["https://example.com/latest.json", ""],
+            "key"
+        ));
+        assert!(updater_usable(
+            &[
+                "https://github.com/ShirelBrandBrigade/StatasMon/releases/latest/download/latest.json"
+            ],
+            "dW50cnVzdGVk"
+        ));
+    }
+
+    #[test]
+    fn notes_summary_takes_the_first_non_empty_line() {
+        assert_eq!(notes_summary(None), "see the release notes");
+        assert_eq!(
+            notes_summary(Some("  \n\n Fixes the thermal card \nmore")),
+            "Fixes the thermal card"
+        );
+        let long = "x".repeat(150);
+        let s = notes_summary(Some(&long));
+        assert_eq!(s.chars().count(), 121);
+        assert!(s.ends_with('…'));
+    }
 }

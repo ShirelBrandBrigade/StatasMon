@@ -363,9 +363,7 @@ export function SettingsScreen() {
             Check for updates on launch (opt-in)
           </label>
           <p className="st-note">
-            The check itself arrives with the installer in Phase 7; until then this only records
-            your choice. Off means the app never contacts the network.
-          </p>
+            When enabled, StatasMon checks once at launch and shows a notice if a newer version exists. Nothing is installed without your action.</p>
         </Card>
 
         <Card title="About" aria-label="About" className="st-about">

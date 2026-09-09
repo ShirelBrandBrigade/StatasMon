@@ -47,3 +47,10 @@ entry when it is fixed; reference the commit.
   (store errors currently map to Device/Io); per-app storage sizes on iOS
   have no protocol message yet (`IosSource::app_sizes()`); wide CSV export
   switches to long format above 64 metrics (ADR-012).
+- **DMG bundling on this Mac** (2026-09-09): Tauri's `bundle_dmg.sh` fails
+  with "Permission denied" when run from the agent shell; it succeeds with
+  `CI=true` (skips the Finder AppleScript step), and `hdiutil create`
+  produces an equivalent DMG. CI is unaffected.
+- **Low host memory** during the final test runs: Vitest workers were killed
+  when the machine had under 100 MB free; run `vitest run --maxWorkers=2`
+  when that happens. Not an app issue.

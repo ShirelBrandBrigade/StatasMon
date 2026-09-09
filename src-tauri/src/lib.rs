@@ -104,6 +104,8 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             let mode = source_mode();
             // Store root: `STATASMON_STORE_DIR` (dev) or the app data folder
@@ -149,6 +151,7 @@ pub fn run() {
                     None
                 }
             };
+            let update_check = settings.update_check;
             app.manage(AppState {
                 engine,
                 mode,
@@ -158,6 +161,11 @@ pub fn run() {
                 settings_dir,
                 settings: Mutex::new(settings),
             });
+            // Opt-in launch check (ADR-015): announces a new version as a
+            // notice; installing is a separate, explicit command.
+            if update_check {
+                commands::spawn_startup_check(app.handle().clone());
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -184,6 +192,8 @@ pub fn run() {
             commands::fake_detach,
             commands::fake_reattach,
             commands::ui_report,
+            commands::check_for_update,
+            commands::install_update,
         ])
         .run(tauri::generate_context!())
         .unwrap_or_else(|e| panic!("error while running StatasMon: {e}"));

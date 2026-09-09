@@ -13,3 +13,4 @@ playwright-report/
 coverage/
 packages/protocol/generated/*.ts
 !packages/protocol/generated/.gitkeep
+ci-overrides.json

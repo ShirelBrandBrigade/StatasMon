@@ -1,7 +1,37 @@
 name: release
+# Builds the installers for macOS (arm64 + x86_64) and Windows.
+#
+# - On a tag `v*`: signed + notarized when the secrets exist, updater
+#   artifacts included, uploaded to a DRAFT GitHub release (publish by hand,
+#   docs/RELEASE.md).
+# - On workflow_dispatch: an unsigned test build (no release is created;
+#   the installers are attached to the workflow run as artifacts).
+#
+# Secrets (all optional until they exist; the workflow degrades to unsigned):
+#   TAURI_SIGNING_PRIVATE_KEY, TAURI_SIGNING_PRIVATE_KEY_PASSWORD  updater signature
+#   APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY  macOS code signing
+#   APPLE_ID, APPLE_PASSWORD, APPLE_TEAM_ID                         notarization (Apple ID)
+#   APPLE_API_ISSUER, APPLE_API_KEY, APPLE_API_KEY_CONTENT           notarization (API key, preferred)
+#   AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET,
+#   AZURE_SIGNING_ENDPOINT, AZURE_SIGNING_ACCOUNT, AZURE_SIGNING_PROFILE  Windows: Azure Artifact Signing
+#   WINDOWS_CERTIFICATE, WINDOWS_CERTIFICATE_PASSWORD                Windows: OV/EV .pfx (alternative)
 on:
-  push: { tags: ["v*"] }
+  push:
+    tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      unsigned:
+        description: "Unsigned test build (skip code signing, notarization and updater signatures; no release)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     strategy:
@@ -9,27 +39,193 @@ jobs:
       matrix:
         include:
           - os: macos-latest
+            target: aarch64-apple-darwin
             args: --target aarch64-apple-darwin
           - os: macos-latest
+            target: x86_64-apple-darwin
             args: --target x86_64-apple-darwin
           - os: windows-latest
+            target: x86_64-pc-windows-msvc
             args: ""
     runs-on: ${{ matrix.os }}
+    env:
+      # A tag build is "release mode"; a manual run with `unsigned` is a test build.
+      UNSIGNED: ${{ github.event_name == 'workflow_dispatch' && inputs.unsigned == true }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - uses: dtolnay/rust-toolchain@stable
-        with: { targets: aarch64-apple-darwin,x86_64-apple-darwin }
+        with: { targets: ${{ matrix.target }} }
       - uses: swatinem/rust-cache@v2
+        with: { key: release-${{ matrix.target }} }
       - run: pnpm install --frozen-lockfile
-      - uses: tauri-apps/tauri-action@v1
+      - run: pnpm protocol:gen
+
+      # ---- Signing configuration -------------------------------------------
+      # Everything below writes ONE override file, ci-overrides.json, that is
+      # merged into tauri.conf.json with `--config`. Without secrets it only
+      # turns the updater artifacts off (they cannot be produced unsigned).
+      - name: Prepare build overrides
+        id: overrides
+        shell: bash
+        env:
+          TAURI_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          APPLE_CERT: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID_: ${{ secrets.APPLE_ID }}
+          APPLE_API_ISSUER_: ${{ secrets.APPLE_API_ISSUER }}
+          AZURE_ENDPOINT: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
+          AZURE_ACCOUNT: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
+          AZURE_PROFILE: ${{ secrets.AZURE_SIGNING_PROFILE }}
+          WIN_CERT: ${{ secrets.WINDOWS_CERTIFICATE }}
+        run: |
+          overrides='{}'
+          updater=true
+          if [ "$UNSIGNED" = "true" ] || [ -z "$TAURI_KEY" ]; then
+            updater=false
+            echo "::notice::updater artifacts are OFF (no TAURI_SIGNING_PRIVATE_KEY or unsigned build)"
+          fi
+          overrides=$(printf '%s' "$overrides" | node -e '
+            const o = JSON.parse(require("fs").readFileSync(0, "utf8"));
+            o.bundle = { createUpdaterArtifacts: process.argv[1] === "true" };
+            process.stdout.write(JSON.stringify(o));' "$updater")
+
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            if [ "$UNSIGNED" != "true" ] && [ -n "$APPLE_CERT" ] && [ -n "$APPLE_IDENTITY" ]; then
+              echo "mac_sign=true" >> "$GITHUB_OUTPUT"
+              if [ -n "$APPLE_API_ISSUER_" ] || [ -n "$APPLE_ID_" ]; then
+                echo "mac_notarize=true" >> "$GITHUB_OUTPUT"
+              else
+                echo "::warning::macOS build is signed but NOT notarized (no APPLE_API_* or APPLE_ID secrets)"
+              fi
+            else
+              echo "::warning::macOS build is UNSIGNED (no APPLE_CERTIFICATE / APPLE_SIGNING_IDENTITY, or unsigned build)"
+            fi
+          fi
+
+          if [ "$RUNNER_OS" = "Windows" ] && [ "$UNSIGNED" != "true" ]; then
+            if [ -n "$AZURE_ENDPOINT" ] && [ -n "$AZURE_ACCOUNT" ] && [ -n "$AZURE_PROFILE" ]; then
+              # Azure Artifact Signing (Trusted Signing): sign every binary
+              # and installer through `signCommand`. %1 is the file to sign.
+              echo "win_sign=azure" >> "$GITHUB_OUTPUT"
+              overrides=$(printf '%s' "$overrides" | node -e '
+                const o = JSON.parse(require("fs").readFileSync(0, "utf8"));
+                const [endpoint, account, profile] = process.argv.slice(1);
+                o.bundle.windows = { signCommand: `trusted-signing-cli -e ${endpoint} -a ${account} -c ${profile} %1` };
+                process.stdout.write(JSON.stringify(o));' "$AZURE_ENDPOINT" "$AZURE_ACCOUNT" "$AZURE_PROFILE")
+            elif [ -n "$WIN_CERT" ]; then
+              echo "win_sign=pfx" >> "$GITHUB_OUTPUT"
+            else
+              echo "::warning::Windows build is UNSIGNED (no AZURE_SIGNING_* or WINDOWS_CERTIFICATE secrets)"
+            fi
+          fi
+
+          printf '%s\n' "$overrides" > ci-overrides.json
+          echo "overrides: $overrides"
+
+      - name: Install Azure Artifact Signing CLI
+        if: steps.overrides.outputs.win_sign == 'azure'
+        run: cargo install trusted-signing-cli --locked
+
+      - name: Import Windows certificate (.pfx)
+        if: steps.overrides.outputs.win_sign == 'pfx'
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          $pfx = Join-Path $env:RUNNER_TEMP "signing.pfx"
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE))
+          $pwd = ConvertTo-SecureString $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
+          $cert = Import-PfxCertificate -FilePath $pfx -CertStoreLocation Cert:\CurrentUser\My -Password $pwd
+          Remove-Item $pfx
+          $o = Get-Content ci-overrides.json | ConvertFrom-Json
+          $o.bundle | Add-Member -NotePropertyName windows -NotePropertyValue @{ certificateThumbprint = $cert.Thumbprint; timestampUrl = "http://timestamp.digicert.com" } -Force
+          $o | ConvertTo-Json -Depth 8 -Compress | Set-Content ci-overrides.json
+          Write-Host "certificate imported: $($cert.Thumbprint)"
+
+      # ---- Build ------------------------------------------------------------
+      # Release (tag): create/refresh a DRAFT release and upload the bundles
+      # plus latest.json (updater manifest). Signing env vars are only
+      # exported when the corresponding secrets exist, because the bundler
+      # treats an empty APPLE_CERTIFICATE as a certificate to import.
+      - name: Export signing environment
+        if: env.UNSIGNED != 'true'
+        shell: bash
+        env:
+          S_TAURI_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          S_TAURI_PW: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          S_APPLE_CERT: ${{ secrets.APPLE_CERTIFICATE }}
+          S_APPLE_CERT_PW: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          S_APPLE_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          S_APPLE_ID: ${{ secrets.APPLE_ID }}
+          S_APPLE_PW: ${{ secrets.APPLE_PASSWORD }}
+          S_APPLE_TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          S_APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          S_APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          S_APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
+          S_AZURE_TENANT: ${{ secrets.AZURE_TENANT_ID }}
+          S_AZURE_CLIENT: ${{ secrets.AZURE_CLIENT_ID }}
+          S_AZURE_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        run: |
+          put() { if [ -n "$2" ]; then { echo "$1<<__EOF__"; echo "$2"; echo "__EOF__"; } >> "$GITHUB_ENV"; fi; }
+          put TAURI_SIGNING_PRIVATE_KEY "$S_TAURI_KEY"
+          if [ -n "$S_TAURI_KEY" ]; then echo "TAURI_SIGNING_PRIVATE_KEY_PASSWORD=$S_TAURI_PW" >> "$GITHUB_ENV"; fi
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            put APPLE_CERTIFICATE "$S_APPLE_CERT"
+            put APPLE_CERTIFICATE_PASSWORD "$S_APPLE_CERT_PW"
+            put APPLE_SIGNING_IDENTITY "$S_APPLE_IDENTITY"
+            if [ -n "$S_APPLE_API_ISSUER" ] && [ -n "$S_APPLE_API_KEY_CONTENT" ]; then
+              # App Store Connect API key (preferred): the .p8 content lands in a file.
+              key_path="$RUNNER_TEMP/AuthKey_${S_APPLE_API_KEY}.p8"
+              printf '%s\n' "$S_APPLE_API_KEY_CONTENT" > "$key_path"
+              put APPLE_API_ISSUER "$S_APPLE_API_ISSUER"
+              put APPLE_API_KEY "$S_APPLE_API_KEY"
+              put APPLE_API_KEY_PATH "$key_path"
+            else
+              put APPLE_ID "$S_APPLE_ID"
+              put APPLE_PASSWORD "$S_APPLE_PW"
+              put APPLE_TEAM_ID "$S_APPLE_TEAM"
+            fi
+          fi
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            put AZURE_TENANT_ID "$S_AZURE_TENANT"
+            put AZURE_CLIENT_ID "$S_AZURE_CLIENT"
+            put AZURE_CLIENT_SECRET "$S_AZURE_SECRET"
+          fi
+
+      - name: Build and upload to the draft release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Signing secrets are added in Phase 7 (APPLE_*, TAURI_SIGNING_*, Azure signing).
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "StatasMon ${{ github.ref_name }}"
+          releaseBody: "See CHANGELOG.md for what changed. Installers: .dmg (macOS 12+, Apple Silicon and Intel), .exe (Windows 10/11, per-user NSIS) and .msi."
           releaseDraft: true
-          args: ${{ matrix.args }}
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
+          args: ${{ matrix.args }} --config ci-overrides.json
+
+      - name: Build (test artifacts, no release)
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: ${{ matrix.args }} --config ci-overrides.json
+
+      - name: Attach installers to the workflow run
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: statasmon-${{ matrix.target }}
+          if-no-files-found: error
+          path: |
+            target/**/bundle/dmg/*.dmg
+            target/**/bundle/nsis/*.exe
+            target/**/bundle/msi/*.msi

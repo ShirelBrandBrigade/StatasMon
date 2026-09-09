@@ -30,7 +30,8 @@ pnpm --filter @statasmon/desktop e2e   # Playwright on the browser replay
 
 Rust stable (see `rust-toolchain.toml`), Node 22+, pnpm 12. The plan, the
 design system, the decisions and the research live in `docs/`; the working
-rules for people and agents are in `CLAUDE.md`.
+rules for people and agents are in `CLAUDE.md`. Releases: `docs/RELEASE.md`
+and `CHANGELOG.md`.
 
 ## Layout
 

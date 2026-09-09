@@ -1,6 +1,6 @@
 # StatasMon — development plan
 
-Status line (keep current): **Phases 0–6 done (iOS live checks pending the iPad) · Phase 7 in progress · 2026-09-09 · plan v1.1**
+Status line (keep current): **All phases built · open: iOS live checks (iPad), Windows pass (7.3), signing secrets (7.4) · 2026-09-09 · plan v1.1**
 
 This is the working document for the lead session and every sub-agent. It
 says what we are building, what the platforms can actually provide, the

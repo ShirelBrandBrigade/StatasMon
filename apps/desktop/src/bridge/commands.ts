@@ -21,6 +21,13 @@ export interface StoreStats {
   session_count: number;
 }
 
+/** `check_for_update` (Phase 7.4): whether the release endpoint has a newer version. */
+export interface UpdateStatus {
+  available: boolean;
+  version?: string;
+  notes?: string;
+}
+
 import { getStream } from "./index";
 
 /** Typed wrappers over the core commands (names are the contract with src-tauri). */
@@ -61,4 +68,16 @@ export const commands = {
     (await getStream()).invoke<void>("fake_detach", { deviceId }),
   fakeReattach: async (deviceId: string) =>
     (await getStream()).invoke<void>("fake_reattach", { deviceId }),
+  /**
+   * Asks the release endpoint once (a user action, allowed whatever the launch
+   * setting). Rejects with `{ code: "unsupported" }` when the build has no
+   * updater endpoint/public key, `{ code: "io" }` when the request failed.
+   */
+  checkForUpdate: async () => (await getStream()).invoke<UpdateStatus>("check_for_update"),
+  /**
+   * Downloads, verifies the signature, installs and relaunches. Guarded by the
+   * "Check for updates on launch" setting; progress arrives as `progress`
+   * messages with `task_id: "update"`. Resolves only on failure (the app restarts).
+   */
+  installUpdate: async () => (await getStream()).invoke<void>("install_update"),
 };
