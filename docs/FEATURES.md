@@ -1,4 +1,4 @@
-# DeviceLog feature and data inventory
+# StatasMon feature and data inventory
 
 Every item lists the fields the UI shows. "Source" columns are filled from
 `docs/research/*.md`; a field the platform cannot provide is shown as "—" in

@@ -1,6 +1,6 @@
-# DeviceLog — working rules for Claude and sub-agents
+# StatasMon — working rules for Claude and sub-agents
 
-DeviceLog is a macOS + Windows desktop app that connects to iPhones, iPads
+StatasMon is a macOS + Windows desktop app that connects to iPhones, iPads
 and Android devices, records everything they report (CPU, memory, thermal,
 battery, storage, network, processes, logs, device information) and shows it
 in one dark "glass" dashboard. Read these files before doing anything:

@@ -1,6 +1,6 @@
-# DeviceLog — development plan
+# StatasMon — development plan
 
-Status line (keep current): **Phase 0 not started · 2026-09-09 · plan v1**
+Status line (keep current): **Phase 0 in progress (0.1) · 2026-09-09 · plan v1.1**
 
 This is the working document for the lead session and every sub-agent. It
 says what we are building, what the platforms can actually provide, the
@@ -25,8 +25,8 @@ then dig into the log and export evidence.
 
 **v1 scope.** Everything in `docs/FEATURES.md` sections 0–11 for iOS 17.4+
 and Android 12+, USB first, Wi-Fi where the platform makes it cheap.
-Working name **DeviceLog**; the sample app in mockups is **FieldKit**. Both
-are placeholders until the user names them.
+The app is **StatasMon** (bundle id `com.statasmon.app` until the user says
+otherwise); the sample app in mockups is **FieldKit**, a placeholder.
 
 **Non-goals for v1.** Root/jailbreak features, remote control of the
 device, screen mirroring, cloud sync, accounts, plugins, iOS 16 and lower,
@@ -432,11 +432,13 @@ tests added and passing (output pasted) · fixtures added for parsers ·
 no literal colors · capabilities honored (dashes with reasons) · docs
 touched · ADR if a decision changed.
 
-## 9. Open questions for the user (non-blocking; defaults in brackets)
-1. Product name [DeviceLog] and app bundle id [com.<you>.devicelog].
-2. Test devices and OS versions available now (iPhone, iPad, Android) and
-   whether a Windows machine is available for Phase 3+ [needed by then].
-3. adb distribution: detect + download-with-consent [default] vs build from AOSP.
-4. Apple Developer account for signing/notarization and a Windows signing
-   route (Azure Artifact Signing or EV cert) [needed in Phase 7].
-5. Project folder on disk for the repository [pick when Phase 0 starts].
+## 9. Answered and open questions
+Answered 2026-09-09: name **StatasMon**; repository at
+`/Users/bb/Desktop/StatasMon` (git, branch `main`); test devices in
+`docs/DEVICE-MATRIX.md` (Samsung SM-X700 tablet, iPad 10th gen on iPadOS
+17.4.1). No iPhone and no Windows machine yet.
+Open (defaults in brackets):
+1. adb distribution: detect + download-with-consent [default] vs build from AOSP.
+2. Apple Developer account and Windows signing route [needed in Phase 7].
+3. A Windows machine for Phase 3.1 and 7.3 [required before those steps].
+4. An iPhone for the iOS matrix [optional; the iPad covers iOS tier 1 and 2].

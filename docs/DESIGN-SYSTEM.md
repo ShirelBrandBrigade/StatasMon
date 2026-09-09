@@ -1,4 +1,4 @@
-# DeviceLog design system (from direction AD-1 "Dark Glass")
+# StatasMon design system (from direction AD-1 "Dark Glass")
 
 Source of truth for every screen. Values are lifted from the chosen mockup
 (`docs/design-reference/dark-glass.css`, `docs/design-reference/dark-glass.body.html`; all mockups in `design-mockups/`). Do not invent new colors, radii or
