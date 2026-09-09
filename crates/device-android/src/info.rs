@@ -281,7 +281,11 @@ pub fn build_info(
     let model = prop("ro.product.model");
     let brand = prop("ro.product.brand").or_else(|| prop("ro.product.manufacturer"));
     let marketing_name = match (&brand, &model) {
-        (Some(b), Some(m)) => Some(format!("{} {}", title_case(b), m)),
+        (Some(b), Some(m)) => Some(format!(
+            "{} {}",
+            title_case(b),
+            statasmon_idmap::model_marketing_name(m).unwrap_or(m.as_str())
+        )),
         (None, Some(m)) => Some(m.clone()),
         _ => None,
     };

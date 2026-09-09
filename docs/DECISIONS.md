@@ -81,3 +81,21 @@ zero new crates; a native host-protocol client (`host:track-devices`,
 persistent shells) is a later optimisation behind the same `Shell` trait;
 `nproc` is not used for core counts because it honours the shell's cpuset
 (6 of 8 on the Tab S8) — `/sys/devices/system/cpu/possible` is.
+
+## ADR-010 · 2026-09-09 · Android sampler conventions
+Status: accepted. Context: step 2.3–2.6 implementation choices that the
+UI and later providers must share. Decisions: per-process `cpu_pct` uses
+the `top` convention (100 % = one core busy); `mem_bytes` = RSS from `ps`
+(KiB × 1024); memory mapping used = MemTotal − MemAvailable, cached =
+Cached + Buffers, app = AnonPages, wired = SUnreclaim + KernelStack +
+PageTables, swap = SwapTotal − SwapFree; `mem.pressure` from PSI `some
+avg10` with thresholds 1 / 5 / 20 % (fallback: major-fault rate, capped at
+2); `net.dropped` is the kernel running total, `net.rx_total`/`tx_total`
+count from the first tick; core kind = highest-max-frequency cluster is
+Performance, the rest Efficiency (so the SM8450 reads 4P + 4E); metrics
+the device cannot provide are not emitted (no zeros). Battery detail is
+marked available when `dumpsys battery` works even if the sysfs is locked;
+the missing fields (cycles, capacities) are dashed individually.
+Consequences: the Android tablet shows real per-core load, three thermal
+sensors and disk categories; `bat.current` is withheld until Samsung's
+`current now` unit and sign are verified against a known load.

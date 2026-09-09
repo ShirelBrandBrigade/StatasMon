@@ -158,3 +158,68 @@ mod tests {
         assert_eq!(soc_manufacturer_name("acme"), None);
     }
 }
+
+/// Marketing name for an Android model number where the model string
+/// itself is not the marketing name (Samsung, mostly). Pixel devices put the
+/// marketing name in `ro.product.model` already.
+pub fn model_marketing_name(model: &str) -> Option<&'static str> {
+    let m = model.trim().to_ascii_uppercase();
+    // Samsung model numbers carry a region suffix (SM-X700N, SM-S928B/DS);
+    // match on the family prefix.
+    let family = m.split('/').next().unwrap_or(&m);
+    let base: String = family
+        .chars()
+        .take_while(|c| !c.is_ascii_alphabetic() || family.len() <= 7)
+        .collect();
+    let key = if base.len() >= 7 { &base[..7] } else { family };
+    MODELS.iter().find(|(k, _)| *k == key).map(|(_, v)| *v)
+}
+
+const MODELS: &[(&str, &str)] = &[
+    ("SM-X700", "Galaxy Tab S8"),
+    ("SM-X706", "Galaxy Tab S8 5G"),
+    ("SM-X800", "Galaxy Tab S8+"),
+    ("SM-X806", "Galaxy Tab S8+ 5G"),
+    ("SM-X900", "Galaxy Tab S8 Ultra"),
+    ("SM-X906", "Galaxy Tab S8 Ultra 5G"),
+    ("SM-X710", "Galaxy Tab S9"),
+    ("SM-X716", "Galaxy Tab S9 5G"),
+    ("SM-X810", "Galaxy Tab S9+"),
+    ("SM-X816", "Galaxy Tab S9+ 5G"),
+    ("SM-X910", "Galaxy Tab S9 Ultra"),
+    ("SM-X916", "Galaxy Tab S9 Ultra 5G"),
+    ("SM-X720", "Galaxy Tab S10"),
+    ("SM-X820", "Galaxy Tab S10+"),
+    ("SM-X920", "Galaxy Tab S10 Ultra"),
+    ("SM-S911", "Galaxy S23"),
+    ("SM-S916", "Galaxy S23+"),
+    ("SM-S918", "Galaxy S23 Ultra"),
+    ("SM-S921", "Galaxy S24"),
+    ("SM-S926", "Galaxy S24+"),
+    ("SM-S928", "Galaxy S24 Ultra"),
+    ("SM-S931", "Galaxy S25"),
+    ("SM-S936", "Galaxy S25+"),
+    ("SM-S938", "Galaxy S25 Ultra"),
+    ("SM-F946", "Galaxy Z Fold5"),
+    ("SM-F956", "Galaxy Z Fold6"),
+    ("SM-F731", "Galaxy Z Flip5"),
+    ("SM-F741", "Galaxy Z Flip6"),
+    ("SM-A546", "Galaxy A54"),
+    ("SM-A556", "Galaxy A55"),
+];
+
+#[cfg(test)]
+mod model_tests {
+    use super::model_marketing_name;
+
+    #[test]
+    fn samsung_models_resolve_with_region_suffixes() {
+        assert_eq!(model_marketing_name("SM-X700"), Some("Galaxy Tab S8"));
+        assert_eq!(model_marketing_name("SM-X700N"), Some("Galaxy Tab S8"));
+        assert_eq!(
+            model_marketing_name("SM-S928B/DS"),
+            Some("Galaxy S24 Ultra")
+        );
+        assert_eq!(model_marketing_name("Pixel 9 Pro"), None);
+    }
+}

@@ -1,6 +1,6 @@
 # StatasMon — development plan
 
-Status line (keep current): **Phases 0–1 done · Phase 2 in progress (2.1–2.6) · 2026-09-09 · plan v1.1**
+Status line (keep current): **Phases 0–2 done · Phase 3 next (3.1) · 2026-09-09 · plan v1.1**
 
 This is the working document for the lead session and every sub-agent. It
 says what we are building, what the platforms can actually provide, the
@@ -311,7 +311,7 @@ Acceptance: the Overview matches AD-1 on the fake device; perf budgets met.
     (opt-in), foreground app · core-android · done 2026-09-09.
 2.6 logcat stream → `LogEntry`, `--pid` per-app filter, LMK kill and crash
     events, dropbox crash/ANR fetch · core-android · done 2026-09-09.
-2.7 Wireless pairing dialog (`adb pair`/`connect`, mDNS list) · ui + core
+2.7 Wireless pairing dialog (`adb pair`/`connect`, mDNS list) · ui + core · done 2026-09-09 (mDNS list deferred to Phase 6).
     · core done 2026-09-09 (`AdbHandle::pair/connect`, `DeviceAction::AdbPair/
     AdbConnect`); dialog + mDNS list pending (ui).
 Acceptance: the Overview runs live on a real Android device with every

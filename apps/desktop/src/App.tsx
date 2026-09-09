@@ -18,6 +18,7 @@ import { ComingSoon } from "./shell/ComingSoon";
 import { EmptyState } from "./shell/EmptyState";
 import { viewFromHash } from "./shell/routes";
 import { useAppStore } from "./store/app";
+import { telemetry } from "./store/telemetry";
 
 /** Real Overview cards are dropped in here as Phase 1 steps land (see `OverviewSlots`). */
 const OVERVIEW_SLOTS: OverviewSlots = {
@@ -51,12 +52,16 @@ function useBridge() {
     const report = setTimeout(() => {
       void getStream().then((st) => {
         if (st.kind !== "tauri") return;
-        const ids = Object.keys(useAppStore.getState().devices);
+        const devices = useAppStore.getState().devices;
+        const lines = Object.values(devices).map((d) => {
+          const v = d.latest;
+          return `${d.summary.id} [${d.summary.state.state}] "${d.headline?.sentence ?? "-"}" cpu=${v["cpu.total"]?.toFixed(0) ?? "-"} mem=${v["mem.used"] ? (v["mem.used"] / 2 ** 30).toFixed(2) : "-"}GB bat=${v["bat.percent"] ?? "-"} thermal=${v["thermal.raw"] ?? "-"} rx=${v["net.rx_bps"]?.toFixed(0) ?? "-"} logs=${telemetry.logsFor(d.summary.id).size}`;
+        });
         void st.invoke("ui_report", {
-          message: `ui received ${dispatchedCount} messages; devices=${ids.join(",")}`,
+          message: `ui received ${dispatchedCount} messages; ${lines.join(" || ")}`,
         });
       });
-    }, 4000);
+    }, 12_000);
     return () => {
       clearTimeout(report);
       stop?.();

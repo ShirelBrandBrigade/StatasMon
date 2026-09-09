@@ -19,5 +19,18 @@ entry when it is fixed; reference the commit.
   fires in a hidden window; live cards catch up in one tick when the window
   is visible again. Acceptable for v1; revisit if background recording UI
   needs live counters.
-- **Real-device verification pending** for everything in Phase 1 (by
-  design: fake device first).
+- **Android tick cost is ~270 ms through the adb subprocess** (2026-09-09):
+  each cadence spawns one `adb shell` per tick; ~50 ms of that is process
+  spawn. A persistent shell or a native host-protocol client (ADR-009's
+  "later optimization") would bring the fast tick under ~100 ms. Fine at
+  1 Hz; revisit before Phase 7's perf pass.
+- **Samsung `dumpsys battery` prints `current now: 671093`** with an
+  unverified unit and sign, so `bat.current` and `bat.power` are withheld
+  on this device until checked against a known charging load.
+- **Deferred Android sub-items**: opt-in `dumpsys meminfo` PSS snapshots
+  (plan 2.5) and enrichment of crash/ANR events from `dumpsys dropbox`
+  (plan 2.6) are not implemented; events currently carry the log line only.
+- **Wireless ADB pair/connect and bugreport** run real adb but were not
+  exercised live (they change host/device state); the dialog and the
+  actions are unit-tested.
+- **Real-device verification** of the iOS side is pending (Phase 3).

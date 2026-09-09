@@ -6,4 +6,4 @@
 
 pub mod android;
 
-pub use android::{soc_manufacturer_name, soc_marketing_name};
+pub use android::{model_marketing_name, soc_manufacturer_name, soc_marketing_name};

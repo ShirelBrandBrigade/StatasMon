@@ -39,7 +39,7 @@ async fn galaxy_tab_s8_info_sheet() {
     let id = &info.identity;
     assert_eq!(id.model_identifier.as_deref(), Some("SM-X700"));
     assert_eq!(id.manufacturer.as_deref(), Some("samsung"));
-    assert_eq!(id.marketing_name.as_deref(), Some("Samsung SM-X700"));
+    assert_eq!(id.marketing_name.as_deref(), Some("Samsung Galaxy Tab S8"));
     assert_eq!(id.model_number.as_deref(), Some("gts8wifixx"));
     assert_eq!(id.unique_id.as_deref(), Some("R52W303E34B"));
     assert_eq!(id.serial_number.as_deref(), Some("R5XXXXXXXXX"));
@@ -147,7 +147,7 @@ async fn fixture_source_connects_and_emits_state_capabilities_info() {
     assert_eq!(src.id(), "android:192.168.50.20:5555");
     assert_eq!(src.summary().transport, Transport::AdbTcp);
     assert_eq!(src.summary().state, ConnectionState::Tier2);
-    assert_eq!(src.summary().model_name, "Samsung SM-X700");
+    assert_eq!(src.summary().model_name, "Samsung Galaxy Tab S8");
     // The fixture cannot answer the batched probe, so everything is
     // unavailable with a reason, but the sheet still comes from getprop.
     let info = src.info().await.unwrap();
