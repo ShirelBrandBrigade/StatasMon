@@ -262,16 +262,16 @@ Each step: deliverable · owner role · verification. Mark done with a date.
 0.2 `crates/protocol`: events, `MetricId` catalog with units, `DeviceInfo` · done 2026-09-09
     document, `CapabilitySet`; `ts-rs` generation into `packages/protocol`
     · protocol · `cargo test` + generated TS compiles.
-0.3 `crates/device` trait + `crates/device-fake` (seeded generator for every
+0.3 `crates/device` trait + `crates/device-fake` (seeded generator for every · done 2026-09-09
     metric, scripted scenarios: thermal rise, memory warning, crash, app
     launch; replay of fixtures) · core-store/qa · fake runs headless and
     emits all event kinds.
-0.4 `crates/core`: scheduler, bus, ring buffers, rules engine v1 · core ·
+0.4 `crates/core`: scheduler, bus, ring buffers, rules engine v1 · core · done 2026-09-09
     unit tests for buffers and rules.
 0.5 `src-tauri`: commands + channels wired to core; `pnpm dev:mock` shows
     events in a debug panel · core + ui · manual + Vitest on the client
     buffer mirror.
-0.6 `packages/ui`: tokens from DESIGN-SYSTEM.md, fonts bundled, primitives
+0.6 `packages/ui`: tokens from DESIGN-SYSTEM.md, fonts bundled, primitives · done 2026-09-09
     (Card, Ring, StackBar, Legend, Pill, KeyValue, Sparkline, Button,
     Segment) with a Storybook-free gallery route · ui · visual check
     against the AD-1 mockup.

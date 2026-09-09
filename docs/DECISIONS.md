@@ -49,3 +49,13 @@ connect; SoC temperature is dashed on iOS.
 ## ADR-007 · 2026-09-09 · Packet capture on Android is out of v1
 Status: accepted. Context: tcpdump needs root on user builds. Decision:
 pcap only on iOS (pcapd); Android shows a dash with the reason.
+
+## ADR-008 · 2026-09-09 · Sessions auto-record on attach; pausing stops storage, not the connection
+Status: accepted. Context: the engine (step 0.4) needed a policy. Decision:
+`EngineConfig::auto_record` defaults to true so a device starts recording
+the moment it attaches; while Paused or Stopped the live snapshot still
+updates (latest values, cores, processes) but nothing is stored, counted or
+forwarded as `Samples`/`Cores`/`Processes`/`Log`; `Info`, `Capabilities`,
+`DeviceState`, `Event`, `Error`, `Headline` and `Session` always flow.
+Consequences: the UI can show live numbers with a "paused" badge; storage
+(Phase 5) follows the same gate.

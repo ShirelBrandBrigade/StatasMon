@@ -3410,10 +3410,30 @@ dependencies = [
 [[package]]
 name = "statasmon-core"
 version = "0.1.0"
+dependencies = [
+ "parking_lot",
+ "regex",
+ "serde",
+ "serde_json",
+ "statasmon-device",
+ "statasmon-device-fake",
+ "statasmon-protocol",
+ "thiserror 2.0.20",
+ "tokio",
+ "tracing",
+ "uuid",
+]
 
 [[package]]
 name = "statasmon-device"
 version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "serde_json",
+ "statasmon-protocol",
+ "thiserror 2.0.20",
+ "tokio",
+]
 
 [[package]]
 name = "statasmon-device-android"
@@ -3422,6 +3442,16 @@ version = "0.1.0"
 [[package]]
 name = "statasmon-device-fake"
 version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "parking_lot",
+ "serde_json",
+ "statasmon-device",
+ "statasmon-protocol",
+ "thiserror 2.0.20",
+ "tokio",
+ "tracing",
+]
 
 [[package]]
 name = "statasmon-device-ios"
