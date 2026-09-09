@@ -1,6 +1,6 @@
 # StatasMon — development plan
 
-Status line (keep current): **Phases 0–2 done · Phase 3 next (3.1) · 2026-09-09 · plan v1.1**
+Status line (keep current): **Phases 0–2 done · Phases 3 and 5 in progress (parallel), then 4, 6, 7 · 2026-09-09 · plan v1.1**
 
 This is the working document for the lead session and every sub-agent. It
 says what we are building, what the platforms can actually provide, the
@@ -319,15 +319,21 @@ FEATURES.md field either filled or dashed with a reason.
 
 ### Phase 3 — iOS tier 1 (no tunnel)
 3.1 usbmuxd discovery on macOS and Windows (Apple Mobile Device Support
-    detection + instructions), pairing/trust flow · core-ios.
+    detection + instructions), pairing/trust flow · core-ios · done 2026-09-09
+    (`MuxdDiscovery`; live check on the iPad pending, see ADR-011).
 3.2 `DeviceInfo` from lockdown `GetValue` (all keys), `crates/idmap`
     table (ProductType → marketing name, ChipID/HardwarePlatform → chip
-    name, from AppleDB snapshot with a refresh script) · core-ios + idmap.
+    name, from AppleDB snapshot with a refresh script) · core-ios + idmap ·
+    done 2026-09-09 (static table in `crates/idmap/src/apple.rs`; the
+    refresh script is deferred to Phase 7; RAM and uptime stay dashed at
+    tier 1).
 3.3 Battery: `com.apple.mobile.battery` + IORegistry `AppleSmartBattery`
     parser (voltage, amperage sign, temperature ×0.01, cycles, capacities,
-    health %) at 2 s · core-ios.
+    health %) at 2 s · core-ios · done 2026-09-09 (`IOPMPowerSource` class
+    query at the medium cadence; fixture shape-only until captured).
 3.4 Storage: `com.apple.disk_usage` + installation_proxy per-app sizes ·
-    core-ios.
+    core-ios · done 2026-09-09 (per-app list kept on `IosSource::app_sizes`
+    until the protocol carries per-app storage).
 3.5 `os_trace_relay` stream → `LogEntry` (pid, process, subsystem,
     category, level), thermalmonitord transition parser → `thermal.state`
     and ThermalChange events; memory warning lines → events · core-ios.
@@ -356,12 +362,12 @@ Acceptance: full Overview on a real iPhone with Developer Mode on; tier
 degrades cleanly when it is off.
 
 ### Phase 5 — Sessions, store, export
-5.1 Store schema + migrations + writer + retention · core-store.
+5.1 Store schema + migrations + writer + retention · core-store · done 2026-09-09.
 5.2 History queries with downsampling; range segment drives charts from
-    the store beyond the live buffer · core-store + ui.
+    the store beyond the live buffer · core-store + ui · core done 2026-09-09.
 5.3 Marks (keyboard M), events on charts · core + ui.
 5.4 Exports: `.log`, `.jsonl`, `.csv`, session `.zip`; scopes; progress ·
-    export + ui.
+    export + ui · core done 2026-09-09.
 5.5 Sessions screen: list, reopen, delete, compare two sessions (same
     metric overlaid) · ui.
 Acceptance: record 1 h on two devices, reopen, export bundle, sizes and

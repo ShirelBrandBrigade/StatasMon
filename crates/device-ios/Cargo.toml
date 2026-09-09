@@ -22,6 +22,8 @@ thiserror = { workspace = true }
 tracing = { workspace = true }
 parking_lot = { workspace = true }
 chrono = { workspace = true }
+uuid = { workspace = true }
+futures = "0.3"
 
 [dev-dependencies]
 statasmon-core = { workspace = true }

@@ -29,3 +29,6 @@ pub mod storage;
 pub mod thermal;
 
 pub use error::IosError;
+pub use info::{ConnectionFacts, InfoInputs, build_info, load_inputs, read_info};
+pub use muxd::{IosProvider, MuxdDiscovery};
+pub use source::{IosSeed, IosSource, TrustHandle, app_data_dir, device_id, tier1_capabilities};

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>CFBundleDisplayName</key>
+		<string>Safari</string>
+		<key>CFBundleIdentifier</key>
+		<string>com.apple.mobilesafari</string>
+		<key>DynamicDiskUsage</key>
+		<integer>120000000</integer>
+		<key>StaticDiskUsage</key>
+		<integer>15000000</integer>
+	</dict>
+	<dict>
+		<key>CFBundleDisplayName</key>
+		<string>Big Game</string>
+		<key>CFBundleIdentifier</key>
+		<string>com.example.big</string>
+		<key>DynamicDiskUsage</key>
+		<integer>500000000</integer>
+		<key>StaticDiskUsage</key>
+		<integer>2000000000</integer>
+	</dict>
+	<dict>
+		<key>CFBundleDisplayName</key>
+		<string>Tiny</string>
+		<key>CFBundleIdentifier</key>
+		<string>com.example.tiny</string>
+		<key>DynamicDiskUsage</key>
+		<integer>0</integer>
+		<key>StaticDiskUsage</key>
+		<integer>3000000</integer>
+	</dict>
+</array>
+</plist>

@@ -99,3 +99,107 @@ the missing fields (cycles, capacities) are dashed individually.
 Consequences: the Android tablet shows real per-core load, three thermal
 sensors and disk categories; `bat.current` is withheld until Samsung's
 `current now` unit and sign are verified against a known load.
+
+## ADR-011 · 2026-09-09 · iOS pairing UX and provider shape (tier 1)
+Status: accepted. Context: step 3.1 needed a trust flow that never blocks
+and a way for every iOS service (battery, storage, logs, crashes, pcap) to
+share one pair record. Decisions: (1) `MuxdDiscovery` attaches a device
+the moment usbmuxd reports it; without a valid pair record it is attached
+as an `IosSource::untrusted` (`ConnectionState::NeedsTrust`, every
+capability unavailable with the reason) and a lockdown `Pair` request is
+sent so the device shows "Trust This Computer"; the request is repeated
+every 3 s while `PairingDialogResponsePending`, the reason changes to
+"unlock the device" on `PasswordProtected`, and after `UserDeniedPairing`
+the device is asked again only every 30 s until it is re-plugged. Once
+paired the record is saved into usbmuxd (`SavePairRecord`, so iTunes /
+Finder / other tools share it) and the untrusted source is replaced by the
+tier-1 source. The host id is a fresh uppercase UUID per pairing, as
+Apple's tools do. (2) `IosProvider` wraps `UsbmuxdProvider` and caches the
+pair record in memory, so a service open costs one usbmuxd round-trip;
+the logs agent receives it as `Arc<dyn IdeviceProvider>`. (3) usbmuxd
+`Listen` runs on a dedicated thread (the crate's stream is not `Send`);
+when `Listen` is refused the discovery polls `ListDevices` every 2 s.
+(4) A tier-1 source emits only what it measured: RAM, uptime, media/other
+storage and all DVT metrics are dashed with the Developer Mode / tunnel
+reason; `BatteryDetail` is available only when the IORegistry query
+answered at connect. Dependencies added to `device-ios`: `uuid` (already
+a workspace dependency, MIT/Apache-2.0) and `futures` 0.3 (MIT/Apache-2.0,
+already pulled in by `idevice`). Consequences: the sidebar shows an iOS
+device within a second of plugging it in, with a "needs trust" state
+instead of nothing; a pairing declined on the device is not retried in a
+loop; the per-app storage list has no protocol message yet (kept on
+`IosSource::app_sizes`, to be added to the protocol in Phase 6).
+
+## ADR-012 · 2026-09-09 · Session store, retention and export formats
+Status: accepted. Context: Phase 5 (5.1, core of 5.2 and 5.4) needed the
+on-disk shape of sessions, the write path that never touches the UI
+thread, and the export formats the UI will offer. Decisions:
+- **Layout.** Under the app data folder (`~/Library/Application
+  Support/com.statasmon.app` on macOS via Tauri's resolver;
+  `STATASMON_STORE_DIR` overrides it for dev runs): `index.sqlite` with one
+  `sessions` row per session (the `SessionSummary` fields plus
+  `device_info_json`, `last_ts_ms`, `path`) and `sessions/<id>.sqlite` with
+  `samples(ts_ms, metric, value)` indexed `(metric, ts_ms)`, `cores`,
+  `processes`, `logs(seq PRIMARY KEY, …)`, `events`, `marks`, `meta`. Both
+  are WAL with `synchronous=NORMAL`; schemas are versioned by
+  `PRAGMA user_version` (index v1, session v1) and migrated on open.
+  Enum columns store the wire names (`error`, `lmk_kill`, `performance`).
+- **Session ids** are `<device_id sanitised>-<yyyyMMdd-HHmmss>` (local
+  time; `:`/`/` become `_`), made unique with `-2`, `-3` when needed, and
+  are the ids the UI sees in `SessionState.id`; the in-memory `Session`
+  keeps its uuid internally.
+- **Writer.** One `std::thread` per store fed by a bounded
+  `std::sync::mpsc` queue (4 096 ops). Everything that arrives within one
+  second is applied in one transaction per session; index counters are
+  folded in the same batch. The engine's `write` never blocks: a full queue
+  drops the message and counts it (`Store::dropped`, a warning every 1 000
+  drops); lifecycle ops (`begin`, `end`, `mark`, `set_info`, `flush`) wait
+  for room. ADR-008 applies: nothing is stored while paused except the
+  session transition events themselves and marks.
+- **Retention defaults.** `max_session_ms` 4 h: when a session's recording
+  time reaches it the engine stops it and starts a new one (`Event`
+  "Session split…" + `Session` message); `keep_days` 30: a daily sweep on
+  the writer thread deletes ended sessions older than that, then the
+  oldest ended sessions past the optional `max_total_bytes`; every sweep
+  ends with `wal_checkpoint(TRUNCATE)`. Sessions left open by a crash are
+  ended at their last sample when the store opens. Deleting a live session
+  is refused by the store; the engine stops it first.
+- **Queries.** History is downsampled in SQL (`GROUP BY` bucket of
+  `step_ms` from `from_ms`, average, stamped with the bucket start — the
+  same shape the live ring returns) and never returns more than 5 000
+  points: the step is raised when a range would. Logs filter by process,
+  level, time range and buffer like the live ring. Substring search uses an
+  **FTS5 external-content table with the trigram tokenizer** (available in
+  the bundled SQLite; verified by the store tests) for queries of three or
+  more characters and `LIKE … ESCAPE '\'` otherwise or when FTS is
+  missing (`meta.fts` records which); regex search uses a `regexp`
+  function registered on the connection (case-insensitive, 1 MiB size
+  limit). Readers open their own connection per query.
+- **Export.** Every export writes `<path>.part` and renames it into place
+  when complete (an existing file is replaced), reports progress about
+  every 2 % through `Message::Progress { task_id: "export-<n>" }` and
+  returns `ExportResult { path, bytes, entries }`. `.log`: one line per
+  entry — `2026-09-09 14:32:07.412  FieldKit[4412]  ERROR
+  com.example.fieldkit  message` (local time, origin = iOS subsystem or
+  Android tag). `.jsonl`: header `{"statasmon":1,"session":…}` then one
+  `LogEntry` per line. `.csv`: **wide** (`ts_ms,cpu.total,…`, one row per
+  tick) for the `Session` scope with ≤ 64 metrics — the whole catalog fits,
+  so 40 (the first draft) would have made wide unreachable on real devices
+  — **long** (`ts_ms,metric,value`) otherwise; the `App` scope exports the
+  app's process rows (the only per-app metrics stored). `.zip` bundle:
+  `device.json`, `session.json`, `metrics.csv` (wide), `cores.csv`,
+  `processes.csv`, `logs.jsonl`, `events.json`, `marks.json`, `crashes/*`
+  copied from `<app-data>/crashes/<device>/` (sanitised or raw device id),
+  `capture.pcap` from `<app-data>/pcap/<session id>.pcap` — the crash and
+  pcap actions (Phase 3/4) must write there for the bundle to pick them up.
+- **Dependencies** (all maintained in the last 12 months): `rusqlite`
+  0.40.2 (MIT, `bundled` SQLite + `functions`), `csv` 1.4 (MIT/Unlicense),
+  `zip` 8.6 (MIT, deflate only; 9.0 is still pre-release), `regex` 1.13
+  (MIT/Apache, already in use), `tempfile` 3.27 (MIT/Apache, dev only).
+Consequences: the UI queries a stored session by passing `session_id` in
+`HistoryQuery`/`LogFilter`; new commands `list_sessions`, `open_session`,
+`delete_session`, `store_stats`, and `export_data` now returns
+`ExportResult`. `Engine::new` degrades to memory-only with an `Error`
+notice when the store cannot open. Retention settings reach the UI in
+6.6; a store-side `EngineError::Store` variant is a small follow-up (store
+errors currently map onto `Device` errors with an `Io`/`Unsupported` code).

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BonjourFullServiceName</key>
+	<string></string>
+	<key>EnableWifiConnections</key>
+	<false/>
+	<key>EnableWifiDebugging</key>
+	<false/>
+	<key>EnableWifiPairing</key>
+	<false/>
+	<key>SupportsWifi</key>
+	<true/>
+	<key>SupportsWifiSyncing</key>
+	<true/>
+	<key>WirelessBuddyID</key>
+	<string></string>
+</dict>
+</plist>

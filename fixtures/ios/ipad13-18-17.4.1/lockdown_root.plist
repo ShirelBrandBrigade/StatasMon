@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ActivationState</key>
+	<string>Activated</string>
+	<key>BasebandVersion</key>
+	<string></string>
+	<key>BluetoothAddress</key>
+	<string>00:00:00:00:00:00</string>
+	<key>BuildVersion</key>
+	<string>21E237</string>
+	<key>CPUArchitecture</key>
+	<string>arm64e</string>
+	<key>ChipID</key>
+	<integer>33025</integer>
+	<key>DeviceClass</key>
+	<string>iPad</string>
+	<key>DeviceColor</key>
+	<string>1</string>
+	<key>DeviceName</key>
+	<string>Test iPad</string>
+	<key>HardwareModel</key>
+	<string>J271AP</string>
+	<key>HardwarePlatform</key>
+	<string>t8101</string>
+	<key>ModelNumber</key>
+	<string>MPQ03</string>
+	<key>PasswordProtected</key>
+	<true/>
+	<key>ProductName</key>
+	<string>iPhone OS</string>
+	<key>ProductType</key>
+	<string>iPad13,18</string>
+	<key>ProductVersion</key>
+	<string>17.4.1</string>
+	<key>ProductionSOC</key>
+	<true/>
+	<key>RegionInfo</key>
+	<string>LL/A</string>
+	<key>SIMStatus</key>
+	<string>kCTSIMSupportSIMStatusNotInserted</string>
+	<key>SerialNumber</key>
+	<string>SERIAL000000</string>
+	<key>TelephonyCapability</key>
+	<false/>
+	<key>TimeZone</key>
+	<string>Asia/Jerusalem</string>
+	<key>TimeZoneOffsetFromUTC</key>
+	<real>10800.0</real>
+	<key>TrustedHostAttached</key>
+	<true/>
+	<key>UniqueDeviceID</key>
+	<string>00000000-0000000000000000</string>
+	<key>WiFiAddress</key>
+	<string>00:00:00:00:00:00</string>
+	<key>WirelessBoardSerialNumber</key>
+	<string></string>
+</dict>
+</plist>

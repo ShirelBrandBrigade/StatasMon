@@ -1,0 +1,6 @@
+{
+  "product_type": "iPad13,18",
+  "product_version": "17.4.1",
+  "source": "shape-only: documented keys (docs/research/ios.md), not a device capture; replace with crates/device-ios/examples/capture_fixture.rs output",
+  "captured": null
+}

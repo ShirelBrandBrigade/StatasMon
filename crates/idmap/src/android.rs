@@ -164,14 +164,14 @@ mod tests {
 /// marketing name in `ro.product.model` already.
 pub fn model_marketing_name(model: &str) -> Option<&'static str> {
     let m = model.trim().to_ascii_uppercase();
-    // Samsung model numbers carry a region suffix (SM-X700N, SM-S928B/DS);
-    // match on the family prefix.
+    // Samsung model numbers are "SM-" + one letter + three digits, followed by
+    // a region suffix (SM-X700N, SM-S928B/DS); match on the seven-char family.
     let family = m.split('/').next().unwrap_or(&m);
-    let base: String = family
-        .chars()
-        .take_while(|c| !c.is_ascii_alphabetic() || family.len() <= 7)
-        .collect();
-    let key = if base.len() >= 7 { &base[..7] } else { family };
+    let key: &str = if family.starts_with("SM-") && family.len() >= 7 {
+        &family[..7]
+    } else {
+        family
+    };
     MODELS.iter().find(|(k, _)| *k == key).map(|(_, v)| *v)
 }
 
