@@ -1,14 +1,17 @@
 //! Tauri commands: a 1:1 mapping of the UI's `commands.ts` onto the engine.
 
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use serde::Serialize;
 use statasmon_core::{DeviceSnapshot, EngineError};
 use statasmon_device::ActionResult;
 use statasmon_protocol::{
-    DeviceAction, DeviceSummary, ErrorCode, ExportRequest, HistoryPoint, HistoryQuery, LogFilter,
-    LogPage, Message, MetricId, MetricMeta, SessionState,
+    DeviceAction, DeviceSummary, ErrorCode, ExportRequest, ExportResult, HistoryPoint,
+    HistoryQuery, LogFilter, LogPage, Message, MetricId, MetricMeta, SessionDetail, SessionState,
+    SessionSummary,
 };
+use statasmon_store::StoreStats;
 use tauri::State;
 use tauri::ipc::Channel;
 
@@ -193,13 +196,104 @@ pub fn query_history(
     Ok(state.engine.history(&query)?)
 }
 
+/// Every stored session (newest first) plus the live ones.
 #[tauri::command]
-pub fn export_data(_state: State<'_, AppState>, request: ExportRequest) -> CmdResult<String> {
-    let _ = request;
-    Err(CommandError::unsupported(
-        "Export is not available yet",
-        "Session storage and export arrive in Phase 5 of the plan.",
-    ))
+pub fn list_sessions(state: State<'_, AppState>) -> CmdResult<Vec<SessionSummary>> {
+    Ok(state.engine.session_summaries()?)
+}
+
+/// Summary, device info, marks, events and metric list of one session.
+#[tauri::command]
+pub fn open_session(state: State<'_, AppState>, session_id: String) -> CmdResult<SessionDetail> {
+    Ok(state.engine.session_detail(&session_id)?)
+}
+
+/// Delete a stored session (a live one is stopped first).
+#[tauri::command]
+pub async fn delete_session(state: State<'_, AppState>, session_id: String) -> CmdResult<()> {
+    let engine = state.engine.clone();
+    Ok(engine.delete_session(&session_id).await?)
+}
+
+/// Store root, total size and session count.
+#[tauri::command]
+pub fn store_stats(state: State<'_, AppState>) -> CmdResult<StoreStats> {
+    let store = state.engine.store().ok_or_else(|| {
+        CommandError::unsupported(
+            "Session storage is not available",
+            "Sessions are not being saved in this run; restart the app.",
+        )
+    })?;
+    store.store_stats().map_err(|e| CommandError {
+        code: ErrorCode::Io,
+        message: e.to_string(),
+        hint: Some("Check the app data folder is readable.".to_owned()),
+    })
+}
+
+static EXPORT_SEQ: AtomicU64 = AtomicU64::new(1);
+
+/// Export on a blocking thread; progress arrives as `Message::Progress`
+/// with `task_id = "export-<n>"`, the result is returned when done.
+#[tauri::command]
+pub async fn export_data(
+    state: State<'_, AppState>,
+    request: ExportRequest,
+) -> CmdResult<ExportResult> {
+    let engine = state.engine.clone();
+    let store = engine.store().ok_or_else(|| {
+        CommandError::unsupported(
+            "Session storage is not available",
+            "Sessions are not being saved in this run, so there is nothing to export.",
+        )
+    })?;
+    let mut request = request;
+    if request.session_id.is_none() {
+        request.session_id = engine.current_session_id(&request.device_id)?;
+    }
+    if request.session_id.is_none() {
+        return Err(CommandError::unsupported(
+            "No session to export",
+            "Start a recording or pick a stored session first.",
+        ));
+    }
+    let task_id = format!("export-{}", EXPORT_SEQ.fetch_add(1, Ordering::Relaxed));
+    let app_data = state.app_data_dir.clone();
+    let device_id = request.device_id.clone();
+    let progress_engine = engine.clone();
+    let progress_task = task_id.clone();
+    let outcome = tauri::async_runtime::spawn_blocking(move || {
+        statasmon_export::export(&store, app_data.as_deref(), &request, |pct, msg| {
+            progress_engine.progress(&progress_task, pct, msg);
+        })
+    })
+    .await
+    .map_err(|e| CommandError {
+        code: ErrorCode::Internal,
+        message: format!("export task failed: {e}"),
+        hint: None,
+    })?;
+    match outcome {
+        Ok(result) => {
+            tracing::info!(path = %result.path, bytes = result.bytes, entries = result.entries, "export done");
+            Ok(result)
+        }
+        Err(e) => {
+            let err = CommandError {
+                code: e.code(),
+                message: e.to_string(),
+                hint: e.hint(),
+            };
+            engine.progress(&task_id, 100.0, &format!("Export failed: {e}"));
+            engine.notice(Message::Error {
+                device_id: Some(device_id),
+                code: err.code,
+                message: format!("Export failed: {e}"),
+                hint: err.hint.clone(),
+            });
+            Err(err)
+        }
+    }
 }
 
 /// What a device action produced, in a UI-friendly shape.

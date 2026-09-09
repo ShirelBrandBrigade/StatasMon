@@ -5,12 +5,14 @@
 mod commands;
 mod state;
 
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use parking_lot::Mutex;
-use statasmon_core::{Engine, EngineConfig};
+use statasmon_core::{Engine, EngineConfig, StoreConfig};
 use statasmon_device_android::adb::{AdbDiscovery, AdbLocation};
 use statasmon_device_fake::FakeDiscovery;
+use statasmon_device_ios::MuxdDiscovery;
 use tauri::Manager;
 
 use state::{AppState, SourceMode};
@@ -56,6 +58,30 @@ fn attach_android(engine: &Engine) {
     });
 }
 
+/// Attach the iOS discovery (usbmuxd). The discovery itself keeps retrying
+/// every 5 s while usbmuxd is unreachable; the probe here only produces the
+/// one-time `DriverMissing` notice with the install hint (Windows needs
+/// Apple Mobile Device Support from iTunes / the Apple Devices app).
+fn attach_ios(engine: &Engine) {
+    let engine = engine.clone();
+    tauri::async_runtime::spawn(async move {
+        let discovery = MuxdDiscovery::new();
+        match discovery.probe().await {
+            Ok(()) => tracing::info!(addr = ?discovery.addr(), "ios: usbmuxd reachable"),
+            Err(e) => {
+                tracing::error!(code = "driver_missing", error = %e, "ios: usbmuxd unreachable");
+                engine.notice(statasmon_protocol::Message::Error {
+                    device_id: None,
+                    code: e.code(),
+                    message: e.to_string(),
+                    hint: e.hint(),
+                });
+            }
+        }
+        engine.attach_discovery(Box::new(discovery));
+    });
+}
+
 fn init_tracing() {
     use tracing_subscriber::EnvFilter;
     let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
@@ -72,8 +98,26 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             let mode = source_mode();
-            let engine =
-                tauri::async_runtime::block_on(async { Engine::new(EngineConfig::default()) });
+            // Store root: `STATASMON_STORE_DIR` (dev) or the app data folder
+            // (`~/Library/Application Support/com.statasmon.app` on macOS).
+            let app_data_dir = match app.path().app_data_dir() {
+                Ok(dir) => Some(dir),
+                Err(e) => {
+                    tracing::error!(error = %e, "app data dir unavailable; sessions are not saved");
+                    None
+                }
+            };
+            let store_root = std::env::var_os("STATASMON_STORE_DIR")
+                .map(PathBuf::from)
+                .or_else(|| app_data_dir.clone());
+            let config = match &store_root {
+                Some(root) => {
+                    tracing::info!(root = %root.display(), "session store root");
+                    EngineConfig::default().with_store(StoreConfig::new(root))
+                }
+                None => EngineConfig::default(),
+            };
+            let engine = tauri::async_runtime::block_on(async { Engine::new(config) });
             let fake = match mode {
                 SourceMode::Fake => {
                     let discovery = FakeDiscovery::from_env();
@@ -87,9 +131,8 @@ pub fn run() {
                 }
                 SourceMode::Real => {
                     attach_android(&engine);
-                    tracing::info!(
-                        "device source: real (android over adb; iOS arrives in Phase 3)"
-                    );
+                    attach_ios(&engine);
+                    tracing::info!("device source: real (android over adb, iOS over usbmuxd)");
                     None
                 }
             };
@@ -98,6 +141,7 @@ pub fn run() {
                 mode,
                 fake,
                 forwarder: Arc::new(Mutex::new(None)),
+                app_data_dir,
             });
             Ok(())
         })
@@ -115,6 +159,10 @@ pub fn run() {
             commands::query_logs,
             commands::query_history,
             commands::export_data,
+            commands::list_sessions,
+            commands::open_session,
+            commands::delete_session,
+            commands::store_stats,
             commands::device_action,
             commands::fake_detach,
             commands::fake_reattach,

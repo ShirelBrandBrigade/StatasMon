@@ -32,9 +32,22 @@
 //! headline) and always forwarded; so are the engine's own `Headline` and
 //! `Session` messages.
 //!
+//! ## The store (Phase 5)
+//! With [`EngineConfig::store`] set, the engine opens a
+//! [`statasmon_store::Store`] and becomes its producer: every session
+//! start (auto-record, `start_session`, a split at the recording cap)
+//! begins a store session named `<device>-<yyyyMMdd-HHmmss>`, which is the
+//! id the UI sees in `SessionState.id`; while **Recording** every
+//! `Samples`/`Cores`/`Processes`/`Log`/`Event` is handed to the store's
+//! writer queue (non-blocking; a full queue drops and counts), marks are
+//! stored whenever a session is open, `stop`/detach end the session.
+//! History and log queries with a `session_id` are answered from the
+//! store, without one from the live rings, which stay as they are.
+//!
 //! The engine never blocks: all provider I/O runs in the sources' own
 //! tasks; the engine's ingress task only mutates in-memory state under a
-//! short `parking_lot` lock and never awaits while holding it.
+//! short `parking_lot` lock and never awaits while holding it; store
+//! writes happen on the store's own thread.
 //!
 //! [`DeviceSource`]: statasmon_device::DeviceSource
 //! [`Message`]: statasmon_protocol::Message
@@ -56,3 +69,4 @@ pub use ring::{CoreRing, RingBuffer};
 pub use rules::{RecentEvent, RulesInput};
 pub use session::Session;
 pub use snapshot::DeviceSnapshot;
+pub use statasmon_store::{Store, StoreConfig};

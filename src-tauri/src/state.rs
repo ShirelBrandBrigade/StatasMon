@@ -1,5 +1,6 @@
 //! Shared state behind every Tauri command.
 
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use parking_lot::Mutex;
@@ -24,12 +25,15 @@ pub struct AppState {
     pub fake: Option<FakeHandle>,
     /// The forwarding task of the current UI subscription, if any.
     pub forwarder: Arc<Mutex<Option<JoinHandle<()>>>>,
+    /// The app data folder (store root, `crashes/`, `pcap/`), when resolved.
+    pub app_data_dir: Option<PathBuf>,
 }
 
 impl std::fmt::Debug for AppState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("AppState")
             .field("mode", &self.mode)
+            .field("app_data_dir", &self.app_data_dir)
             .finish_non_exhaustive()
     }
 }

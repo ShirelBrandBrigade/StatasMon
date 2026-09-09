@@ -1,5 +1,5 @@
-//! The engine: owns sources, drives discovery, updates per-device state
-//! and republishes every message on the bus.
+//! The engine: owns sources, drives discovery, updates per-device state,
+//! feeds the session store and republishes every message on the bus.
 
 use std::collections::{BTreeMap, VecDeque};
 use std::fmt;
@@ -7,13 +7,15 @@ use std::sync::Arc;
 
 use parking_lot::{Mutex, RwLock};
 use statasmon_device::{
-    ActionResult, DeviceSource, Discovery, DiscoveryEvent, DiscoverySink, EventSink, now_ms,
+    ActionResult, DeviceError, DeviceSource, Discovery, DiscoveryEvent, DiscoverySink, EventSink,
+    now_ms,
 };
 use statasmon_protocol::{
-    CapabilitySet, CoreSample, DeviceAction, DeviceId, DeviceInfo, DeviceSummary, EventKind,
-    Headline, HistoryPoint, HistoryQuery, LogFilter, LogPage, Message, MetricId, MetricValue,
-    ProcessRow, SessionState, SessionStatus,
+    CapabilitySet, CoreSample, DeviceAction, DeviceId, DeviceInfo, DeviceSummary, ErrorCode,
+    EventKind, Headline, HistoryPoint, HistoryQuery, LogFilter, LogPage, Message, MetricId,
+    MetricValue, ProcessRow, SessionDetail, SessionState, SessionStatus, SessionSummary,
 };
+use statasmon_store::{Store, StoreError, session_id_for};
 use tokio::sync::{broadcast, mpsc};
 use tokio::task::JoinHandle;
 
@@ -48,6 +50,9 @@ struct DeviceRecord {
     processes: Vec<ProcessRow>,
     events: VecDeque<RecentEvent>,
     session: Session,
+    /// The store's id of the current (or last) session; this is the id the
+    /// UI sees in `SessionState.id` when a store is configured.
+    store_session: Option<String>,
     headline: Headline,
 }
 
@@ -56,6 +61,7 @@ impl fmt::Debug for DeviceRecord {
         f.debug_struct("DeviceRecord")
             .field("summary", &self.summary)
             .field("session", &self.session.status())
+            .field("store_session", &self.store_session)
             .finish_non_exhaustive()
     }
 }
@@ -78,6 +84,7 @@ impl DeviceRecord {
             processes: Vec::new(),
             events: VecDeque::new(),
             session: Session::new(),
+            store_session: None,
             headline: Headline::default(),
         };
         record.evaluate(config.event_window_ms, now_ms());
@@ -99,6 +106,25 @@ impl DeviceRecord {
                 value: *value,
             })
             .collect()
+    }
+
+    /// The session state for the UI, carrying the store's session id.
+    fn session_state(&self, now_ms: i64) -> SessionState {
+        let mut state = self.session.state(now_ms);
+        if state.id.is_some()
+            && let Some(id) = &self.store_session
+        {
+            state.id = Some(id.clone());
+        }
+        state
+    }
+
+    /// True while the session is recording or paused (has a live session).
+    fn session_open(&self) -> bool {
+        matches!(
+            self.session.status(),
+            SessionStatus::Recording | SessionStatus::Paused
+        )
     }
 
     /// Re-run the rules; returns the new headline when it changed.
@@ -164,8 +190,29 @@ impl DeviceRecord {
             cores: self.latest_cores.clone(),
             processes: self.processes.clone(),
             headline: self.headline.clone(),
-            session: self.session.state(now_ms),
+            session: self.session_state(now_ms),
         }
+    }
+
+    /// A summary row for a session that only exists in memory (no store).
+    fn live_summary(&self, state: &SessionState, now_ms: i64) -> Option<SessionSummary> {
+        let id = state.id.clone()?;
+        Some(SessionSummary {
+            id,
+            device_id: self.summary.id.clone(),
+            device_name: self.summary.name.clone(),
+            model_name: self.display_name().to_owned(),
+            platform: self.summary.platform,
+            started_at_ms: state.started_at_ms.unwrap_or(now_ms),
+            ended_at_ms: (state.status == SessionStatus::Stopped).then_some(now_ms),
+            elapsed_ms: state.elapsed_ms,
+            sample_count: state.sample_count,
+            log_count: state.log_count,
+            event_count: 0,
+            mark_count: state.marks.len() as u64,
+            size_bytes: 0,
+            live: self.session_open(),
+        })
     }
 }
 
@@ -180,6 +227,8 @@ struct Inner {
     shut_down: parking_lot::Mutex<bool>,
     /// Startup / global notices (e.g. adb not found) replayed to late subscribers.
     notices: parking_lot::Mutex<Vec<Message>>,
+    /// The session store, when configured and opened.
+    store: Option<Arc<Store>>,
 }
 
 /// The session engine. Cheap to clone; all clones share one state.
@@ -195,15 +244,59 @@ impl fmt::Debug for Engine {
         f.debug_struct("Engine")
             .field("devices", &self.inner.devices.read().len())
             .field("subscribers", &self.inner.bus.receiver_count())
+            .field("store", &self.inner.store.is_some())
             .finish_non_exhaustive()
     }
 }
 
+/// Map a store error onto the engine's error type (a store problem is
+/// reported like a provider I/O problem, with a hint).
+fn store_err(e: StoreError) -> EngineError {
+    match e {
+        StoreError::InvalidFilter(m) => EngineError::InvalidFilter(m),
+        StoreError::UnknownSession(id) => EngineError::Device(
+            DeviceError::new(ErrorCode::Unsupported, format!("unknown session {id}"))
+                .with_hint("The session was deleted or never stored. Refresh the Sessions list."),
+        ),
+        StoreError::Live(id) => EngineError::Device(
+            DeviceError::new(
+                ErrorCode::Unsupported,
+                format!("session {id} is still recording"),
+            )
+            .with_hint("Stop the recording before deleting or exporting the whole session."),
+        ),
+        other => EngineError::Device(
+            DeviceError::new(ErrorCode::Io, format!("session store: {other}"))
+                .with_hint("Check free disk space and that the app data folder is writable."),
+        ),
+    }
+}
+
 impl Engine {
-    /// Create the engine and start its ingress task.
+    /// Create the engine and start its ingress task. When `config.store` is
+    /// set the store is opened under its root; if that fails the engine
+    /// runs without storage and publishes an `Error` notice saying so.
     pub fn new(config: EngineConfig) -> Self {
         let (bus, _) = broadcast::channel(config.bus_capacity.max(4096));
         let (ingress, rx) = EventSink::channel(INGRESS_CAPACITY);
+        let mut store_error = None;
+        let store = match &config.store {
+            Some(store_config) => match Store::open(store_config.clone()) {
+                Ok(store) => {
+                    tracing::info!(root = %store_config.root.display(), "session store opened");
+                    Some(store)
+                }
+                Err(e) => {
+                    tracing::error!(root = %store_config.root.display(), error = %e, "session store failed to open");
+                    store_error = Some(format!(
+                        "Session storage is off: {e} ({})",
+                        store_config.root.display()
+                    ));
+                    None
+                }
+            },
+            None => None,
+        };
         let inner = Arc::new(Inner {
             config,
             bus,
@@ -212,8 +305,20 @@ impl Engine {
             tasks: Mutex::new(Vec::new()),
             shut_down: Mutex::new(false),
             notices: parking_lot::Mutex::new(Vec::new()),
+            store,
         });
         let engine = Self { inner };
+        if let Some(message) = store_error {
+            engine.notice(Message::Error {
+                device_id: None,
+                code: ErrorCode::Io,
+                message,
+                hint: Some(
+                    "Sessions are not being saved. Check the app data folder is writable and restart."
+                        .to_owned(),
+                ),
+            });
+        }
         let ingress = tokio::spawn(engine.clone().ingress_loop(rx));
         let ticker = tokio::spawn(engine.clone().session_ticker());
         let mut tasks = engine.inner.tasks.lock();
@@ -226,6 +331,11 @@ impl Engine {
     /// The configuration in use.
     pub fn config(&self) -> &EngineConfig {
         &self.inner.config
+    }
+
+    /// The session store, when one is configured and open.
+    pub fn store(&self) -> Option<Arc<Store>> {
+        self.inner.store.clone()
     }
 
     /// Subscribe to every message after the engine processed it. A
@@ -281,11 +391,11 @@ impl Engine {
         let summary = record.summary.clone();
         let capabilities = record.capabilities.clone();
         let now = now_ms();
-        if self.inner.config.auto_record {
-            let _ = record.session.start(now);
+        if self.inner.config.auto_record && record.session.start(now).is_ok() {
+            self.begin_store_session(&mut record, now);
         }
         let started_session = record.session.status() == SessionStatus::Recording;
-        let session = record.session.state(now);
+        let session = record.session_state(now);
         let headline = record.headline.clone();
         self.inner
             .devices
@@ -330,7 +440,8 @@ impl Engine {
         Ok(())
     }
 
-    /// Stop and forget a device, publishing `DeviceDetached`.
+    /// Stop and forget a device, publishing `DeviceDetached`. An open
+    /// session is ended in the store.
     pub async fn detach(&self, device_id: &str) -> Result<(), EngineError> {
         let record = self
             .inner
@@ -338,7 +449,15 @@ impl Engine {
             .write()
             .remove(device_id)
             .ok_or_else(|| EngineError::UnknownDevice(device_id.to_owned()))?;
-        let source = Arc::clone(&record.lock().source);
+        let source = {
+            let mut r = record.lock();
+            if r.session_open() {
+                let now = now_ms();
+                self.end_store_session(&mut r, now);
+                let _ = r.session.stop(now);
+            }
+            Arc::clone(&r.source)
+        };
         if let Err(e) = source.stop().await {
             tracing::warn!(device = device_id, error = %e, "stop failed");
         }
@@ -372,8 +491,21 @@ impl Engine {
         Some(h)
     }
 
-    /// Metric history from the live ring (downsampled when `step_ms > 0`).
+    /// Metric history: from the store when `query.session_id` is set,
+    /// otherwise from the live ring (downsampled when `step_ms > 0`).
     pub fn history(&self, query: &HistoryQuery) -> Result<Vec<HistoryPoint>, EngineError> {
+        if let Some(session_id) = query.session_id.as_deref() {
+            let store = self.store_or_err()?;
+            return store
+                .history(
+                    session_id,
+                    query.metric,
+                    query.from_ms,
+                    query.to_ms,
+                    query.step_ms,
+                )
+                .map_err(store_err);
+        }
         let record = self.record(&query.device_id)?;
         let points =
             record
@@ -383,7 +515,7 @@ impl Engine {
         Ok(points)
     }
 
-    /// Per-core ticks in `[from_ms, to_ms]`.
+    /// Per-core ticks in `[from_ms, to_ms]` from the live ring.
     pub fn cores_history(
         &self,
         device_id: &str,
@@ -395,20 +527,47 @@ impl Engine {
         Ok(ticks)
     }
 
-    /// A page of log entries matching `filter` (its `device_id` picks the device).
+    /// Per-core ticks of a stored session.
+    pub fn stored_cores_history(
+        &self,
+        session_id: &str,
+        from_ms: i64,
+        to_ms: i64,
+    ) -> Result<Vec<(i64, Vec<CoreSample>)>, EngineError> {
+        self.store_or_err()?
+            .cores_history(session_id, from_ms, to_ms)
+            .map_err(store_err)
+    }
+
+    /// A page of log entries matching `filter`: from the store when
+    /// `filter.session_id` is set, otherwise from the live ring of
+    /// `filter.device_id`.
     pub fn query_logs(
         &self,
         filter: &LogFilter,
         offset: usize,
         limit: usize,
     ) -> Result<LogPage, EngineError> {
+        if let Some(session_id) = filter.session_id.as_deref() {
+            return self
+                .store_or_err()?
+                .logs(session_id, filter, offset, limit)
+                .map_err(store_err);
+        }
         let record = self.record(&filter.device_id)?;
         let page = record.lock().logs.filter(filter, offset, limit)?;
         Ok(page)
     }
 
-    /// Number of stored log entries matching `filter`.
+    /// Number of log entries matching `filter` (store or live ring, as
+    /// [`Engine::query_logs`]).
     pub fn count_logs(&self, filter: &LogFilter) -> Result<u64, EngineError> {
+        if let Some(session_id) = filter.session_id.as_deref() {
+            return self
+                .store_or_err()?
+                .count_logs(session_id, filter)
+                .map_err(store_err);
+        }
         let record = self.record(&filter.device_id)?;
         let n = record.lock().logs.count(filter)?;
         Ok(n)
@@ -417,33 +576,127 @@ impl Engine {
     /// The session state of one device.
     pub fn session(&self, device_id: &str) -> Result<SessionState, EngineError> {
         let record = self.record(device_id)?;
-        let s = record.lock().session.state(now_ms());
+        let s = record.lock().session_state(now_ms());
         Ok(s)
     }
 
-    /// Start a new recording session.
+    /// The store id of the device's current (or last) session.
+    pub fn current_session_id(&self, device_id: &str) -> Result<Option<String>, EngineError> {
+        let record = self.record(device_id)?;
+        let r = record.lock();
+        Ok(r.session_state(now_ms()).id)
+    }
+
+    /// Every session: stored ones (newest first) with the live ones
+    /// overlaid with their in-memory counters; without a store, only the
+    /// in-memory sessions of attached devices.
+    pub fn session_summaries(&self) -> Result<Vec<SessionSummary>, EngineError> {
+        let mut out = match &self.inner.store {
+            Some(store) => store.list().map_err(store_err)?,
+            None => Vec::new(),
+        };
+        let now = now_ms();
+        let records: Vec<Arc<Mutex<DeviceRecord>>> =
+            self.inner.devices.read().values().cloned().collect();
+        for record in records {
+            let r = record.lock();
+            let state = r.session_state(now);
+            let Some(id) = state.id.clone() else {
+                continue;
+            };
+            if let Some(row) = out.iter_mut().find(|s| s.id == id) {
+                if r.session_open() {
+                    overlay_live(row, &state);
+                }
+            } else if self.inner.store.is_none()
+                && let Some(row) = r.live_summary(&state, now)
+            {
+                out.push(row);
+            }
+        }
+        out.sort_by(|a, b| b.started_at_ms.cmp(&a.started_at_ms).then(b.id.cmp(&a.id)));
+        Ok(out)
+    }
+
+    /// Everything the UI needs to open a stored session (live counters
+    /// overlaid while it is still recording).
+    pub fn session_detail(&self, session_id: &str) -> Result<SessionDetail, EngineError> {
+        let mut detail = self
+            .store_or_err()?
+            .open_session(session_id)
+            .map_err(store_err)?;
+        let now = now_ms();
+        let records: Vec<Arc<Mutex<DeviceRecord>>> =
+            self.inner.devices.read().values().cloned().collect();
+        for record in records {
+            let r = record.lock();
+            if r.session_open() && r.store_session.as_deref() == Some(session_id) {
+                let state = r.session_state(now);
+                overlay_live(&mut detail.summary, &state);
+                detail.marks = state.marks;
+            }
+        }
+        Ok(detail)
+    }
+
+    /// Delete a stored session. A session still being recorded is
+    /// stopped first. Runs the file deletion on a blocking thread.
+    pub async fn delete_session(&self, session_id: &str) -> Result<(), EngineError> {
+        let store = self.store_or_err()?;
+        let recording: Vec<DeviceId> = self
+            .inner
+            .devices
+            .read()
+            .iter()
+            .filter(|(_, r)| {
+                let r = r.lock();
+                r.session_open() && r.store_session.as_deref() == Some(session_id)
+            })
+            .map(|(id, _)| id.clone())
+            .collect();
+        for device_id in recording {
+            self.stop_session(&device_id)?;
+        }
+        let id = session_id.to_owned();
+        tokio::task::spawn_blocking(move || store.delete(&id))
+            .await
+            .map_err(|e| EngineError::Device(DeviceError::new(ErrorCode::Internal, e.to_string())))?
+            .map_err(store_err)
+    }
+
+    /// Start a new recording session (and a new store session).
     pub fn start_session(&self, device_id: &str) -> Result<SessionState, EngineError> {
-        self.session_command(device_id, "start", "Session started", |s, now| s.start(now))
+        self.session_command(device_id, "start", "Session started", |engine, r, now| {
+            r.session.start(now)?;
+            engine.begin_store_session(r, now);
+            Ok(())
+        })
     }
 
     /// Pause: keep the connection, stop storing.
     pub fn pause(&self, device_id: &str) -> Result<SessionState, EngineError> {
-        self.session_command(device_id, "pause", "Session paused", |s, now| s.pause(now))
+        self.session_command(device_id, "pause", "Session paused", |_, r, now| {
+            r.session.pause(now)
+        })
     }
 
     /// Resume storing.
     pub fn resume(&self, device_id: &str) -> Result<SessionState, EngineError> {
-        self.session_command(device_id, "resume", "Session resumed", |s, now| {
-            s.resume(now)
+        self.session_command(device_id, "resume", "Session resumed", |_, r, now| {
+            r.session.resume(now)
         })
     }
 
-    /// Stop the session (the device stays connected).
+    /// Stop the session (the device stays connected); the store session ends.
     pub fn stop_session(&self, device_id: &str) -> Result<SessionState, EngineError> {
-        self.session_command(device_id, "stop", "Session stopped", |s, now| s.stop(now))
+        self.session_command(device_id, "stop", "Session stopped", |engine, r, now| {
+            r.session.stop(now)?;
+            engine.end_store_session(r, now);
+            Ok(())
+        })
     }
 
-    /// Add a mark; publishes an `Event { kind: Mark }`.
+    /// Add a mark; publishes an `Event { kind: Mark }` and stores the mark.
     pub fn mark(&self, device_id: &str, label: &str) -> Result<SessionState, EngineError> {
         let record = self.record(device_id)?;
         let now = now_ms();
@@ -456,7 +709,12 @@ impl Engine {
                         action: "mark",
                         status,
                     })?;
-            (r.session.state(now), mark)
+            if let (Some(store), Some(sid)) = (&self.inner.store, &r.store_session)
+                && let Err(e) = store.mark(sid, &mark)
+            {
+                tracing::warn!(session = %sid, error = %e, "store mark");
+            }
+            (r.session_state(now), mark)
         };
         self.publish(Message::Event {
             device_id: device_id.to_owned(),
@@ -487,7 +745,8 @@ impl Engine {
         Ok(result?)
     }
 
-    /// Stop every source and background task.
+    /// Stop every source and background task, end open sessions and flush
+    /// the store.
     pub async fn shutdown(&self) {
         *self.inner.shut_down.lock() = true;
         let ids: Vec<DeviceId> = self.inner.devices.read().keys().cloned().collect();
@@ -498,6 +757,12 @@ impl Engine {
         }
         for task in self.inner.tasks.lock().drain(..) {
             task.abort();
+        }
+        if let Some(store) = self.inner.store.clone() {
+            let flushed = tokio::task::spawn_blocking(move || store.flush()).await;
+            if let Ok(Err(e)) = flushed {
+                tracing::warn!(error = %e, "store flush on shutdown");
+            }
         }
     }
 
@@ -510,20 +775,72 @@ impl Engine {
             .ok_or_else(|| EngineError::UnknownDevice(device_id.to_owned()))
     }
 
+    fn store_or_err(&self) -> Result<Arc<Store>, EngineError> {
+        self.inner.store.clone().ok_or_else(|| {
+            EngineError::Device(
+                DeviceError::new(
+                    ErrorCode::Unsupported,
+                    "session storage is not available in this run",
+                )
+                .with_hint(
+                    "Sessions are not being saved; restart the app to retry opening the store.",
+                ),
+            )
+        })
+    }
+
+    /// Begin a store session for a record whose `Session` just started.
+    fn begin_store_session(&self, r: &mut DeviceRecord, now_ms: i64) {
+        let Some(store) = &self.inner.store else {
+            return;
+        };
+        let base = session_id_for(&r.summary.id, now_ms);
+        match store.begin(&base, &r.summary, r.info.as_ref(), now_ms) {
+            Ok(id) => r.store_session = Some(id),
+            Err(e) => {
+                tracing::error!(device = %r.summary.id, error = %e, "store begin failed");
+                r.store_session = None;
+            }
+        }
+    }
+
+    /// End the store session of a record (the id stays for display).
+    fn end_store_session(&self, r: &mut DeviceRecord, now_ms: i64) {
+        if let (Some(store), Some(id)) = (&self.inner.store, &r.store_session)
+            && let Err(e) = store.end(id, now_ms, r.session.elapsed_ms(now_ms))
+        {
+            tracing::warn!(session = %id, error = %e, "store end failed");
+        }
+    }
+
+    /// Split the session when it reaches the store's recording cap.
+    /// Returns the new session state when a split happened.
+    fn maybe_split(&self, r: &mut DeviceRecord, now_ms: i64) -> Option<SessionState> {
+        let cap = self.inner.config.store.as_ref()?.max_session_ms;
+        if cap <= 0 || r.session.elapsed_ms(now_ms) < cap {
+            return None;
+        }
+        r.session.stop(now_ms).ok()?;
+        self.end_store_session(r, now_ms);
+        r.session.start(now_ms).ok()?;
+        self.begin_store_session(r, now_ms);
+        Some(r.session_state(now_ms))
+    }
+
     fn session_command(
         &self,
         device_id: &str,
         action: &'static str,
         detail: &str,
-        f: impl FnOnce(&mut Session, i64) -> Result<(), SessionStatus>,
+        f: impl FnOnce(&Engine, &mut DeviceRecord, i64) -> Result<(), SessionStatus>,
     ) -> Result<SessionState, EngineError> {
         let record = self.record(device_id)?;
         let now = now_ms();
         let state = {
             let mut r = record.lock();
-            f(&mut r.session, now)
+            f(self, &mut r, now)
                 .map_err(|status| EngineError::InvalidTransition { action, status })?;
-            r.session.state(now)
+            r.session_state(now)
         };
         self.publish_session_event(device_id, now, detail);
         self.publish(Message::Session {
@@ -533,8 +850,11 @@ impl Engine {
         Ok(state)
     }
 
+    /// Publish a session transition as a `Connection` event; stored too
+    /// while the device has an open store session (so "Session started",
+    /// "paused", "resumed" and splits appear on the stored timeline).
     fn publish_session_event(&self, device_id: &str, ts_ms: i64, detail: &str) {
-        self.publish(Message::Event {
+        let message = Arc::new(Message::Event {
             device_id: device_id.to_owned(),
             ts_ms,
             kind: EventKind::Connection,
@@ -542,6 +862,8 @@ impl Engine {
             pid: None,
             process: None,
         });
+        self.store_write(&message);
+        self.publish_arc(message);
     }
 
     /// Publish a message that is not tied to a device source (startup errors,
@@ -559,14 +881,36 @@ impl Engine {
         self.publish(message);
     }
 
+    /// Publish a `Message::Progress` for a long task (export). Not kept
+    /// as a notice.
+    pub fn progress(&self, task_id: &str, pct: f32, message: &str) {
+        self.publish(Message::Progress {
+            task_id: task_id.to_owned(),
+            pct: pct.clamp(0.0, 100.0),
+            message: message.to_owned(),
+        });
+    }
+
     /// Notices published so far with [`Engine::notice`], oldest first.
     pub fn notices(&self) -> Vec<Message> {
         self.inner.notices.lock().clone()
     }
 
     fn publish(&self, message: Message) {
+        self.publish_arc(Arc::new(message));
+    }
+
+    fn publish_arc(&self, message: Arc<Message>) {
         // `send` only fails when there is no subscriber; that is fine.
-        let _ = self.inner.bus.send(Arc::new(message));
+        let _ = self.inner.bus.send(message);
+    }
+
+    /// Hand a message to the store writer (never blocks; drops are counted
+    /// by the store).
+    fn store_write(&self, message: &Arc<Message>) {
+        if let Some(store) = &self.inner.store {
+            store.write(message);
+        }
     }
 
     async fn ingress_loop(self, mut rx: mpsc::Receiver<Message>) {
@@ -593,7 +937,7 @@ impl Engine {
             for (id, record) in records {
                 let state = {
                     let r = record.lock();
-                    r.session.is_recording().then(|| r.session.state(now))
+                    r.session.is_recording().then(|| r.session_state(now))
                 };
                 if let Some(session) = state {
                     self.publish(Message::Session {
@@ -605,8 +949,8 @@ impl Engine {
         }
     }
 
-    /// Update state for one provider message and forward it when the
-    /// session allows (see the crate docs for the storage policy).
+    /// Update state for one provider message, feed the store and forward
+    /// it when the session allows (see the crate docs for the policy).
     fn handle(&self, message: Message) {
         let Some(device_id) = message.device_id().map(str::to_owned) else {
             self.publish(message);
@@ -616,12 +960,14 @@ impl Engine {
             tracing::debug!(device = %device_id, "message for unknown device dropped");
             return;
         };
+        let message = Arc::new(message);
         let window = self.inner.config.event_window_ms;
         let mut headline = None;
+        let mut split = None;
         let forward = {
             let mut r = record.lock();
             let recording = r.session.is_recording();
-            match &message {
+            match &*message {
                 Message::Samples { ts_ms, values, .. } => {
                     for v in values {
                         r.latest.insert(v.id, v.value);
@@ -630,6 +976,8 @@ impl Engine {
                     if recording {
                         r.metrics.push(*ts_ms, values);
                         r.session.count_samples(1);
+                        self.store_write(&message);
+                        split = self.maybe_split(&mut r, *ts_ms);
                     }
                     headline = r.evaluate(window, *ts_ms);
                     recording
@@ -638,17 +986,22 @@ impl Engine {
                     r.latest_cores = cores.clone();
                     if recording {
                         r.cores.push(*ts_ms, cores.clone());
+                        self.store_write(&message);
                     }
                     recording
                 }
                 Message::Processes { rows, .. } => {
                     r.processes = rows.clone();
+                    if recording {
+                        self.store_write(&message);
+                    }
                     recording
                 }
                 Message::Log { entries, .. } => {
                     if recording {
                         r.logs.push(entries.iter().cloned());
                         r.session.count_logs(entries.len() as u64);
+                        self.store_write(&message);
                     }
                     recording
                 }
@@ -671,10 +1024,19 @@ impl Engine {
                         });
                         headline = r.evaluate(window, *ts_ms);
                     }
+                    if recording {
+                        self.store_write(&message);
+                    }
                     true
                 }
                 Message::Info { info, .. } => {
                     r.info = Some((**info).clone());
+                    if let (Some(store), Some(sid)) = (&self.inner.store, &r.store_session)
+                        && r.session_open()
+                        && let Err(e) = store.set_info(sid, info)
+                    {
+                        tracing::warn!(session = %sid, error = %e, "store info");
+                    }
                     headline = r.evaluate(window, now_ms());
                     true
                 }
@@ -696,13 +1058,37 @@ impl Engine {
             }
         };
         if forward {
-            self.publish(message);
+            self.publish_arc(message);
         }
         if let Some(headline) = headline {
             self.publish(Message::Headline {
-                device_id,
+                device_id: device_id.clone(),
                 headline,
             });
         }
+        if let Some(session) = split {
+            let cap_h = self
+                .inner
+                .config
+                .store
+                .as_ref()
+                .map_or(0.0, |s| s.max_session_ms as f64 / 3_600_000.0);
+            self.publish_session_event(
+                &device_id,
+                session.started_at_ms.unwrap_or_else(now_ms),
+                &format!("Session split: {cap_h:.2} h recording cap reached"),
+            );
+            self.publish(Message::Session { device_id, session });
+        }
     }
+}
+
+/// Overlay the in-memory counters of a live session onto a stored row.
+fn overlay_live(row: &mut SessionSummary, state: &SessionState) {
+    row.live = true;
+    row.ended_at_ms = None;
+    row.elapsed_ms = state.elapsed_ms;
+    row.sample_count = row.sample_count.max(state.sample_count);
+    row.log_count = row.log_count.max(state.log_count);
+    row.mark_count = row.mark_count.max(state.marks.len() as u64);
 }

@@ -43,6 +43,11 @@ parking_lot = "0.12"
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.26", features = ["v4", "serde"] }
 async-trait = "0.1"
+regex = "1.13"
+rusqlite = { version = "0.40", features = ["bundled", "functions"] }
+csv = "1.4"
+zip = { version = "8.6", default-features = false, features = ["deflate"] }
+tempfile = "3.27"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

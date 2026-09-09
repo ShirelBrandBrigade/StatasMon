@@ -10,17 +10,19 @@ description = "Session engine: scheduler, bus, ring buffers and headline rules"
 [dependencies]
 statasmon-protocol = { workspace = true }
 statasmon-device = { workspace = true }
+statasmon-store = { workspace = true }
 serde = { workspace = true }
 tokio = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 parking_lot = { workspace = true }
 uuid = { workspace = true }
-regex = "1.13"
+regex = { workspace = true }
 
 [dev-dependencies]
 statasmon-device-fake = { workspace = true }
 serde_json = { workspace = true }
+tempfile = { workspace = true }
 
 [lints]
 workspace = true

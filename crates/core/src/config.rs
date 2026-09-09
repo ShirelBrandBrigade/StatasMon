@@ -1,6 +1,7 @@
 //! Engine configuration.
 
 use statasmon_protocol::SamplingConfig;
+use statasmon_store::StoreConfig;
 
 /// Bus capacity: messages a slow subscriber may fall behind before it
 /// starts skipping.
@@ -31,6 +32,9 @@ pub struct EngineConfig {
     pub auto_record: bool,
     /// How long events keep influencing the headline.
     pub event_window_ms: i64,
+    /// Session store (root directory and retention). `None` keeps
+    /// everything in memory only.
+    pub store: Option<StoreConfig>,
 }
 
 impl Default for EngineConfig {
@@ -43,6 +47,7 @@ impl Default for EngineConfig {
             bus_capacity: DEFAULT_BUS_CAPACITY,
             auto_record: true,
             event_window_ms: DEFAULT_EVENT_WINDOW_MS,
+            store: None,
         }
     }
 }
@@ -59,6 +64,13 @@ impl EngineConfig {
     #[must_use]
     pub fn with_auto_record(mut self, auto_record: bool) -> Self {
         self.auto_record = auto_record;
+        self
+    }
+
+    /// Enable the session store.
+    #[must_use]
+    pub fn with_store(mut self, store: StoreConfig) -> Self {
+        self.store = Some(store);
         self
     }
 }
