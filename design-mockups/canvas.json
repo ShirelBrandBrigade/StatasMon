@@ -1,0 +1,161 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "A \u00b7 Mission Control"
+    },
+    {
+      "file": "FieldNotebook.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "B \u00b7 Field Notebook"
+    },
+    {
+      "file": "SwissGrid.dc.html",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "C \u00b7 Swiss Grid"
+    },
+    {
+      "file": "GlassObservatory.dc.html",
+      "x": 0,
+      "y": 1120,
+      "w": 1440,
+      "h": 900,
+      "title": "D \u00b7 Glass Observatory"
+    },
+    {
+      "file": "TerminalNative.dc.html",
+      "x": 1560,
+      "y": 1120,
+      "w": 1440,
+      "h": 900,
+      "title": "E \u00b7 Terminal Native"
+    },
+    {
+      "file": "TimelineStudio.dc.html",
+      "x": 3120,
+      "y": 1120,
+      "w": 1440,
+      "h": 900,
+      "title": "F \u00b7 Timeline Studio"
+    },
+    {
+      "file": "DarkGlass.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "AD-1 \u00b7 Dark Glass",
+      "page": "page-2"
+    },
+    {
+      "file": "LightInstrument.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "AD-2 \u00b7 Light Instrument",
+      "page": "page-2"
+    },
+    {
+      "file": "TwoToneWorkbench.dc.html",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "AD-3 \u00b7 Two-tone Workbench",
+      "page": "page-2"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-a",
+      "x": 0,
+      "y": -150,
+      "w": 700,
+      "text": "A \u00b7 Mission Control\nDark instrument panel: every metric on one screen, no scrolling.\n\nTradeoff: Density has a cost: on a small laptop screen the panels get cramped, and the per-app log view needs a second screen or a mode switch."
+    },
+    {
+      "id": "note-b",
+      "x": 1560,
+      "y": -150,
+      "w": 700,
+      "text": "B \u00b7 Field Notebook\nLight, editorial, report-first: the session reads like a lab journal.\n\nTradeoff: Slower for live watching. Big serif figures and prose captions trade real-time scanning for understanding after the fact."
+    },
+    {
+      "id": "note-c",
+      "x": 3120,
+      "y": -150,
+      "w": 700,
+      "text": "C \u00b7 Swiss Grid\nBlack, white and one red. Hairline modular grid, oversized numerals.\n\nTradeoff: Austerity can feel cold, and with only one accent the design has nowhere to go when two things are wrong at once."
+    },
+    {
+      "id": "note-d",
+      "x": 0,
+      "y": 970,
+      "w": 700,
+      "text": "D \u00b7 Glass Observatory\nSoft, friendly, card-based: a consumer-grade feel for a developer tool.\n\nTradeoff: Rings and rounded cards hide precision. Power users will want the raw table view within a week, so this direction needs a dense mode behind it."
+    },
+    {
+      "id": "note-e",
+      "x": 1560,
+      "y": 970,
+      "w": 700,
+      "text": "E \u00b7 Terminal Native\nPure monospace, tmux-style panes, keyboard-first.\n\nTradeoff: Highest learning curve and the least visual hierarchy: everything is the same weight, so the app relies on color to say what matters."
+    },
+    {
+      "id": "note-f",
+      "x": 3120,
+      "y": 970,
+      "w": 700,
+      "text": "F \u00b7 Timeline Studio\nTime is the organizing axis: stacked tracks, a playhead, a log that scrubs with it.\n\nTradeoff: Less good for the pure 'right now' glance, and it is the most complex to build: every metric needs history and the log needs time-indexed navigation."
+    },
+    {
+      "id": "note-g",
+      "x": 0,
+      "y": -150,
+      "w": 700,
+      "text": "AD-1 \u00b7 Dark Glass\nD's layout and components on A's dark palette.\n\nTradeoff: The friendliest of the three at a glance and the closest to D's flow, with A's density folded into each card. The frosted cards need a real GPU-composited window to look as intended.",
+      "page": "page-2"
+    },
+    {
+      "id": "note-h",
+      "x": 1560,
+      "y": -150,
+      "w": 700,
+      "text": "AD-2 \u00b7 Light Instrument\nA's structure and density on D's light palette.\n\nTradeoff: The most information per pixel of the three and the easiest to read in a bright room, but the least 'calm': nothing is summarized, everything competes equally.",
+      "page": "page-2"
+    },
+    {
+      "id": "note-k",
+      "x": 3120,
+      "y": -150,
+      "w": 700,
+      "text": "AD-3 \u00b7 Two-tone Workbench\nA's dark sidebar beside D's light content, with a summary tier above a detail tier.\n\nTradeoff: The most opinionated hierarchy (summary, then details, then evidence), so it scales best as features grow; but two palettes on one screen must be tuned carefully or the seam shows.",
+      "page": "page-2"
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-2"
+  },
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "Six directions"
+    },
+    {
+      "id": "page-2",
+      "name": "A + D blends"
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,wght@0,400;1,400&family=Archivo:wght@400;500;600;800;900&family=Space+Mono:wght@400;700&family=Manrope:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700&family=Source+Code+Pro:wght@400;600&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: inherit; text-decoration: none; } a:hover { color: inherit; }
+.dsF{width:1440px;height:900px;overflow:hidden;background:#1b1917;color:#efe9df;font-family:"Sora",system-ui,sans-serif;font-size:12.5px;display:flex;flex-direction:column;--pnl:#22201d;--line:#34302a;--mut:#a39c8f;--dim:#6d675c;--amber:#e8a33d;--blue:#7aa6d9;--green:#8ec98a;--red:#e46a5a;--vio:#b39ae0;--mono:"Source Code Pro",ui-monospace,Menlo,monospace}
+.dsF *{box-sizing:border-box}
+.dsF .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.dsF .top{height:56px;display:flex;align-items:center;gap:18px;padding:0 18px;border-bottom:1px solid var(--line);background:#1f1d1a}
+.dsF .brand{font-weight:700;letter-spacing:-.01em;font-size:14px}
+.dsF .tabs{display:flex;gap:2px;background:#161513;border-radius:8px;padding:3px}
+.dsF .tabs span{padding:6px 12px;border-radius:6px;color:var(--mut);display:flex;gap:8px;align-items:center;font-size:12px}
+.dsF .tabs span.on{background:#2e2b26;color:#efe9df}
+.dsF .tabs i{width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block}
+.dsF .tabs i.idle{background:var(--dim)}
+.dsF .tr{display:flex;gap:6px;align-items:center;margin-left:auto}
+.dsF .tb{width:32px;height:32px;border-radius:7px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:#efe9df;background:#26231f}
+.dsF .tb.rec{color:var(--red)}
+.dsF .rng{display:flex;gap:2px;background:#161513;border-radius:8px;padding:3px;margin-left:8px}
+.dsF .rng span{padding:6px 10px;border-radius:6px;color:var(--mut);font-size:12px}
+.dsF .rng span.on{background:#2e2b26;color:#efe9df}
+.dsF .ph{font-family:var(--mono);font-size:22px;letter-spacing:-.01em;color:var(--amber);margin-left:14px;font-weight:600}
+.dsF .ph small{font-size:11px;color:var(--mut);display:block;font-family:"Sora",sans-serif;font-weight:400;letter-spacing:0}
+.dsF .btn{padding:8px 14px;border-radius:7px;background:var(--amber);color:#1b1917;font-weight:700;font-size:12px;margin-left:10px}
+.dsF .body{flex:1;display:flex;min-height:0}
+.dsF .tl{flex:1;display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--line)}
+.dsF .tracks{position:relative;display:flex;flex-direction:column}
+.dsF .ruler{height:28px;display:grid;grid-template-columns:176px 1fr;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.dsF .ruler .tk{display:flex;justify-content:space-between;align-items:flex-end;padding:0 0 4px}
+.dsF .lane{display:grid;grid-template-columns:176px 1fr;border-bottom:1px solid #2a2723}
+.dsF .lane .lb{padding:8px 14px;display:flex;flex-direction:column;justify-content:center;gap:2px;border-right:1px solid var(--line);background:#1f1d1a}
+.dsF .lane .lb b{font-weight:600;font-size:12px}
+.dsF .lane .lb span{font-family:var(--mono);font-size:10.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dsF .lane .lb span em{font-style:normal;color:var(--amber)}
+.dsF .lane svg{display:block;width:100%;height:100%}
+.dsF .lane .ar{position:relative;background:repeating-linear-gradient(90deg,transparent 0 calc(12.5% - 1px),#26231f calc(12.5% - 1px) 12.5%)}
+.dsF .play{position:absolute;top:0;bottom:0;left:calc(176px + (100% - 176px) * .62);width:1px;background:var(--amber);box-shadow:0 0 8px var(--amber);z-index:2}
+.dsF .play::before{content:"";position:absolute;top:0;left:-6px;border:6px solid transparent;border-top:8px solid var(--amber)}
+.dsF .ev{position:absolute;top:50%;transform:translateY(-50%);padding:3px 8px;border-radius:5px;font-size:11px;white-space:nowrap;background:#2e2b26;border:1px solid var(--line);color:#efe9df}
+.dsF .ev.w{border-color:var(--amber);color:var(--amber)}
+.dsF .ev.e{border-color:var(--red);color:var(--red)}
+.dsF .ev.i{border-color:var(--blue);color:var(--blue)}
+.dsF .ev::before{content:"";position:absolute;left:-1px;top:-14px;bottom:-14px;width:1px;background:currentColor;opacity:.5}
+.dsF .logs{flex:1;min-height:0;display:flex;flex-direction:column}
+.dsF .lh{display:flex;gap:6px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line);font-size:11.5px}
+.dsF .lh .f{padding:4px 9px;border-radius:999px;border:1px solid var(--line);color:var(--mut)}
+.dsF .lh .f.on{background:#2e2b26;color:#efe9df;border-color:#45403a}
+.dsF .lg{flex:1;min-height:0;overflow:hidden;font-family:var(--mono);font-size:11.5px;display:flex;flex-direction:column}
+.dsF .lg div{display:grid;grid-template-columns:100px 118px 56px 1fr;gap:12px;padding:4px 14px;line-height:1.5;white-space:nowrap}
+.dsF .lg div span:last-child{overflow:hidden;text-overflow:ellipsis}
+.dsF .lg .t{color:var(--dim)}
+.dsF .lg .cur{background:#2c2419;box-shadow:inset 3px 0 0 var(--amber)}
+.dsF .lg .cur .t{color:var(--amber)}
+.dsF .lI{color:var(--blue)}.dsF .lN{color:var(--vio)}.dsF .lE{color:var(--amber)}.dsF .lF{color:var(--red);font-weight:700}.dsF .lD{color:var(--dim)}
+.dsF .insp{width:330px;display:flex;flex-direction:column;background:var(--pnl);min-height:0}
+.dsF .insp h3{margin:0;padding:14px 18px 10px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:600;border-bottom:1px solid var(--line)}
+.dsF .insp h3 b{display:block;font-family:var(--mono);font-size:16px;color:var(--amber);letter-spacing:0;text-transform:none;margin-top:3px}
+.dsF .sec{padding:12px 18px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:7px}
+.dsF .sec .st{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.dsF .kv{display:flex;justify-content:space-between;font-size:12.5px}
+.dsF .kv span:first-child{color:var(--mut)}
+.dsF .kv span:last-child{font-family:var(--mono)}
+.dsF .ap{display:flex;align-items:center;gap:10px;font-size:12px}
+.dsF .ap b{font-weight:500;width:104px}
+.dsF .ap .bar{flex:1;height:6px;background:#2e2b26;border-radius:3px;overflow:hidden}
+.dsF .ap .bar i{display:block;height:100%;background:var(--blue);border-radius:3px}
+.dsF .ap em{font-style:normal;font-family:var(--mono);color:var(--mut);width:44px;text-align:right}
+  </style>
+</helmet>
+<div class="dsF">
+  <div class="top">
+    <div class="brand">DeviceLog</div>
+    <div class="tabs"><span class="on"><i></i>iPhone 16 Pro</span><span><i class="idle"></i>iPad Pro 13″</span><span><i></i>Pixel 9 Pro</span><span style="color:var(--dim)">+</span></div>
+    <div class="tr">
+      <div class="tb"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M4 12l12-8v16z"></path><rect x="18" y="4" width="3" height="16"></rect></svg></div>
+      <div class="tb"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg></div>
+      <div class="tb"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20 12L8 4v16z"></path><rect x="3" y="4" width="3" height="16"></rect></svg></div>
+      <div class="tb rec"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7"></circle></svg></div>
+      <div class="rng"><span>1 m</span><span>5 m</span><span class="on">15 m</span><span>1 h</span><span>Session</span></div>
+      <div class="ph">14:21:37.210<small>playhead · session 00:32:14 · live paused</small></div>
+      <div class="btn">Export range</div>
+    </div>
+  </div>
+  <div class="body">
+    <div class="tl">
+      <div class="tracks">
+        <div class="play"></div>
+        <div class="ruler"><div style="border-right:1px solid var(--line)"></div><div class="tk"><span>14:17</span><span>14:19</span><span>14:21</span><span>14:23</span><span>14:25</span><span>14:27</span><span>14:29</span><span>14:31</span><span>now</span></div></div>
+        <div class="lane" style="height:66px"><div class="lb"><b>CPU</b><span><em>44%</em> · P 71 / E 26</span></div><div class="ar"><svg viewBox="0 0 1000 66" preserveAspectRatio="none"><path d="M0 50 L60 46 L120 48 L180 40 L240 44 L300 36 L360 38 L420 30 L480 34 L540 22 L600 26 L620 18 L660 24 L720 30 L780 36 L840 40 L900 42 L960 38 L1000 40 L1000 66 L0 66Z" fill="#7aa6d9" opacity=".18"></path><polyline points="0,50 60,46 120,48 180,40 240,44 300,36 360,38 420,30 480,34 540,22 600,26 620,18 660,24 720,30 780,36 840,40 900,42 960,38 1000,40" fill="none" stroke="#7aa6d9" stroke-width="2"></polyline></svg></div></div>
+        <div class="lane" style="height:56px"><div class="lb"><b>Memory</b><span><em>5.9 GB</em> · normal</span></div><div class="ar"><svg viewBox="0 0 1000 56" preserveAspectRatio="none"><path d="M0 34 L200 32 L400 28 L600 20 L620 14 L640 26 L800 24 L1000 22 L1000 56 L0 56Z" fill="#b39ae0" opacity=".18"></path><polyline points="0,34 200,32 400,28 600,20 620,14 640,26 800,24 1000,22" fill="none" stroke="#b39ae0" stroke-width="2"></polyline></svg></div></div>
+        <div class="lane" style="height:46px"><div class="lb"><b>Thermal</b><span><em>Fair</em> · SoC 41.2 °C</span></div><div class="ar"><svg viewBox="0 0 1000 46" preserveAspectRatio="none"><rect x="0" y="0" width="560" height="46" fill="#8ec98a" opacity=".12"></rect><rect x="560" y="0" width="440" height="46" fill="#e8a33d" opacity=".16"></rect><polyline points="0,36 200,34 400,30 560,26 620,18 800,14 1000,12" fill="none" stroke="#e8a33d" stroke-width="2"></polyline></svg><span class="ev w" style="left:56.5%">Nominal → Fair</span></div></div>
+        <div class="lane" style="height:46px"><div class="lb"><b>Battery</b><span><em>84%</em> · 4.19 V</span></div><div class="ar"><svg viewBox="0 0 1000 46" preserveAspectRatio="none"><polyline points="0,30 250,26 500,21 750,16 1000,10" fill="none" stroke="#8ec98a" stroke-width="2"></polyline></svg></div></div>
+        <div class="lane" style="height:56px"><div class="lb"><b>Net ↓</b><span><em>31.0 Mb/s</em> · 2 204 p/s</span></div><div class="ar"><svg viewBox="0 0 1000 56" preserveAspectRatio="none"><path d="M0 50 L80 44 L160 46 L240 30 L320 38 L400 20 L480 28 L560 14 L620 8 L680 24 L760 18 L840 30 L920 26 L1000 32 L1000 56 L0 56Z" fill="#7aa6d9" opacity=".18"></path><polyline points="0,50 80,44 160,46 240,30 320,38 400,20 480,28 560,14 620,8 680,24 760,18 840,30 920,26 1000,32" fill="none" stroke="#7aa6d9" stroke-width="2"></polyline></svg></div></div>
+        <div class="lane" style="height:46px"><div class="lb"><b>Net ↑</b><span><em>4.1 Mb/s</em> · 702 p/s</span></div><div class="ar"><svg viewBox="0 0 1000 46" preserveAspectRatio="none"><polyline points="0,40 80,38 160,39 240,34 320,36 400,30 480,33 560,28 620,22 680,30 760,28 840,32 920,30 1000,31" fill="none" stroke="#b39ae0" stroke-width="2"></polyline></svg></div></div>
+        <div class="lane" style="height:52px"><div class="lb"><b>Events</b><span>4 in range</span></div><div class="ar"><span class="ev i" style="left:11%">FieldKit launched</span><span class="ev e" style="left:33%">Request timed out</span><span class="ev e" style="left:77%">Memory warning</span><span class="ev i" style="left:90%">Cache purged</span></div></div>
+      </div>
+      <div class="logs">
+        <div class="lh"><span class="f on">All apps</span><span class="f">FieldKit</span><span class="f">Safari</span><span class="f">System</span><span style="margin-left:auto;color:var(--dim)">Log follows the playhead · scroll to move it</span></div>
+        <div class="lg">
+          <div><span class="t">14:21:29.880</span><span>FieldKit</span><span class="lD">DEBUG</span><span>Sync: 18 pending records → POST /v2/sync</span></div>
+          <div><span class="t">14:21:33.004</span><span>MobileSafari</span><span class="lD">DEBUG</span><span>Media playback started · 1080p HEVC</span></div>
+          <div class="cur"><span class="t">14:21:37.210</span><span>thermalmonitord</span><span class="lN">NOTICE</span><span>Thermal pressure level: Nominal → Fair</span></div>
+          <div><span class="t">14:21:37.412</span><span>FieldKit</span><span class="lI">INFO</span><span>Reduced sync batch size to 6 (thermal fair)</span></div>
+          <div><span class="t">14:21:40.121</span><span>SpringBoard</span><span class="lN">NOTICE</span><span>Backlight lowered · thermal mitigation</span></div>
+          <div><span class="t">14:21:44.930</span><span>FieldKit</span><span class="lD">DEBUG</span><span>Batch 1/3 acknowledged · 6 records · 412 ms</span></div>
+          <div><span class="t">14:21:51.552</span><span>FieldKit</span><span class="lE">ERROR</span><span>Batch 2/3 failed: HTTP 503 from api.example.com · retry in 4 s</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="insp">
+      <h3>At playhead<b>14:21:37.210</b></h3>
+      <div class="sec"><div class="st">Snapshot</div>
+        <div class="kv"><span>CPU total</span><span>44%</span></div>
+        <div class="kv"><span>Cores P0 · P1</span><span>74 · 68</span></div>
+        <div class="kv"><span>Cores E0–E3</span><span>31 · 28 · 24 · 21</span></div>
+        <div class="kv"><span>Memory used</span><span>5.9 / 8 GB</span></div>
+        <div class="kv"><span>Thermal</span><span style="color:var(--amber)">Fair · 41.2 °C</span></div>
+        <div class="kv"><span>Battery</span><span>84% · 4.19 V</span></div>
+        <div class="kv"><span>Network</span><span>31.0 ↓ 4.1 ↑</span></div>
+        <div class="kv"><span>Packets</span><span>2 204 / 702 per s</span></div>
+      </div>
+      <div class="sec"><div class="st">CPU by app at this instant</div>
+        <div class="ap"><b>FieldKit</b><div class="bar"><i style="width:52%"></i></div><em>18.6%</em></div>
+        <div class="ap"><b>Safari</b><div class="bar"><i style="width:40%"></i></div><em>14.1%</em></div>
+        <div class="ap"><b>mediaserverd</b><div class="bar"><i style="width:22%"></i></div><em>7.9%</em></div>
+        <div class="ap"><b>kernel_task</b><div class="bar"><i style="width:19%"></i></div><em>6.8%</em></div>
+        <div class="ap"><b>SpringBoard</b><div class="bar"><i style="width:11%"></i></div><em>3.9%</em></div>
+      </div>
+      <div class="sec"><div class="st">What changed here</div>
+        <div style="font-size:12.5px;line-height:1.55;color:var(--mut)">Thermal state rose to <span style="color:var(--amber)">Fair</span> 8 s after Safari began 1080p playback while FieldKit was syncing. FieldKit reduced its batch size in response.</div>
+      </div>
+      <div class="sec" style="border:0;margin-top:auto"><div class="st">Other devices at this time</div>
+        <div class="kv"><span>iPad Pro 13″</span><span>12% · Nominal</span></div>
+        <div class="kv"><span>Pixel 9 Pro</span><span>39% · Light</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,34 @@
+.dsE{width:1440px;height:900px;overflow:hidden;background:#0c0c0c;color:#d0d0d0;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:12.5px;line-height:1.45;display:flex;flex-direction:column;font-variant-numeric:tabular-nums;--dim:#6b6b6b;--bd:#3a3a3a;--g:#98c379;--y:#e5c07b;--r:#e06c75;--b:#61afef;--m:#c678dd;--c:#56b6c2}
+.dsE *{box-sizing:border-box}
+.dsE .sb{height:26px;background:#262626;color:#e6e6e6;display:flex;align-items:center;padding:0 12px;gap:0;white-space:nowrap}
+.dsE .sb span{padding:0 10px;border-right:1px solid #3f3f3f}
+.dsE .sb span:last-child{border:0}
+.dsE .sb .on{background:#3d3d3d;color:#fff}
+.dsE .sb .r{margin-left:auto;border:0;color:#9a9a9a}
+.dsE .wrap{flex:1;display:grid;grid-template-columns:520px 1fr;grid-template-rows:190px 132px 112px 104px minmax(0,1fr);gap:10px;padding:14px 12px 8px;min-height:0}
+.dsE .pn{border:1px solid var(--bd);position:relative;padding:12px 12px 8px;display:flex;flex-direction:column;gap:3px;min-height:0;overflow:hidden}
+.dsE .pn.on{border-color:var(--g)}
+.dsE .pn .tt{position:absolute;top:-9px;left:10px;background:#0c0c0c;padding:0 6px;color:#e6e6e6;font-weight:600}
+.dsE .pn.on .tt{color:var(--g)}
+.dsE .pn .tr{position:absolute;top:-9px;right:10px;background:#0c0c0c;padding:0 6px;color:var(--dim)}
+.dsE .ln{display:flex;gap:10px;white-space:nowrap;align-items:center}
+.dsE .k{color:var(--dim);width:92px;flex-shrink:0}
+.dsE .k.w{width:64px}
+.dsE .bar{flex:1;height:11px;display:flex;gap:1px;background:repeating-linear-gradient(90deg,#1c1c1c 0 6px,#0c0c0c 6px 8px);position:relative}
+.dsE .bar i{display:block;height:100%;background:var(--g);background:repeating-linear-gradient(90deg,var(--col,#98c379) 0 6px,#0c0c0c 6px 8px)}
+.dsE .v{width:52px;text-align:right;flex-shrink:0}
+.dsE .g{color:var(--g)}.dsE .y{color:var(--y)}.dsE .r{color:var(--r)}.dsE .b{color:var(--b)}.dsE .m{color:var(--m)}.dsE .c{color:var(--c)}.dsE .d{color:var(--dim)}
+.dsE .row{display:grid;grid-template-columns:36px 150px 62px 74px 48px 76px 1fr;gap:10px;white-space:nowrap}
+.dsE .row.h{background:#262626;color:#fff;padding:1px 6px;margin:0 -6px}
+.dsE .row.sel{background:#1a2a1a}
+.dsE .log{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.dsE .log div{display:grid;grid-template-columns:100px 118px 54px 1fr;gap:12px;white-space:nowrap;overflow:hidden}
+.dsE .log div span:last-child{overflow:hidden;text-overflow:ellipsis}
+.dsE .log .cur{background:#1e1e1e;outline:1px solid #333}
+.dsE .cmd{height:28px;display:flex;align-items:center;padding:0 12px;gap:24px;color:#e6e6e6;border-top:1px solid var(--bd)}
+.dsE .cmd .cur{display:inline-block;width:8px;height:15px;background:#d0d0d0;vertical-align:-3px}
+.dsE .keys{height:24px;display:flex;align-items:center;padding:0 12px;gap:18px;color:var(--dim);background:#141414}
+.dsE .keys b{color:#e6e6e6;font-weight:600;background:#2d2d2d;padding:0 5px;margin-right:4px}
+.dsE .spark{display:flex;align-items:flex-end;gap:2px;height:36px;flex:1}
+.dsE .spark i{flex:1;background:var(--b);opacity:.85}
+.dsE .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
