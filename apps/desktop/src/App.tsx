@@ -14,6 +14,12 @@ import {
 import { LogCard } from "./overview/log";
 import { NetworkCard } from "./overview/network";
 import { Overview, type OverviewSlots } from "./overview/Overview";
+import { AppsScreen } from "./screens/apps";
+import { DeviceScreen } from "./screens/device";
+import { LogsScreen } from "./screens/logs";
+import { NetworkScreen } from "./screens/network";
+import { PerformanceScreen } from "./screens/performance";
+import { SettingsScreen } from "./screens/settings";
 import { SessionsScreen } from "./sessions/SessionsScreen";
 import { AppShell } from "./shell/AppShell";
 import { ComingSoon } from "./shell/ComingSoon";
@@ -81,10 +87,22 @@ export function App() {
     <AppShell view={view}>
       {view === "sessions" ? (
         <SessionsScreen />
+      ) : view === "settings" ? (
+        <SettingsScreen />
       ) : !hasDevice ? (
         <EmptyState />
       ) : view === "overview" ? (
         <Overview slots={OVERVIEW_SLOTS} />
+      ) : view === "performance" ? (
+        <PerformanceScreen />
+      ) : view === "network" ? (
+        <NetworkScreen />
+      ) : view === "apps" ? (
+        <AppsScreen />
+      ) : view === "logs" ? (
+        <LogsScreen />
+      ) : view === "device" ? (
+        <DeviceScreen />
       ) : (
         <ComingSoon view={view} />
       )}
