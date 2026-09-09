@@ -1,0 +1,32 @@
+== /sys/devices/system/cpu/cpu0
+614400
+1785600
+307200
+== /sys/devices/system/cpu/cpu1
+729600
+1785600
+307200
+== /sys/devices/system/cpu/cpu2
+614400
+1785600
+307200
+== /sys/devices/system/cpu/cpu3
+1785600
+1785600
+307200
+== /sys/devices/system/cpu/cpu4
+768000
+2496000
+633600
+== /sys/devices/system/cpu/cpu5
+633600
+2496000
+633600
+== /sys/devices/system/cpu/cpu6
+2496000
+2496000
+633600
+== /sys/devices/system/cpu/cpu7
+806400
+2995200
+806400

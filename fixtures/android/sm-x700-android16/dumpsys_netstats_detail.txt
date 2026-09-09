@@ -1,0 +1,1385 @@
+Directory:
+  /data/misc/apexdata/com.android.tethering/netstats
+Configs:
+  netstats_combine_subtype_enabled=false 
+  netstats_store_files_in_apexdata=true 
+  netstats_import_legacy_target_attempts=1 
+  platform legacy stats import attempts count=1 
+  platform legacy stats import successes count=1 
+  platform legacy stats import fallbacks count=0 
+  enable_network_stats_event_logger: true
+  store_transport_types: true
+  netstats_fastdatainput_target_attempts=0 
+  FastDataInput successes=0 
+  FastDataInput fallbacks=0 
+  trafficstats.client.cache.config=TrafficStatsRateLimitCacheConfig{isCacheEnabled: true, expiryDurationMs: 1000, maxEntries: 400} 
+Active interfaces:
+  iface=wlan0 ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] 
+Active UID interfaces:
+  iface=wlan0 ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] 
+All wifi interfaces:
+  wlan0 
+All mobile interfaces:
+  
+Top openSession callers:
+  {uid=10212,package=com.google.android.gms}=7716
+  {uid=10214,package=com.android.vending}=102
+  {uid=1000,package=android}=85
+  {uid=10326,package=com.microsoft.appmanager}=6
+
+Poll counts per reason:
+  DUMPSYS: 0
+  FORCE_UPDATE: 15
+  GLOBAL_ALERT: 72
+  NETWORK_STATUS_CHANGED: 6
+  OPEN_SESSION: 3
+  PERIODIC: 34
+  RAT_CHANGED: 0
+  REG_CALLBACK: 2
+  REMOVE_UIDS: 0
+  UPSTREAM_CHANGED: 1
+
+Recent poll events:
+  2026-09-09T14:38:39.621694 - Poll(flags=3, PollEvent{reason=FORCE_UPDATE})
+  2026-09-09T14:32:49.984604 - Poll(flags=3, PollEvent{reason=PERIODIC})
+  2026-09-09T14:02:04.580729 - Poll(flags=3, PollEvent{reason=PERIODIC})
+  2026-09-09T14:01:21.429868 - Poll(flags=3, PollEvent{reason=FORCE_UPDATE})
+  2026-09-09T13:56:54.508165 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T13:36:05.493286 - Poll(flags=3, PollEvent{reason=PERIODIC})
+  2026-09-09T13:04:16.114219 - Poll(flags=3, PollEvent{reason=PERIODIC})
+  2026-09-09T12:35:11.621259 - Poll(flags=3, PollEvent{reason=PERIODIC})
+  2026-09-09T12:02:26.227776 - Poll(flags=3, PollEvent{reason=PERIODIC})
+  2026-09-09T11:33:04.004233 - Poll(flags=3, PollEvent{reason=PERIODIC})
+  2026-09-09T11:29:54.892387 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:52.872946 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:51.632494 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:49.596440 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:47.972435 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:46.416195 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:44.457603 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:43.297683 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:33.035883 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:31.889204 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:30.653508 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:29.034187 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:27.684517 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:25.917520 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:24.783479 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:29:23.109917 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:28:42.309793 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:28:00.854712 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:20:36.279662 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:20:20.410108 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:17:45.735240 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:15:40.168645 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:14:28.924508 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:14:23.366251 - Poll(flags=3, PollEvent{reason=OPEN_SESSION})
+  2026-09-09T11:11:31.088898 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:11:29.119448 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:11:27.738681 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:10:56.406056 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:10:30.646072 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:10:29.329912 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:09:39.290934 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:09:38.020489 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:09:36.321415 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:09:34.838767 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:09:26.969094 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:08:59.700877 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:08:58.478102 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:08:57.180617 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:08:36.421088 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+  2026-09-09T11:08:21.327774 - Poll(flags=1, PollEvent{reason=GLOBAL_ALERT})
+
+Stats Providers:
+  OffloadController Xt:
+    NetworkStats: elapsedRealtime=0
+  OffloadController Uid:
+    NetworkStats: elapsedRealtime=0
+  BpfCoordinator Xt:
+    NetworkStats: elapsedRealtime=0
+  BpfCoordinator Uid:
+    NetworkStats: elapsedRealtime=0
+
+Stats Observers:
+  RequestInfo from pid/uid:2365/1000(android) for DataUsageRequest [ requestId=1, networkTemplate=NetworkTemplate: matchRule=MOBILE, matchSubscriberIds=[], matchWifiNetworkKeys=[], thresholdInBytes=0 ] accessLevel:3
+  RequestInfo from pid/uid:2365/1000(android) for DataUsageRequest [ requestId=2, networkTemplate=NetworkTemplate: matchRule=WIFI, matchSubscriberIds=[], matchWifiNetworkKeys=[], thresholdInBytes=0 ] accessLevel:3
+
+Dev stats:
+  Pending bytes: 
+  History since boot:
+Xt stats:
+  Pending bytes: 500547
+  History since boot:
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=false, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=-1 set=ALL tag=0x0
+    NetworkStatsHistory: bucketDuration=3600
+      st=1788937200 rb=1802 rp=7 tb=464 tp=6 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=-1 set=ALL tag=0x0
+    NetworkStatsHistory: bucketDuration=3600
+      st=1788937200 rb=20430996 rp=24960 tb=5294868 tp=14785 op=0
+      st=1788940800 rb=511556185 rp=394686 tb=12979476 tp=79516 op=0
+      st=1788944400 rb=740444 rp=1480 tb=442930 tp=1312 op=0
+      st=1788948000 rb=3580536 rp=3143 tb=320852 tp=1592 op=0
+      st=1788951600 rb=300500 rp=572 tb=172850 tp=495 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=false, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=-1 set=ALL tag=0x0
+    NetworkStatsHistory: bucketDuration=3600
+      st=1784023200 rb=1083 rp=3 tb=64 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=-1 set=ALL tag=0x0
+    NetworkStatsHistory: bucketDuration=3600
+      st=1788865200 rb=215618 rp=322 tb=63206 tp=324 op=0
+      st=1788868800 rb=832 rp=9 tb=667 tp=5 op=0
+      st=1788872400 rb=772 rp=12 tb=846 tp=11 op=0
+      st=1788876000 rb=5303 rp=30 tb=5836 tp=31 op=0
+      st=1788879600 rb=2592 rp=18 tb=2808 tp=18 op=0
+      st=1788883200 rb=1694 rp=15 tb=1655 tp=12 op=0
+      st=1788886800 rb=3257 rp=19 tb=3444 tp=19 op=0
+      st=1788890400 rb=3008 rp=19 tb=3099 tp=18 op=0
+      st=1788894000 rb=957 rp=11 tb=1041 tp=11 op=0
+      st=1788897600 rb=1291 rp=13 tb=1378 tp=13 op=0
+      st=1788901200 rb=1946 rp=14 tb=2032 tp=14 op=0
+      st=1788904800 rb=7867 rp=36 tb=8606 tp=39 op=0
+      st=1788908400 rb=14451 rp=42 tb=7835 tp=45 op=0
+      st=1788912000 rb=3161 rp=24 tb=3483 tp=25 op=0
+      st=1788915600 rb=892 rp=14 tb=1253 tp=18 op=0
+      st=1788919200 rb=1990 rp=17 tb=2257 tp=19 op=0
+      st=1788922800 rb=10943 rp=39 tb=7125 tp=39 op=0
+      st=1788926400 rb=14512 rp=50 tb=9798 tp=52 op=0
+      st=1788930000 rb=5275 rp=32 tb=5291 tp=31 op=0
+      st=1788933600 rb=7252 rp=36 tb=7823 tp=36 op=0
+      st=1788937200 rb=0 rp=0 tb=72 tp=1 op=0
+UID stats:
+  Pending bytes: 458559
+  History since boot:
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=false, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=0 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=0 rp=0 tb=472 tp=6 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=false, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1051 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=0 rp=0 tb=64 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=-253 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=36429 rp=142 tb=189773 tp=191 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=0 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=0 rp=0 tb=7332 tp=178 op=0
+      st=1788940800 rb=0 rp=0 tb=25725 tp=312 op=0
+      st=1788948000 rb=0 rp=0 tb=1611 tp=38 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1000 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=705971 rp=2661 tb=46496 tp=367 op=0
+      st=1788940800 rb=84616 rp=438 tb=9057 tp=107 op=0
+      st=1788948000 rb=117284 rp=179 tb=39865 tp=163 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1051 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=80 rp=2 tb=64 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1073 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6119 rp=18 tb=2061 tp=18 op=0
+      st=1788940800 rb=328 rp=1 tb=332 tp=1 op=0
+      st=1788948000 rb=328 rp=1 tb=332 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=2904 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=9576 rp=11 tb=1713 tp=14 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=2918 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=181787 rp=150 tb=13319 tp=157 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5009 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=175422 rp=180 tb=21182 tp=190 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5009 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=546670 rp=501 tb=63245 tp=479 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5025 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=8228 rp=17 tb=3208 tp=21 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5026 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=5385 rp=9 tb=2563 tp=15 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5026 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=15594 rp=27 tb=4034 tp=26 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10054 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=12080 rp=22 tb=4908 tp=26 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10056 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=249 rp=5 tb=281 tp=5 op=3
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10056 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=125 rp=1 tb=61 tp=1 op=0
+      st=1788948000 rb=277 rp=6 tb=321 tp=6 op=5
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10065 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=83 rp=1 tb=52 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10065 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6448 rp=15 tb=2359 tp=14 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10067 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=8479 rp=20 tb=3500 tp=25 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10069 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=0 rp=0 tb=52 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10069 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6658 rp=11 tb=2008 tp=12 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10070 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=16614 rp=25 tb=8039 tp=43 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10073 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6603 rp=12 tb=2464 tp=14 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10084 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=8368 rp=19 tb=2025 tp=18 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10085 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6443 rp=12 tb=1815 tp=14 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10093 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=744 rp=12 tb=1288 tp=22 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10093 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=35684 rp=69 tb=16876 tp=76 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10095 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=10384 rp=18 tb=2316 tp=23 op=0
+      st=1788940800 rb=6103 rp=12 tb=1751 tp=16 op=0
+      st=1788948000 rb=180 rp=3 tb=192 tp=3 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10095 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=8463 rp=18 tb=3475 tp=19 op=0
+      st=1788948000 rb=5975 rp=10 tb=1467 tp=11 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10096 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6673 rp=12 tb=2477 tp=14 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10106 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=7638 rp=10 tb=2207 tp=10 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10106 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=327 rp=2 tb=177 tp=3 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10123 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=15150 rp=35 tb=3525 tp=34 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10148 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=577003 rp=544 tb=58981 tp=376 op=0
+      st=1788940800 rb=12289 rp=22 tb=6165 tp=24 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10171 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=6767 rp=11 tb=1397 tp=11 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10183 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=211 rp=3 tb=208 tp=4 op=0
+      st=1788940800 rb=44251 rp=58 tb=8288 tp=51 op=0
+      st=1788948000 rb=19783 rp=27 tb=4170 tp=26 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10183 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=15009 rp=21 tb=4357 tp=27 op=0
+      st=1788940800 rb=386 rp=8 tb=527 tp=9 op=0
+      st=1788948000 rb=238 rp=4 tb=293 tp=4 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10185 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6416 rp=12 tb=2180 tp=13 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10190 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6416 rp=10 tb=2427 tp=12 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=2595 rp=11 tb=2889 tp=12 op=0
+      st=1788940800 rb=560 rp=11 tb=936 tp=18 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=8494144 rp=8927 tb=1808142 tp=4305 op=0
+      st=1788940800 rb=27778825 rp=23408 tb=2100456 tp=6741 op=0
+      st=1788948000 rb=174016 rp=386 tb=179703 tp=367 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=174601 rp=389 tb=110109 tp=370 op=0
+      st=1788940800 rb=311382553 rp=244784 tb=4394248 tp=34571 op=0
+      st=1788948000 rb=11131 rp=29 tb=10089 tp=24 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=4942367 rp=4295 tb=1119451 tp=2057 op=0
+      st=1788940800 rb=20777 rp=19 tb=2645 tp=6 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10215 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=40 rp=1 tb=104 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10215 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=1309084 rp=1595 tb=489991 tp=1360 op=0
+      st=1788940800 rb=414074 rp=1544 tb=600712 tp=1631 op=0
+      st=1788948000 rb=30511 rp=65 tb=45660 tp=59 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10217 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=444487 rp=623 tb=385842 tp=581 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10218 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=18937 rp=67 tb=12574 tp=74 op=0
+      st=1788940800 rb=81394 rp=143 tb=44284 tp=137 op=0
+      st=1788948000 rb=18687 rp=41 tb=13193 tp=52 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10219 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=32860 rp=99 tb=66656 tp=114 op=4
+      st=1788940800 rb=69865 rp=138 tb=42790 tp=123 op=24
+      st=1788948000 rb=24308 rp=50 tb=14033 tp=44 op=4
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10224 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=25247 rp=63 tb=24322 tp=48 op=0
+      st=1788940800 rb=6446866 rp=5429 tb=279089 tp=1681 op=0
+      st=1788948000 rb=43077 rp=79 tb=22660 tp=76 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10224 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=7418543 rp=6722 tb=828232 tp=3334 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10225 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=20488 rp=21 tb=1913 tp=17 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10230 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=28881 rp=65 tb=39008 tp=59 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10231 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=8118 rp=17 tb=8285 tp=14 op=0
+      st=1788940800 rb=3923020 rp=3225 tb=108022 tp=604 op=0
+      st=1788948000 rb=10548 rp=20 tb=9365 tp=16 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10260 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=1857130 rp=5123 tb=325396 tp=1849 op=0
+      st=1788940800 rb=66709 rp=374 tb=52 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10260 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=440362 rp=560 tb=37622 tp=249 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10261 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=0 rp=0 tb=60 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10261 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6486 rp=12 tb=2337 tp=11 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10265 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=408001 rp=746 tb=248868 tp=780 op=0
+      st=1788948000 rb=100802 rp=138 tb=32870 tp=115 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10265 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=9611788 rp=8638 tb=1026445 tp=4423 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10268 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6425 rp=11 tb=2418 tp=13 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10276 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6133 rp=18 tb=2070 tp=15 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10280 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=153778 rp=153 tb=7794 tp=103 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10280 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=34434 rp=51 tb=4374 tp=43 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10312 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788948000 rb=17934 rp=33 tb=12221 tp=39 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10323 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=32937 rp=79 tb=64493 tp=104 op=0
+      st=1788940800 rb=12607933 rp=8816 tb=647322 tp=2252 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10323 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=324389 rp=685 tb=476895 tp=836 op=0
+      st=1788940800 rb=130435350 rp=89610 tb=2481381 tp=22533 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10325 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=259 rp=4 tb=450 tp=7 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10325 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=24791 rp=38 tb=5760 tp=40 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10326 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=93864 rp=128 tb=19719 tp=128 op=0
+      st=1788940800 rb=31360 rp=61 tb=36491 tp=75 op=0
+      st=1788948000 rb=22579 rp=27 tb=6639 tp=25 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10326 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=1151781 rp=1030 tb=267096 tp=881 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10354 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=22716 rp=63 tb=10422 tp=55 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10436 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=147039 rp=216 tb=22204 tp=182 op=0
+      st=1788948000 rb=3249240 rp=2493 tb=99015 tp=1015 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=false, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1073 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1784023200 rb=722 rp=2 tb=0 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=0 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=0 rp=0 tb=660 tp=10 op=0
+      st=1788868800 rb=0 rp=0 tb=52 tp=1 op=0
+      st=1788876000 rb=0 rp=0 tb=4 tp=0 op=0
+      st=1788904800 rb=0 rp=0 tb=56 tp=1 op=0
+      st=1788933600 rb=0 rp=0 tb=152 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1000 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=80367 rp=66 tb=3994 tp=59 op=0
+      st=1788926400 rb=139 rp=2 tb=115 tp=2 op=0
+      st=1788933600 rb=63 rp=0 tb=23 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1002 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=30359 rp=60 tb=10773 tp=61 op=0
+      st=1788912000 rb=0 rp=0 tb=347 tp=6 op=0
+      st=1788919200 rb=0 rp=0 tb=165 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1021 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=207 rp=2 tb=140 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1051 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=80 rp=2 tb=128 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1073 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=6120 rp=18 tb=2113 tp=19 op=0
+      st=1788883200 rb=361 rp=1 tb=332 tp=1 op=0
+      st=1788904800 rb=361 rp=1 tb=332 tp=1 op=0
+      st=1788926400 rb=361 rp=1 tb=332 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10089 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=12891 rp=27 tb=4724 tp=28 op=0
+      st=1788904800 rb=0 rp=0 tb=31 tp=1 op=0
+      st=1788912000 rb=40 rp=1 tb=225 tp=3 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=10676 rp=35 tb=5654 tp=35 op=0
+      st=1788868800 rb=1604 rp=21 tb=1462 tp=15 op=0
+      st=1788876000 rb=7775 rp=45 tb=8639 tp=49 op=0
+      st=1788883200 rb=4590 rp=33 tb=4767 tp=30 op=0
+      st=1788890400 rb=3965 rp=30 tb=4140 tp=29 op=0
+      st=1788897600 rb=3186 rp=27 tb=3345 tp=26 op=0
+      st=1788904800 rb=21936 rp=75 tb=16088 tp=82 op=0
+      st=1788912000 rb=3942 rp=36 tb=4110 tp=34 op=0
+      st=1788919200 rb=12808 rp=53 tb=9200 tp=55 op=0
+      st=1788926400 rb=19269 rp=80 tb=14713 tp=81 op=0
+      st=1788933600 rb=7109 rp=33 tb=7647 tp=34 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10312 set=FOREGROUND tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=60790 rp=68 tb=23275 tp=72 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10354 set=DEFAULT tag=0x0
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=13710 rp=41 tb=11809 tp=37 op=0
+UID tag stats:
+  Pending bytes: 1358251
+  History since boot:
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=false, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1051 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=0 rp=0 tb=64 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=-253 set=DEFAULT tag=0xffffffff
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=36429 rp=142 tb=189773 tp=191 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1000 set=FOREGROUND tag=0xffffff01
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=6852 rp=11 tb=1383 tp=10 op=0
+      st=1788948000 rb=90720 rp=92 tb=8185 tp=73 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1000 set=FOREGROUND tag=0xffffff81
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=5306 rp=24 tb=2397 tp=29 op=0
+      st=1788940800 rb=11746 rp=62 tb=3748 tp=62 op=0
+      st=1788948000 rb=6828 rp=36 tb=2179 tp=36 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1000 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=1415 rp=9 tb=627 tp=9 op=0
+      st=1788948000 rb=365 rp=2 tb=148 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1000 set=FOREGROUND tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=19571 rp=33 tb=7007 tp=34 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1000 set=FOREGROUND tag=0x74d11
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=26248 rp=33 tb=5246 tp=39 op=0
+      st=1788948000 rb=19255 rp=47 tb=29197 tp=49 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1000 set=FOREGROUND tag=0xa86db
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=8398 rp=12 tb=2839 tp=15 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1000 set=FOREGROUND tag=0xc000608
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=8654 rp=22 tb=4339 tp=23 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1051 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=80 rp=2 tb=64 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1073 set=FOREGROUND tag=0xfffffe01
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=328 rp=1 tb=332 tp=1 op=0
+      st=1788948000 rb=328 rp=1 tb=332 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1073 set=FOREGROUND tag=0xffffff81
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=5748 rp=14 tb=1822 tp=14 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1073 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=279 rp=2 tb=135 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=2904 set=DEFAULT tag=0xffffffff
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=9576 rp=11 tb=1713 tp=14 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=2918 set=DEFAULT tag=0xf01d
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=181787 rp=150 tb=13319 tp=157 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5009 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=509 rp=3 tb=202 tp=3 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5009 set=DEFAULT tag=0x1
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=174193 rp=165 tb=20188 tp=172 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5009 set=FOREGROUND tag=0xf8841318
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=10790 rp=18 tb=4509 tp=22 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5009 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=580 rp=3 tb=209 tp=3 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5009 set=FOREGROUND tag=0x1
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=522010 rp=453 tb=53563 tp=425 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5009 set=FOREGROUND tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=12958 rp=22 tb=4600 tp=22 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5025 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=267 rp=1 tb=65 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5026 set=DEFAULT tag=0xf8841318
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=0 rp=0 tb=52 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5026 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=195 rp=1 tb=67 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5026 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=5190 rp=8 tb=2332 tp=11 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5026 set=FOREGROUND tag=0xf8841318
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=5395 rp=9 tb=2256 tp=11 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=5026 set=FOREGROUND tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=1636 rp=4 tb=156 tp=3 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10054 set=DEFAULT tag=0xf8841318
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=5395 rp=9 tb=2382 tp=11 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10054 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6557 rp=11 tb=2370 tp=12 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10056 set=DEFAULT tag=0xffffff01
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=0 rp=0 tb=0 tp=0 op=3
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10056 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=77 rp=1 tb=61 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10056 set=FOREGROUND tag=0xffffff01
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788948000 rb=0 rp=0 tb=0 tp=0 op=5
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10056 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=125 rp=1 tb=61 tp=1 op=0
+      st=1788948000 rb=77 rp=1 tb=61 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10065 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=184 rp=1 tb=64 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10067 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=267 rp=1 tb=65 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10069 set=DEFAULT tag=0x8001
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=0 rp=0 tb=52 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10069 set=FOREGROUND tag=0x8001
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6658 rp=11 tb=2008 tp=12 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10070 set=DEFAULT tag=0xcbfb0d95
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=16058 rp=23 tb=7083 tp=30 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10070 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=556 rp=2 tb=136 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10073 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=210 rp=1 tb=82 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10073 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6341 rp=10 tb=2278 tp=11 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10084 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=184 rp=1 tb=77 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10085 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=176 rp=1 tb=69 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10093 set=DEFAULT tag=0x1
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=744 rp=12 tb=1028 tp=17 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10093 set=FOREGROUND tag=0x1
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=35580 rp=67 tb=16772 tp=74 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10095 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=176 rp=1 tb=138 tp=2 op=0
+      st=1788940800 rb=176 rp=1 tb=69 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10095 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=4803 rp=6 tb=889 tp=7 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10095 set=DEFAULT tag=0x7370f178
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=5301 rp=9 tb=1029 tp=9 op=0
+      st=1788940800 rb=5927 rp=11 tb=1630 tp=14 op=0
+      st=1788948000 rb=180 rp=3 tb=140 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10095 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=176 rp=1 tb=0 tp=0 op=0
+      st=1788948000 rb=176 rp=1 tb=69 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10095 set=FOREGROUND tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=1810 rp=5 tb=1516 tp=5 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10095 set=FOREGROUND tag=0x7370f178
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6477 rp=12 tb=1959 tp=14 op=0
+      st=1788948000 rb=5799 rp=9 tb=1398 tp=10 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10096 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6621 rp=11 tb=2373 tp=12 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10106 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=267 rp=1 tb=65 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10123 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=77 rp=1 tb=61 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10148 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=635 rp=5 tb=335 tp=5 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10148 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6627 rp=11 tb=2111 tp=12 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10148 set=DEFAULT tag=0xf00d
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=33376 rp=41 tb=14167 tp=49 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10148 set=DEFAULT tag=0x4001804
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=272238 rp=231 tb=11318 tp=73 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10148 set=DEFAULT tag=0x4003300
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=12289 rp=22 tb=6165 tp=24 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10183 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=292 rp=2 tb=122 tp=2 op=0
+      st=1788948000 rb=146 rp=1 tb=61 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10183 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=192 rp=1 tb=71 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10185 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=204 rp=1 tb=76 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10190 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6416 rp=10 tb=2427 tp=12 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=117 rp=1 tb=62 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=DEFAULT tag=0x407
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=2478 rp=10 tb=2827 tp=11 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=7205 rp=38 tb=2828 tp=38 op=0
+      st=1788940800 rb=8299 rp=48 tb=3429 tp=48 op=0
+      st=1788948000 rb=2628 rp=14 tb=1012 tp=14 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x401
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=51904 rp=115 tb=30912 tp=114 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x407
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=101704 rp=159 tb=12398 tp=143 op=0
+      st=1788940800 rb=44136 rp=103 tb=11170 tp=87 op=0
+      st=1788948000 rb=6340 rp=20 tb=1123 tp=16 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x408
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=19882 rp=79 tb=103893 tp=99 op=0
+      st=1788940800 rb=10475 rp=23 tb=21809 tp=25 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x1f04
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=139546 rp=114 tb=23863 tp=120 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4901
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=7671 rp=14 tb=3474 tp=17 op=0
+      st=1788948000 rb=7703 rp=15 tb=3431 tp=16 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x10101
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788948000 rb=76 rp=1 tb=76 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4000104
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=9327 rp=27 tb=10703 tp=23 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x400010a
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=21863 rp=48 tb=17496 tp=45 op=0
+      st=1788940800 rb=12464 rp=25 tb=6798 tp=24 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4000401
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=366214 rp=848 tb=583358 tp=826 op=0
+      st=1788940800 rb=54083 rp=146 tb=42618 tp=129 op=0
+      st=1788948000 rb=27336 rp=42 tb=8371 tp=32 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4000407
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=28732 rp=166 tb=37330 tp=148 op=0
+      st=1788940800 rb=73980 rp=164 tb=63519 tp=142 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x400060c
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=8202 rp=15 tb=3304 tp=17 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4001000
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=12106 rp=15 tb=8374 tp=13 op=0
+      st=1788948000 rb=13564 rp=17 tb=9652 tp=14 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4001203
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=647895 rp=561 tb=171906 tp=231 op=0
+      st=1788940800 rb=403128 rp=557 tb=746211 tp=763 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4001803
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=1125625 rp=966 tb=63998 tp=258 op=0
+      st=1788940800 rb=174072 rp=166 tb=27935 tp=115 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4001804
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=30486 rp=32 tb=5734 tp=26 op=0
+      st=1788948000 rb=9777 rp=15 tb=9793 tp=13 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4001807
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=8612 rp=13 tb=8178 tp=10 op=0
+      st=1788948000 rb=9550 rp=13 tb=4840 tp=14 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4001b00
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=8401 rp=17 tb=4491 tp=19 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4001f05
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=52154 rp=45 tb=4797 tp=32 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4002500
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=16010 rp=62 tb=8147 tp=44 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4002604
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=55098 rp=106 tb=39638 tp=87 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4003000
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=12330 rp=56 tb=97501 tp=90 op=0
+      st=1788940800 rb=17197 rp=71 tb=107494 tp=100 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4004100
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=37923 rp=77 tb=18437 tp=80 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4004600
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=48470 rp=87 tb=23122 tp=109 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4004800
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=18253 rp=22 tb=5230 tp=20 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4005500
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=286243 rp=238 tb=11379 tp=84 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4007901
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=12284 rp=56 tb=100985 tp=94 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x4008100
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=21285 rp=65 tb=103662 tp=106 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x5065fff
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=66600 rp=323 tb=393127 tp=483 op=0
+      st=1788948000 rb=22619 rp=88 tb=74351 tp=99 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0x8006401
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=26171258 rp=20693 tb=348882 tp=3937 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc000405
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=43240 rp=82 tb=26811 tp=82 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc000609
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=22064 rp=26 tb=5678 tp=20 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc001000
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=12643 rp=18 tb=5649 tp=16 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc001001
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=13568 rp=32 tb=8587 tp=34 op=0
+      st=1788940800 rb=22646 rp=45 tb=14759 tp=44 op=0
+      st=1788948000 rb=12899 rp=25 tb=8696 tp=27 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc001600
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=7060 rp=18 tb=3863 tp=18 op=0
+      st=1788948000 rb=1213 rp=2 tb=664 tp=3 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc001f05
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=247322 rp=229 tb=21638 tp=113 op=0
+      st=1788940800 rb=78647 rp=82 tb=13023 tp=55 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc001f06
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=13199 rp=37 tb=8748 tp=32 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc002200
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=26005 rp=55 tb=19282 tp=51 op=0
+      st=1788948000 rb=4471 rp=9 tb=3315 tp=8 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc002500
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=8520 rp=22 tb=24340 tp=23 op=0
+      st=1788940800 rb=41856 rp=76 tb=21307 tp=83 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc002604
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=46550 rp=73 tb=31420 tp=62 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc003801
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=18317 rp=43 tb=10879 tp=40 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc004100
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=11172 rp=33 tb=24533 tp=32 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc004800
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=37758 rp=92 tb=33838 tp=96 op=0
+      st=1788940800 rb=29039 rp=60 tb=24368 tp=60 op=0
+      st=1788948000 rb=2984 rp=5 tb=2702 tp=5 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc004901
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=209012 rp=182 tb=20046 tp=80 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc005601
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=12255 rp=24 tb=7498 tp=23 op=0
+      st=1788940800 rb=13803 rp=29 tb=8839 tp=26 op=0
+      st=1788948000 rb=13107 rp=25 tb=8586 tp=25 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc005a00
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=4909102 rp=4056 tb=49806 tp=676 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc007401
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=43368 rp=105 tb=34072 tp=97 op=0
+      st=1788940800 rb=64289 rp=123 tb=62959 tp=108 op=0
+      st=1788948000 rb=39107 rp=79 tb=42694 tp=69 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc008201
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=9290 rp=25 tb=11235 tp=21 op=0
+      st=1788940800 rb=6146 rp=15 tb=7385 tp=13 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc009201
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=11025 rp=18 tb=5993 tp=19 op=0
+      st=1788940800 rb=17570 rp=38 tb=14349 tp=35 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc009202
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=11540 rp=30 tb=7512 tp=25 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc009203
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=15285 rp=30 tb=7640 tp=32 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc009606
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=11396 rp=18 tb=5410 tp=19 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc009800
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=10879 rp=30 tb=6365 tp=27 op=0
+      st=1788940800 rb=7609 rp=17 tb=6459 tp=12 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc010301
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=20667 rp=71 tb=44070 tp=76 op=0
+      st=1788940800 rb=13362 rp=26 tb=19623 tp=34 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=FOREGROUND tag=0xc011100
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=11290 rp=33 tb=7941 tp=32 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=DEFAULT tag=0xe54a17d1
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=125 rp=1 tb=0 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=DEFAULT tag=0xeb5711c8
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=125 rp=1 tb=0 tp=0 op=0
+      st=1788940800 rb=10223 rp=22 tb=7483 tp=24 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=1556 rp=11 tb=741 tp=11 op=0
+      st=1788940800 rb=6489 rp=44 tb=3252 tp=44 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=DEFAULT tag=0x6900
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=12267 rp=59 tb=22013 tp=55 op=0
+      st=1788940800 rb=47398 rp=235 tb=111929 tp=221 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=6653 rp=12 tb=2464 tp=13 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=DEFAULT tag=0x4000401
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=5988 rp=30 tb=5976 tp=25 op=0
+      st=1788940800 rb=11461 rp=31 tb=10044 tp=23 op=0
+      st=1788948000 rb=11131 rp=29 tb=10089 tp=24 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=DEFAULT tag=0x4001803
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=96194 rp=88 tb=10079 tp=49 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=DEFAULT tag=0x4003300
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=9027 rp=20 tb=9309 tp=16 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=DEFAULT tag=0x4be64f9b
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=7550 rp=64 tb=41267 tp=74 op=0
+      st=1788940800 rb=416103 rp=697 tb=1602084 tp=1534 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=FOREGROUND tag=0xe54a17d1
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=3985190 rp=2760 tb=37649 tp=572 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=FOREGROUND tag=0xeb5711c8
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=27077 rp=88 tb=164645 tp=144 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=2084 rp=13 tb=981 tp=13 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=FOREGROUND tag=0x6900
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=7373 rp=36 tb=16694 tp=34 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=FOREGROUND tag=0x4000401
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=17916 rp=59 tb=19209 tp=51 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=FOREGROUND tag=0x4001803
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=166895 rp=143 tb=3701 tp=33 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10214 set=FOREGROUND tag=0x4be64f9b
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=405423 rp=548 tb=495870 tp=573 op=0
+      st=1788940800 rb=20777 rp=19 tb=2645 tp=6 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10215 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=796 rp=4 tb=284 tp=4 op=0
+      st=1788940800 rb=594 rp=3 tb=210 tp=3 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10215 set=FOREGROUND tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=7693 rp=13 tb=3633 tp=15 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10215 set=FOREGROUND tag=0x4000401
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=20528 rp=98 tb=206018 tp=192 op=0
+      st=1788940800 rb=34675 rp=64 tb=26055 tp=52 op=0
+      st=1788948000 rb=11884 rp=20 tb=9342 tp=15 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10215 set=FOREGROUND tag=0x4003300
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=44257 rp=55 tb=9587 tp=51 op=0
+      st=1788940800 rb=10151 rp=20 tb=5842 tp=19 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10215 set=FOREGROUND tag=0x5065fff
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=48720 rp=148 tb=131655 tp=165 op=0
+      st=1788948000 rb=18627 rp=45 tb=36318 tp=44 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10217 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=15381 rp=25 tb=6912 tp=26 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10217 set=DEFAULT tag=0x4000401
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=26732 rp=135 tb=169290 tp=181 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10217 set=DEFAULT tag=0x4001803
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=92131 rp=84 tb=11313 tp=48 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10218 set=DEFAULT tag=0x9601
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=39534 rp=56 tb=11395 tp=49 op=0
+      st=1788948000 rb=18687 rp=41 tb=13193 tp=52 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10218 set=DEFAULT tag=0xc009500
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=18937 rp=67 tb=12574 tp=74 op=0
+      st=1788940800 rb=41860 rp=87 tb=32889 tp=88 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10219 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=216 rp=1 tb=88 tp=1 op=0
+      st=1788940800 rb=349 rp=2 tb=130 tp=2 op=0
+      st=1788948000 rb=59 rp=0 tb=22 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10219 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6514 rp=11 tb=2399 tp=12 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10219 set=DEFAULT tag=0x4000401
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=10277 rp=57 tb=56668 tp=66 op=0
+      st=1788940800 rb=14239 rp=31 tb=9276 tp=27 op=0
+      st=1788948000 rb=14743 rp=32 tb=8270 tp=28 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10219 set=DEFAULT tag=0x10000000
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=0 rp=0 tb=0 tp=0 op=2
+      st=1788948000 rb=0 rp=0 tb=0 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10219 set=DEFAULT tag=0x10000004
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=0 rp=0 tb=0 tp=0 op=1
+      st=1788948000 rb=0 rp=0 tb=0 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10219 set=DEFAULT tag=0x11000000
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=0 rp=0 tb=0 tp=0 op=3
+      st=1788948000 rb=0 rp=0 tb=0 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10219 set=DEFAULT tag=0x12000000
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=0 rp=0 tb=0 tp=0 op=2
+      st=1788948000 rb=0 rp=0 tb=0 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10219 set=DEFAULT tag=0x20000000
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=0 rp=0 tb=0 tp=0 op=1
+      st=1788940800 rb=0 rp=0 tb=0 tp=0 op=6
+      st=1788948000 rb=0 rp=0 tb=0 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10219 set=DEFAULT tag=0x20000004
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=7610 rp=11 tb=3281 tp=11 op=1
+      st=1788940800 rb=0 rp=0 tb=0 tp=0 op=2
+      st=1788948000 rb=0 rp=0 tb=0 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10219 set=DEFAULT tag=0x21000000
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=0 rp=0 tb=0 tp=0 op=1
+      st=1788940800 rb=0 rp=0 tb=0 tp=0 op=7
+      st=1788948000 rb=0 rp=0 tb=0 tp=0 op=1
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10219 set=DEFAULT tag=0x22000000
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=0 rp=0 tb=0 tp=0 op=1
+      st=1788940800 rb=0 rp=0 tb=0 tp=0 op=4
+      st=1788948000 rb=0 rp=0 tb=0 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10224 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=303 rp=2 tb=125 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10224 set=DEFAULT tag=0x4000401
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=25247 rp=63 tb=24322 tp=48 op=0
+      st=1788940800 rb=83297 rp=171 tb=58684 tp=147 op=0
+      st=1788948000 rb=16542 rp=32 tb=11434 tp=26 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10224 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=243 rp=2 tb=131 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10225 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=91 rp=1 tb=75 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10230 set=DEFAULT tag=0x5065fff
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=28881 rp=65 tb=39008 tp=59 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10231 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=394 rp=2 tb=138 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10231 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=7547 rp=11 tb=3117 tp=12 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10231 set=DEFAULT tag=0x4000401
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=8118 rp=17 tb=8285 tp=14 op=0
+      st=1788940800 rb=11673 rp=20 tb=10715 tp=18 op=0
+      st=1788948000 rb=10548 rp=20 tb=9365 tp=16 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10231 set=DEFAULT tag=0x4003300
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=58083 rp=57 tb=10306 tp=34 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10260 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=1948 rp=14 tb=985 tp=14 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10260 set=DEFAULT tag=0xaaa
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=7317 rp=10 tb=2513 tp=12 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10260 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6622 rp=11 tb=2149 tp=13 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10261 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=0 rp=0 tb=60 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10261 set=FOREGROUND tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6434 rp=11 tb=2233 tp=9 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10265 set=DEFAULT tag=0xd83ddc19
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=0 rp=0 tb=52 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10265 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=1595 rp=7 tb=440 tp=7 op=0
+      st=1788948000 rb=349 rp=1 tb=96 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10265 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=0 rp=0 tb=52 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10265 set=FOREGROUND tag=0xd83ddc19
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=11267 rp=13 tb=2696 tp=15 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10265 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=17454 rp=69 tb=4928 tp=69 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10265 set=FOREGROUND tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=6993 rp=13 tb=2361 tp=11 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10268 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6373 rp=10 tb=2314 tp=11 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10276 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=100 rp=1 tb=68 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10280 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=112 rp=1 tb=68 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10280 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=236 rp=2 tb=142 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10312 set=FOREGROUND tag=0xd6dee918
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788948000 rb=7241 rp=14 tb=2020 tp=12 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10312 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788948000 rb=429 rp=2 tb=127 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10323 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=456 rp=3 tb=184 tp=3 op=0
+      st=1788940800 rb=847 rp=5 tb=292 tp=5 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10323 set=DEFAULT tag=0x1
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=17002 rp=25 tb=5829 tp=31 op=0
+      st=1788940800 rb=12593954 rp=8759 tb=545272 tp=2147 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10323 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6862 rp=12 tb=2417 tp=13 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10323 set=DEFAULT tag=0xf001
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=60 rp=1 tb=681 tp=3 op=0
+      st=1788940800 rb=5101 rp=9 tb=2220 tp=11 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10323 set=FOREGROUND tag=0xffffff01
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=129504727 rp=87586 tb=1133012 tp=20056 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10323 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=1162 rp=7 tb=426 tp=7 op=0
+      st=1788940800 rb=3459 rp=21 tb=1284 tp=21 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10323 set=FOREGROUND tag=0x1
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=299320 rp=523 tb=79260 tp=514 op=0
+      st=1788940800 rb=875728 rp=1684 tb=908797 tp=1992 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10323 set=FOREGROUND tag=0xf001
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=7508 rp=16 tb=3623 tp=15 op=0
+      st=1788940800 rb=23991 rp=91 tb=25822 tp=101 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10326 set=DEFAULT tag=0xd83ddc19
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=22614 rp=28 tb=4616 tp=33 op=0
+      st=1788940800 rb=0 rp=0 tb=76 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10326 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=1329 rp=7 tb=466 tp=7 op=0
+      st=1788940800 rb=374 rp=2 tb=141 tp=2 op=0
+      st=1788948000 rb=427 rp=2 tb=163 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10326 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=6549 rp=11 tb=2356 tp=11 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10326 set=FOREGROUND tag=0xd83ddc19
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=22646 rp=28 tb=5070 tp=33 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10326 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=2802 rp=10 tb=706 tp=10 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10326 set=FOREGROUND tag=0x4001804
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=11121 rp=15 tb=5362 tp=16 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10354 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788933600 rb=174 rp=2 tb=142 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10436 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=1102 rp=9 tb=630 tp=9 op=0
+      st=1788948000 rb=2146 rp=17 tb=1219 tp=17 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Studio-5G"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10436 set=FOREGROUND tag=0x80
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788940800 rb=5155 rp=13 tb=3018 tp=15 op=0
+      st=1788948000 rb=10310 rp=26 tb=6300 tp=30 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=false, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1073 set=FOREGROUND tag=0xfffffe01
+    NetworkStatsHistory: bucketDuration=7200
+      st=1784023200 rb=722 rp=2 tb=0 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1000 set=FOREGROUND tag=0xffffff41
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=76 rp=1 tb=76 tp=1 op=0
+      st=1788926400 rb=53 rp=1 tb=53 tp=1 op=0
+      st=1788933600 rb=23 rp=0 tb=23 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1000 set=FOREGROUND tag=0xffffff81
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=80061 rp=62 tb=3752 tp=55 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1000 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=126 rp=1 tb=62 tp=1 op=0
+      st=1788926400 rb=87 rp=1 tb=62 tp=1 op=0
+      st=1788933600 rb=39 rp=0 tb=0 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1002 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=622 rp=3 tb=200 tp=3 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1002 set=FOREGROUND tag=0x1
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=29737 rp=57 tb=10573 tp=58 op=0
+      st=1788912000 rb=0 rp=0 tb=206 tp=3 op=0
+      st=1788919200 rb=0 rp=0 tb=98 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1021 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=131 rp=1 tb=64 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1051 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=80 rp=2 tb=128 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1073 set=FOREGROUND tag=0xfffffe01
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788883200 rb=361 rp=1 tb=332 tp=1 op=0
+      st=1788904800 rb=361 rp=1 tb=332 tp=1 op=0
+      st=1788926400 rb=361 rp=1 tb=332 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1073 set=FOREGROUND tag=0xffffff81
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=5645 rp=12 tb=1758 tp=13 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=1073 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=279 rp=2 tb=135 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10089 set=DEFAULT tag=0xf8841318
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=5973 rp=13 tb=2532 tp=14 op=0
+      st=1788904800 rb=0 rp=0 tb=9 tp=1 op=0
+      st=1788912000 rb=0 rp=0 tb=67 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10089 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=411 rp=2 tb=155 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10089 set=DEFAULT tag=0x8003
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=6507 rp=12 tb=2037 tp=12 op=0
+      st=1788904800 rb=0 rp=0 tb=9 tp=1 op=0
+      st=1788912000 rb=0 rp=0 tb=67 tp=0 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=345 rp=3 tb=178 tp=3 op=0
+      st=1788868800 rb=14 rp=0 tb=7 tp=0 op=0
+      st=1788876000 rb=305 rp=3 tb=162 tp=3 op=0
+      st=1788883200 rb=156 rp=1 tb=83 tp=1 op=0
+      st=1788890400 rb=124 rp=1 tb=65 tp=1 op=0
+      st=1788897600 rb=95 rp=1 tb=51 tp=1 op=0
+      st=1788904800 rb=504 rp=5 tb=267 tp=5 op=0
+      st=1788912000 rb=103 rp=0 tb=54 tp=0 op=0
+      st=1788919200 rb=322 rp=3 tb=171 tp=3 op=0
+      st=1788926400 rb=541 rp=5 tb=287 tp=5 op=0
+      st=1788933600 rb=307 rp=2 tb=162 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=DEFAULT tag=0x407
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=10256 rp=31 tb=5400 tp=31 op=0
+      st=1788868800 rb=1589 rp=21 tb=1455 tp=15 op=0
+      st=1788876000 rb=7471 rp=43 tb=8478 tp=46 op=0
+      st=1788883200 rb=4396 rp=30 tb=4613 tp=29 op=0
+      st=1788890400 rb=3838 rp=29 tb=4069 tp=27 op=0
+      st=1788897600 rb=3092 rp=26 tb=3295 tp=25 op=0
+      st=1788904800 rb=21431 rp=71 tb=15820 tp=78 op=0
+      st=1788912000 rb=3839 rp=35 tb=4056 tp=33 op=0
+      st=1788919200 rb=12486 rp=50 tb=9029 tp=52 op=0
+      st=1788926400 rb=18689 rp=74 tb=14275 tp=75 op=0
+      st=1788933600 rb=6801 rp=31 tb=7484 tp=31 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10212 set=DEFAULT tag=0x10101
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=76 rp=1 tb=76 tp=1 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10312 set=FOREGROUND tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=429 rp=2 tb=127 tp=2 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10312 set=FOREGROUND tag=0x30ba5359
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=45427 rp=41 tb=3158 tp=32 op=0
+  ident=[{type=1, ratType=COMBINED, wifiNetworkKey="Xiaomi_5EF1"wpa2-psk, metered=false, defaultNetwork=true, oemManaged=OEM_NONE, subId=-1, transports={1}}] uid=10354 set=DEFAULT tag=0xffffff82
+    NetworkStatsHistory: bucketDuration=7200
+      st=1788861600 rb=83 rp=1 tb=67 tp=1 op=0
+
+InterfaceMapHelper:
+  BPF map status:
+    IfaceIndexNameMap: OK
+  BPF map content:
+    IfaceIndexNameMap:
+      ifaceIndex=2 ifaceName=dummy0
+      ifaceIndex=1 ifaceName=lo
+      ifaceIndex=16 ifaceName=wlan0
+
+BPF map status:
+  mCookieTagMap: OK
+  mUidCounterSetMap: OK
+  mAppUidStatsMap: OK
+  mStatsMapA: OK
+  mStatsMapB: OK
+  mIfaceStatsMap: OK
+
+BPF map content:
+  mCookieTagMap:
+    cookie=9118 tag=0x4be64f9b uid=10214
+    cookie=1128 tag=0x407 uid=10212
+    cookie=12531 tag=0xfffffe01 uid=1073
+    cookie=4942 tag=0x407 uid=10212
+  mUidCounterSetMap:
+    uid=10212 set=1
+    uid=10121 set=1
+    uid=10253 set=1
+    uid=10099 set=1
+    uid=10055 set=1
+    uid=10042 set=1
+    uid=10206 set=1
+    uid=10246 set=1
+    uid=10312 set=1
+    uid=1002 set=1
+    uid=1073 set=1
+    uid=10251 set=1
+    uid=10359 set=1
+    uid=10311 set=1
+    uid=1000 set=1
+    uid=5013 set=1
+    uid=1068 set=1
+    uid=10215 set=1
+  mAppUidStatsMap:
+    uid rxBytes rxPackets txBytes txPackets
+    10218 119018 251 70051 263
+    10224 13933733 12293 1154303 5139
+    10280 188212 204 12168 146
+    0 0 0 40780 659
+    10215 1753709 3205 1136467 3052
+    10326 1299584 1246 329945 1109
+    10217 444487 623 385842 581
+    10070 16614 25 8039 43
+    1021 207 2 140 2
+    5009 722092 681 84427 669
+    10056 651 12 663 12
+    10261 6486 12 2397 12
+    10276 6133 18 2070 15
+    10084 8368 19 2025 18
+    1000 988816 3348 99670 700
+    10171 6767 11 1397 11
+    10265 10120591 9522 1308183 5318
+    5026 20979 36 6597 41
+    10054 12080 22 4908 26
+    10089 12931 28 4980 32
+    10093 36428 81 18164 98
+    10231 3941686 3262 125672 634
+    10085 6443 12 1815 14
+    10230 28881 65 39008 59
+    5025 8228 17 3208 21
+    1073 14700 43 5834 42
+    10436 3396279 2709 121219 1197
+    10325 25050 42 6210 47
+    10069 6658 11 2060 13
+    10268 6425 11 2418 13
+    10225 20488 21 1913 17
+    10323 143400609 99190 3670091 25725
+    10065 6531 16 2411 15
+    10095 31105 61 9201 72
+    10096 6673 12 2477 14
+    10067 8479 20 3500 25
+    10190 6416 10 2427 12
+    10260 2364201 6057 363070 2099
+    10106 7965 12 2384 13
+    10073 6603 12 2464 14
+    -253 36429 142 189773 191
+    10214 316531429 249516 5636542 37028
+    10183 79878 121 17843 121
+    1051 160 4 256 4
+    10123 15150 35 3525 34
+    10219 127033 287 123479 281
+    10185 6416 12 2180 13
+    10148 589292 566 65146 400
+    2918 181787 150 13319 157
+    1002 30359 60 11285 69
+    10354 36426 104 22231 92
+    2904 9576 11 1713 14
+    10312 78724 101 35496 111
+    10212 36570346 33349 4198595 12046
+  mStatsMapA:
+    ifaceIndex ifaceName tag_hex uid_int cnt_set rxBytes rxPackets txBytes txPackets
+  mStatsMapB:
+    ifaceIndex ifaceName tag_hex uid_int cnt_set rxBytes rxPackets txBytes txPackets
+  mIfaceStatsMap:
+    ifaceIndex ifaceName rxBytes rxPackets txBytes txPackets
+    2 dummy0 0 0 728 13
+    16 wlan0 536936119 425677 19372271 98529
+    1 lo 9600 192 9600 192
+
+SkDestroyListener logs:
+
+NetworkStatsFactory logs:
+  Top distinct tag counts in UidTagSets:
+    10212=56
+    10214=9
+    1000=8
+    10148=5
+    10215=5
+    10323=5
+    5009=4
+    10219=4
+    10231=4
+    10326=4
+    1073=3
+    5026=3
+    10089=3
+    10095=3
+    10217=3
+    10260=3
+    10265=3
+    10312=3
+    1002=2
+    10054=2

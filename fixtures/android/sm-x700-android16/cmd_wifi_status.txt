@@ -1,0 +1,13 @@
+Wifi is enabled
+Wifi scanning is always available
+==== Primary ClientModeManager instance ====
+Wifi is connected to "Studio-5G"
+WifiInfo: SSID: "Studio-5G", BSSID: 02:00:00:00:00:01, MAC: 02:00:00:00:00:02, IP: /192.168.50.213, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -62, Link speed: 300Mbps, Tx Link speed: 300Mbps, Max Supported Tx Link speed: 400Mbps, Rx Link speed: 162Mbps, Max Supported Rx Link speed: 400Mbps, Frequency: 5180MHz, Net ID: 0, Metered hint: false, score: 60, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Studio-5G"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+successfulTxPackets: 51674
+successfulTxPacketsPerSecond: 0.003609030602700653
+retriedTxPackets: 6450
+retriedTxPacketsPerSecond: 1.2954045043780596E-20
+lostTxPackets: 8
+lostTxPacketsPerSecond: 0.0
+successfulRxPackets: 222158
+successfulRxPacketsPerSecond: 5.020080615962411E-20

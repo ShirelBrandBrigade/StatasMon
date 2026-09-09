@@ -1,0 +1,19 @@
+Inter-|   Receive                                                |  Transmit
+ face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
+    lo:    9600     192    0    0    0     0          0         0     9600     192    0    0    0     0       0          0
+dummy0:       0       0    0    0    0     0          0         0      910      13    0    0    0     0       0          0
+  ifb0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+  ifb1:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+ tunl0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+  gre0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+gretap0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+erspan0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+ip_vti0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+ip6_vti0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+  sit0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+ip6tnl0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+ip6gre0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+rmnet_ipa0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+ wlan0: 536689966  426385    0    0    0     0          0         0 20612195   98490    0    0    0     0       0          0
+  p2p0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+wifi-aware0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0

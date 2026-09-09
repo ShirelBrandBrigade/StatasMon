@@ -1,0 +1,27 @@
+Drop box contents: 10 entries
+Max entries: 1000
+Low priority rate limit period: 2000 ms
+Low priority tags: {data_app_wtf, keymaster, system_server_wtf, system_app_strictmode, system_app_wtf, system_server_strictmode, data_app_strictmode, netstats}
+
+2026-09-08 14:01:36 clockpackage (text, 34 bytes)
+    AlarmManager cancelPendingIntent()
+2026-09-08 14:01:36 clockpackage (text, 30 bytes)
+    AlarmManager next alarm : null
+2026-09-09 10:35:06 SecondConnection_ImsEvent (text, 49 bytes)
+    connectImsService: ImsManager(0).connectService()
+2026-09-09 10:35:06 SecondConnection_ImsEvent (text, 43 bytes)
+    ImsManager.ConnectionListener: onConnected
+2026-09-09 10:35:08 clockpackage (text, 34 bytes)
+    AlarmManager cancelPendingIntent()
+2026-09-09 10:35:08 clockpackage (text, 30 bytes)
+    AlarmManager next alarm : null
+2026-09-09 10:35:10 SYSTEM_BOOT (text, 577 bytes)
+    isPrevious: true/Build: samsung/gts8wifixx/gts8wifi:16/BP2A.250605.031 ...
+2026-09-09 10:35:10 SYSTEM_LAST_KMSG_0_20260909_103510_SP (compressed text, 12862 bytes)
+    isPrevious: true/Build: samsung/gts8wifixx/gts8wifi:16/BP2A.250605.031 ...
+2026-09-09 10:35:10 SYSTEM_AUDIT (text, 577 bytes)
+    isPrevious: true/Build: samsung/gts8wifixx/gts8wifi:16/BP2A.250605.031 ...
+2026-09-09 10:35:23 com.samsung.android.app.reminder (text, 54 bytes)
+    AlarmReceiver.dataandroid.intent.action.BOOT_COMPLETED
+
+Usage: dumpsys dropbox [--print|--file] [YYYY-mm-dd] [HH:MM:SS] [tag]

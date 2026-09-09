@@ -1,0 +1,302 @@
+{
+  "getprop": {
+    "cmd": "getprop",
+    "exit": 0,
+    "ms": 110,
+    "bytes": 56374
+  },
+  "proc_stat_1": {
+    "cmd": "cat /proc/stat",
+    "exit": 0,
+    "ms": 50,
+    "bytes": 1730
+  },
+  "proc_stat_2": {
+    "cmd": "sleep 1; cat /proc/stat",
+    "exit": 0,
+    "ms": 1069,
+    "bytes": 1730
+  },
+  "proc_meminfo": {
+    "cmd": "cat /proc/meminfo",
+    "exit": 0,
+    "ms": 54,
+    "bytes": 1570
+  },
+  "proc_vmstat": {
+    "cmd": "cat /proc/vmstat",
+    "exit": 0,
+    "ms": 60,
+    "bytes": 3123
+  },
+  "proc_loadavg": {
+    "cmd": "cat /proc/loadavg",
+    "exit": 0,
+    "ms": 44,
+    "bytes": 27
+  },
+  "proc_uptime": {
+    "cmd": "cat /proc/uptime",
+    "exit": 0,
+    "ms": 47,
+    "bytes": 19
+  },
+  "proc_version": {
+    "cmd": "cat /proc/version",
+    "exit": 0,
+    "ms": 47,
+    "bytes": 399
+  },
+  "proc_net_dev_1": {
+    "cmd": "cat /proc/net/dev",
+    "exit": 0,
+    "ms": 57,
+    "bytes": 2309
+  },
+  "proc_net_dev_2": {
+    "cmd": "sleep 1; cat /proc/net/dev",
+    "exit": 0,
+    "ms": 1069,
+    "bytes": 2309
+  },
+  "proc_pressure_memory": {
+    "cmd": "cat /proc/pressure/memory",
+    "exit": 0,
+    "ms": 44,
+    "bytes": 107
+  },
+  "cpu_online": {
+    "cmd": "cat /sys/devices/system/cpu/online",
+    "exit": 0,
+    "ms": 45,
+    "bytes": 4
+  },
+  "cpufreq": {
+    "cmd": "for c in /sys/devices/system/cpu/cpu[0-9]*; do echo \"== $c\"; cat $c/cpufreq/scaling_cur_freq 2>&1; cat $c/cpufreq/cpuinfo_max_freq 2>&1; cat $c/cpufreq/cpuinfo_min_freq 2>&1; done",
+    "exit": 0,
+    "ms": 658,
+    "bytes": 434
+  },
+  "cpufreq_policies": {
+    "cmd": "for p in /sys/devices/system/cpu/cpufreq/policy*; do echo \"== $p\"; cat $p/related_cpus 2>&1; cat $p/scaling_cur_freq 2>&1; cat $p/cpuinfo_max_freq 2>&1; done",
+    "exit": 0,
+    "ms": 173,
+    "bytes": 191
+  },
+  "uname": {
+    "cmd": "uname -a; uname -m",
+    "exit": 0,
+    "ms": 64,
+    "bytes": 128
+  },
+  "dumpsys_battery": {
+    "cmd": "dumpsys battery",
+    "exit": 0,
+    "ms": 53,
+    "bytes": 11018
+  },
+  "power_supply": {
+    "cmd": "for f in /sys/class/power_supply/battery/*; do printf '%s=' \"$(basename $f)\"; cat $f 2>&1 | head -c 200; echo; done",
+    "exit": 0,
+    "ms": 64,
+    "bytes": 61
+  },
+  "power_supply_list": {
+    "cmd": "ls /sys/class/power_supply/",
+    "exit": 0,
+    "ms": 43,
+    "bytes": 116
+  },
+  "health_hal": {
+    "cmd": "dumpsys android.hardware.health.IHealth/default",
+    "exit": 0,
+    "ms": 59,
+    "bytes": 0
+  },
+  "dumpsys_thermalservice": {
+    "cmd": "dumpsys thermalservice",
+    "exit": 0,
+    "ms": 71,
+    "bytes": 1180
+  },
+  "thermal_headroom": {
+    "cmd": "cmd thermalservice headroom 10",
+    "exit": 0,
+    "ms": 61,
+    "bytes": 34
+  },
+  "thermal_zones": {
+    "cmd": "for z in /sys/class/thermal/thermal_zone*; do printf '%s ' \"$z\"; cat $z/type 2>&1 | tr -d '\\n'; printf ' '; cat $z/temp 2>&1; done",
+    "exit": 0,
+    "ms": 9275,
+    "bytes": 4357
+  },
+  "cmd_wifi_status": {
+    "cmd": "cmd wifi status",
+    "exit": 0,
+    "ms": 76,
+    "bytes": 1230
+  },
+  "proc_net_route": {
+    "cmd": "cat /proc/net/route",
+    "exit": 0,
+    "ms": 53,
+    "bytes": 256
+  },
+  "ip_addr": {
+    "cmd": "ip -o addr",
+    "exit": 0,
+    "ms": 62,
+    "bytes": 513
+  },
+  "ip_s_link": {
+    "cmd": "ip -s link",
+    "exit": 0,
+    "ms": 56,
+    "bytes": 6361
+  },
+  "dumpsys_netstats_detail": {
+    "cmd": "dumpsys netstats detail",
+    "exit": 0,
+    "ms": 97,
+    "bytes": 108726
+  },
+  "dumpsys_netstats_poll": {
+    "cmd": "dumpsys netstats --poll detail",
+    "exit": 0,
+    "ms": 76,
+    "bytes": 12
+  },
+  "df": {
+    "cmd": "df -k",
+    "exit": 0,
+    "ms": 53,
+    "bytes": 5757
+  },
+  "sm_volumes": {
+    "cmd": "sm list-volumes",
+    "exit": 0,
+    "ms": 910,
+    "bytes": 45
+  },
+  "dumpsys_diskstats": {
+    "cmd": "dumpsys diskstats",
+    "exit": 0,
+    "ms": 64,
+    "bytes": 25216
+  },
+  "pm_packages": {
+    "cmd": "pm list packages -U -f",
+    "exit": 0,
+    "ms": 89,
+    "bytes": 55290
+  },
+  "top": {
+    "cmd": "top -b -n 1 -o PID,USER,%CPU,%MEM,RES,THREAD,NAME",
+    "exit": 1,
+    "ms": 51,
+    "bytes": 2461
+  },
+  "ps": {
+    "cmd": "ps -A -o PID,PPID,USER,%CPU,RSS,VSZ,NAME",
+    "exit": 0,
+    "ms": 101,
+    "bytes": 55088
+  },
+  "proc_pid_stat_sample": {
+    "cmd": "for p in $(ls /proc | grep -E '^[0-9]+$' | head -40); do cat /proc/$p/stat 2>/dev/null; done",
+    "exit": 0,
+    "ms": 1169,
+    "bytes": 6419
+  },
+  "proc_1_cmdline": {
+    "cmd": "cat /proc/1/cmdline | tr '\\0' ' '",
+    "exit": 0,
+    "ms": 75,
+    "bytes": 30
+  },
+  "dumpsys_activity_resumed": {
+    "cmd": "dumpsys activity activities | grep -E 'topResumedActivity|ResumedActivity|mResumedActivity'",
+    "exit": 0,
+    "ms": 113,
+    "bytes": 178
+  },
+  "dumpsys_window_focus": {
+    "cmd": "dumpsys window | grep -E 'mCurrentFocus|mFocusedApp'",
+    "exit": 0,
+    "ms": 170,
+    "bytes": 171
+  },
+  "settings_global": {
+    "cmd": "for k in development_settings_enabled adb_enabled adb_wifi_enabled; do printf '%s=' $k; settings get global $k; done",
+    "exit": 0,
+    "ms": 290,
+    "bytes": 64
+  },
+  "wm": {
+    "cmd": "wm size; wm density",
+    "exit": 0,
+    "ms": 89,
+    "bytes": 47
+  },
+  "getenforce": {
+    "cmd": "getenforce",
+    "exit": 0,
+    "ms": 57,
+    "bytes": 10
+  },
+  "logcat_dump": {
+    "cmd": "logcat -d -v threadtime -v epoch -v uid -v usec -b main,system,crash,events -t 3000",
+    "exit": 0,
+    "ms": 564,
+    "bytes": 385339
+  },
+  "logcat_dump_default": {
+    "cmd": "logcat -d -v threadtime -t 500",
+    "exit": 0,
+    "ms": 520,
+    "bytes": 61805
+  },
+  "dumpsys_dropbox_list": {
+    "cmd": "dumpsys dropbox",
+    "exit": 0,
+    "ms": 79,
+    "bytes": 1451
+  },
+  "dumpsys_dropbox_crash": {
+    "cmd": "dumpsys dropbox --print data_app_crash | head -c 200000",
+    "exit": 0,
+    "ms": 65,
+    "bytes": 299
+  },
+  "dumpsys_dropbox_anr": {
+    "cmd": "dumpsys dropbox --print data_app_anr | head -c 100000",
+    "exit": 0,
+    "ms": 63,
+    "bytes": 297
+  },
+  "dumpsys_meminfo": {
+    "cmd": "dumpsys meminfo",
+    "exit": 0,
+    "ms": 1843,
+    "bytes": 49149
+  },
+  "dumpsys_meminfo_pkg": {
+    "cmd": "dumpsys meminfo -d com.android.systemui",
+    "exit": 0,
+    "ms": 339,
+    "bytes": 5517
+  },
+  "pidof_systemui": {
+    "cmd": "pidof com.android.systemui",
+    "exit": 0,
+    "ms": 68,
+    "bytes": 5
+  },
+  "id": {
+    "cmd": "id",
+    "exit": 0,
+    "ms": 52,
+    "bytes": 276
+  }
+}

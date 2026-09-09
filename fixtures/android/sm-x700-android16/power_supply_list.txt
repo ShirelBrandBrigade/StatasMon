@@ -1,0 +1,11 @@
+ac
+battery
+max77705-charger
+max77705-fuelgauge
+max77705-otg
+otg
+pogo
+sec-direct-charger
+sm5440-charger
+usb
+wireless

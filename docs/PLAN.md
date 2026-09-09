@@ -1,6 +1,6 @@
 # StatasMon — development plan
 
-Status line (keep current): **Phases 0–1 done · Phase 2 next (2.1) · 2026-09-09 · plan v1.1**
+Status line (keep current): **Phases 0–1 done · Phase 2 in progress (2.1–2.6) · 2026-09-09 · plan v1.1**
 
 This is the working document for the lead session and every sub-agent. It
 says what we are building, what the platforms can actually provide, the

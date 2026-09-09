@@ -1,0 +1,86 @@
+Applications Memory Usage (in Kilobytes):
+Uptime: 15089480 Realtime: 88942077
+
+** MEMINFO in pid 3133 [com.android.systemui] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap    52002    49428     2556    29449    53948   118960    66444    47534
+  Dalvik Heap    41824    39524      296     2988    46108    86868    37716    49152
+ Dalvik Other     8602     6896     1424      112     9508                           
+        Stack     2084     1772      312      676     2096                           
+       Ashmem        9        0        0        0     1696                           
+    Other dev     2284     2172      112        0     2728                           
+     .so mmap     1658      168       76       76    35676                           
+    .jar mmap     2308        0      428        0    41596                           
+    .apk mmap    39044        0    38192        0    42668                           
+    .ttf mmap      109        0       12        0      740                           
+    .dex mmap    15276      116    15152        0    16036                           
+    .oat mmap      438        0        0        0    12968                           
+    .art mmap    17240     5220    10948     1984    36616                           
+   Other mmap       66        4       28        0     1220                           
+   EGL mtrack     2160     2160        0        0     2160                           
+    GL mtrack     8216     8216        0        0     8216                           
+      Unknown     1348      564      764       69     2236                           
+        TOTAL   230022   116240    70300    35354   316216   205828   104160    96686
+ 
+ Dalvik Details
+        .Heap    38500    38500        0        0    38500                           
+         .LOS      118       12       60     2843      308                           
+      .Zygote     2490      348      184        1     6584                           
+   .NonMoving      716      664       52      144      716                           
+ .LinearAlloc     6472     5884      588        0     6472                           
+          .GC     1758      896      836      112     2408                           
+      .AppJIT      356      100        0        0      612                           
+ .IndirectRef       16       16        0        0       16                           
+   .Boot vdex        8        0        0        0      760                           
+     .App dex    14828      116    14712        0    14828                           
+    .App vdex      440        0      440        0      448                           
+     .App art    15256     4480    10776     1944    15256                           
+    .Boot art     1984      740      172       40    21360                           
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:    55692                          82724
+         Native Heap:    49428                          53948
+                Code:    54244                         150296
+               Stack:     1772                           2096
+            Graphics:    10376                          10376
+       Private Other:    15028
+              System:    43482
+             Unknown:                                   16776
+ 
+           TOTAL PSS:   230022            TOTAL RSS:   316216       TOTAL SWAP PSS:    35354
+ 
+ Objects
+               Views:     2039         ViewRootImpl:       10
+         AppContexts:       71           Activities:        1
+              Assets:       56        AssetManagers:        0
+       Local Binders:      672        Proxy Binders:      255
+       Parcel memory:      417         Parcel count:      323
+    Death Recipients:       13             WebViews:        0
+ 
+ Native Allocations
+                         Count                       Total(kB)
+                        ------                         ------
+    Other (malloced):    10145                            969
+ Other (nonmalloced):     1312                            727
+   Bitmap (malloced):       68                          16965
+ 
+ SQL
+         MEMORY_USED:      418
+  PAGECACHE_OVERFLOW:      173          MALLOC_SIZE:       46
+ 
+ DATABASES
+      pgsz     dbsz   Lookaside(b) cache hits cache misses cache size  Dbname
+PER CONNECTION STATS
+         4       32             25     0    30     2  /data/user/0/com.samsung.android.app.clockpack/databases/lockProfile.db
+         4        8                    0     0     0    (attached) temp
+         4       32             35    25    15     3  /data/user/0/com.samsung.android.app.clockpack/databases/lockProfile.db (2)
+         4      116             31     8    33     3  /data/user/0/com.samsung.android.app.clockpack/databases/logs
+         4      116             66   161    31     5  /data/user/0/com.samsung.android.app.clockpack/databases/logs (1)
+POOL STATS
+     cache hits  cache misses    cache size  Dbname
+             27            61            88  /data/user/0/com.samsung.android.app.clockpack/databases/lockProfile.db
+            169            66           235  /data/user/0/com.samsung.android.app.clockpack/databases/logs

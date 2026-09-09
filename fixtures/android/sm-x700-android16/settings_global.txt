@@ -1,0 +1,3 @@
+development_settings_enabled=1
+adb_enabled=1
+adb_wifi_enabled=0

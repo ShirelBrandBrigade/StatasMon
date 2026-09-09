@@ -3429,6 +3429,19 @@ dependencies = [
 [[package]]
 name = "statasmon-device-android"
 version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "parking_lot",
+ "regex",
+ "serde",
+ "serde_json",
+ "statasmon-device",
+ "statasmon-protocol",
+ "thiserror 2.0.20",
+ "tokio",
+ "tokio-util",
+ "tracing",
+]
 
 [[package]]
 name = "statasmon-device-fake"

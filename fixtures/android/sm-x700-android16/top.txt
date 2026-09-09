@@ -1,0 +1,47 @@
+Command line field types:
+
+  ARGS    CMDLINE minus initial path     CMD     Thread name (/proc/TID/stat:2)
+  CMDLINE Command line (argv[])          COMM    EXE filename (/proc/PID/exe)
+  COMMAND EXE path (/proc/PID/exe)       NAME    Process name (PID's argv[0])
+
+Process attribute field types:
+
+  S       Process state:
+	  R (running) S (sleeping) D (device I/O) T (stopped)  t (trace stop)
+	  X (dead)    Z (zombie)   P (parked)     I (idle)
+	  Also between Linux 2.6.33 and 3.13:
+	  x (dead)    K (wakekill) W (waking)
+
+  SCH     Scheduling policy (0=other, 1=fifo, 2=rr, 3=batch, 4=iso, 5=idle)
+  STAT    Process state (S) plus:
+	  < high priority          N low priority L locked memory
+	  s session leader         + foreground   l multithreaded
+  %CPU    Percentage of CPU time used    %MEM    RSS as % of physical memory
+  %VSZ    VSZ as % of physical memory    ADDR    Instruction pointer
+  BIT     32 or 64                       C       Total %CPU used since start
+  CPU     Which processor running on     DIO     Disk I/O
+  DREAD   Data read from disk            DWRITE  Data written to disk
+  ELAPSED Elapsed time since PID start   F       Flags 1=FORKNOEXEC 4=SUPERPRIV
+  GID     Group ID                       GROUP   Group name
+  IO      Data I/O                       LABEL   Security label
+  MAJFL   Major page faults              MINFL   Minor page faults
+  NI      Niceness (static 19 to -20)    PCY     Android scheduling policy
+  PGID    Process Group ID               PID     Process ID
+  PPID    Parent Process ID              PR      Prio Reversed (dyn 39-0, RT)
+  PRI     Priority (dynamic 0 to 139)    PSR     Processor last executed on
+  READ    Data read                      RES     Short RSS
+  RGID    Real (before sgid) Group ID    RGROUP  Real (before sgid) group name
+  RSS     Resident Set Size (DRAM pages) RTPRIO  Realtime priority
+  RUID    Real (before suid) user ID     RUSER   Real (before suid) user name
+  SHR     Shared memory                  STIME   Start time (ISO 8601)
+  SWAP    Swap I/O                       SZ      4k pages to swap out
+  TCNT    Thread count                   TID     Thread ID
+  TIME    CPU time consumed              TIME+   CPU time (high precision)
+  TTY     Controlling terminal           UID     User id
+  USER    User name                      VIRT    Virtual memory size
+  VSZ     Virtual memory size (1k units) WCHAN   Wait location in kernel
+  WRITE   Data written                   
+
+[stderr]
+top: bad -o 'PID,USER,%CPU,%MEM,RES,THREAD,NAME'
+                                    ^

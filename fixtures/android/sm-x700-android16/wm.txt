@@ -1,0 +1,2 @@
+Physical size: 1600x2560
+Physical density: 340

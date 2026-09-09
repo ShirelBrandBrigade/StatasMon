@@ -1,0 +1,3 @@
+
+[stderr]
+Can't find service: android.hardware.health.IHealth/default
