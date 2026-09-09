@@ -1,6 +1,6 @@
 # StatasMon — development plan
 
-Status line (keep current): **Phases 0–2 done · Phases 3 and 5 in progress (parallel), then 4, 6, 7 · 2026-09-09 · plan v1.1**
+Status line (keep current): **Phases 0–3 and 5 done (Phase 3 live checks pending the iPad) · Phases 4 and 6 in progress · 2026-09-09 · plan v1.1**
 
 This is the working document for the lead session and every sub-agent. It
 says what we are building, what the platforms can actually provide, the
@@ -336,10 +336,10 @@ FEATURES.md field either filled or dashed with a reason.
     until the protocol carries per-app storage).
 3.5 `os_trace_relay` stream → `LogEntry` (pid, process, subsystem,
     category, level), thermalmonitord transition parser → `thermal.state`
-    and ThermalChange events; memory warning lines → events · core-ios.
+    and ThermalChange events; memory warning lines → events · core-ios · done 2026-09-09 (code + fixture tests; live check on the iPad pending).
 3.6 Crash reports (mover + copy, parse `.ips` header into an event) ·
-    core-ios.
-3.7 pcapd start/stop to `.pcap` · core-ios.
+    core-ios · done 2026-09-09 (code + fixture tests; live check on the iPad pending).
+3.7 pcapd start/stop to `.pcap` · core-ios · done 2026-09-09 (code + fixture tests; live check on the iPad pending).
 Acceptance: iPhone and iPad show info, battery, storage, logs, crashes and
 capture on macOS and Windows; CPU/memory/processes are dashed with the
 Developer Mode reason.
@@ -364,12 +364,12 @@ degrades cleanly when it is off.
 ### Phase 5 — Sessions, store, export
 5.1 Store schema + migrations + writer + retention · core-store · done 2026-09-09.
 5.2 History queries with downsampling; range segment drives charts from
-    the store beyond the live buffer · core-store + ui · core done 2026-09-09.
-5.3 Marks (keyboard M), events on charts · core + ui.
+    the store beyond the live buffer · core-store + ui · done 2026-09-09.
+5.3 Marks (keyboard M), events on charts · core + ui · done 2026-09-09.
 5.4 Exports: `.log`, `.jsonl`, `.csv`, session `.zip`; scopes; progress ·
-    export + ui · core done 2026-09-09.
+    export + ui · done 2026-09-09.
 5.5 Sessions screen: list, reopen, delete, compare two sessions (same
-    metric overlaid) · ui.
+    metric overlaid) · ui · done 2026-09-09.
 Acceptance: record 1 h on two devices, reopen, export bundle, sizes and
 timings within budget.
 

@@ -33,4 +33,17 @@ entry when it is fixed; reference the commit.
 - **Wireless ADB pair/connect and bugreport** run real adb but were not
   exercised live (they change host/device state); the dialog and the
   actions are unit-tested.
-- **Real-device verification** of the iOS side is pending (Phase 3).
+- **iOS live verification pending** (2026-09-09): the iPad was not connected
+  while Phase 3 was built. Everything is tested against fixtures and the
+  documented plist shapes. With the iPad plugged in and trusted, run:
+  `STATASMON_LIVE_IOS=1 cargo test -p statasmon-device-ios --tests -- --nocapture`
+  and `cargo run -p statasmon-device-ios --example capture_fixture` (replaces
+  the shape-only fixtures under fixtures/ios), then
+  `cargo run -p statasmon-device-ios --example capture_logs_fixture`. Open
+  questions the hardware answers: whether usbmuxd accepts SavePairRecord
+  from us, the exact IOPMPowerSource keys/units on iPadOS 17.4.1, whether
+  MobileGestalt reports PhysicalMemory, and the thermalmonitord wording.
+- **Store follow-ups** (2026-09-09): add an `EngineError::Store` variant
+  (store errors currently map to Device/Io); per-app storage sizes on iOS
+  have no protocol message yet (`IosSource::app_sizes()`); wide CSV export
+  switches to long format above 64 metrics (ADR-012).
