@@ -1,6 +1,6 @@
 # StatasMon — development plan
 
-Status line (keep current): **Phases 0–3 and 5 done (Phase 3 live checks pending the iPad) · Phases 4 and 6 in progress · 2026-09-09 · plan v1.1**
+Status line (keep current): **Phases 0–6 done (iOS live checks pending the iPad) · Phase 7 in progress · 2026-09-09 · plan v1.1**
 
 This is the working document for the lead session and every sub-agent. It
 says what we are building, what the platforms can actually provide, the
@@ -365,7 +365,7 @@ Developer Mode reason.
     2026-09-09 (off by default, `IosSource::set_energy_enabled`; live check
     pending the iPad; `dvt/energy.rs`).
 4.7 Fallback decision: if `idevice` fails on a supported iOS, evaluate
-    go-ios sidecar (ADR) · lead.
+    go-ios sidecar (ADR) · lead · done 2026-09-09 (decision: stay on `idevice`; no go-ios sidecar needed so far — revisit only if the iPad live tests fail).
 Acceptance: full Overview on a real iPhone with Developer Mode on; tier
 degrades cleanly when it is off.
 
