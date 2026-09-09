@@ -12,6 +12,7 @@ pub mod device;
 pub mod logs;
 pub mod message;
 pub mod metrics;
+pub mod status;
 
 pub use capabilities::{Availability, Capability, CapabilityEntry, CapabilitySet};
 pub use commands::{
@@ -27,6 +28,7 @@ pub use message::{
     CoreKind, CoreSample, ErrorCode, EventKind, Message, MetricValue, ProcessRow, ProcessState,
 };
 pub use metrics::{MetricId, MetricKind, MetricMeta, Unit};
+pub use status::{Headline, Mark, Pill, SessionState, SessionStatus, Severity, Tone};
 
 /// Wire-format version. Bump on any breaking change to a serialized shape.
 pub const PROTOCOL_VERSION: u32 = 1;

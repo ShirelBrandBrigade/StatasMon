@@ -8,6 +8,7 @@ use crate::capabilities::CapabilitySet;
 use crate::device::{ConnectionState, DeviceId, DeviceInfo, DeviceSummary};
 use crate::logs::LogEntry;
 use crate::metrics::MetricId;
+use crate::status::{Headline, SessionState};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
 #[ts(export)]
@@ -147,6 +148,16 @@ pub enum Message {
         pid: Option<u32>,
         process: Option<String>,
     },
+    /// Re-sent whenever the rules engine changes its verdict.
+    Headline {
+        device_id: DeviceId,
+        headline: Headline,
+    },
+    /// Re-sent on every session state change and at least every 5 s while recording.
+    Session {
+        device_id: DeviceId,
+        session: SessionState,
+    },
     Progress {
         task_id: String,
         pct: f32,
@@ -172,7 +183,9 @@ impl Message {
             | Message::Cores { device_id, .. }
             | Message::Processes { device_id, .. }
             | Message::Log { device_id, .. }
-            | Message::Event { device_id, .. } => Some(device_id),
+            | Message::Event { device_id, .. }
+            | Message::Headline { device_id, .. }
+            | Message::Session { device_id, .. } => Some(device_id),
             Message::Progress { .. } => None,
             Message::Error { device_id, .. } => device_id.as_deref(),
         }
