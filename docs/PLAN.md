@@ -397,15 +397,15 @@ timings within budget.
 Acceptance: every FEATURES.md item has a home; Playwright covers each screen.
 
 ### Phase 7 — Hardening and release
-7.1 Perf pass against budgets (two devices, 1 h) · qa.
+7.1 Perf pass against budgets (two devices, 1 h) · qa · done 2026-09-09 (docs/PERF.md; re-measure in a release build with two real devices).
 7.2 Error surfaces: driver missing, untrusted device, tunnel failure, adb
-    conflict, device unplugged mid-session · ui + core.
+    conflict, device unplugged mid-session · ui + core · done 2026-09-09 (notices for adb not found / driver missing / trust pending; adb server loss keeps the device and recovers; device unplug verified by engine tests, not physically).
 7.3 Windows pass on a real Windows machine (WebView2 quirks, drivers,
-    fonts, blur) · release.
+    fonts, blur) · release · blocked 2026-09-09: no Windows machine available (CI builds Windows; drivers, WebView2, fonts and blur untested).
 7.4 Signing + notarization, updater with static JSON, installers (dmg, msi
-    or nsis) · release.
+    or nsis) · release · done 2026-09-09 (unsigned; signing secrets pending).
 7.5 Docs: README, user guide (enable Developer Mode, install drivers),
-    CHANGELOG · lead.
+    CHANGELOG · lead · done 2026-09-09.
 Acceptance: signed builds for both OSes install and run on clean machines.
 
 ---

@@ -315,3 +315,52 @@ survive restarts and reach the core. Decisions:
   the three live without changing the file or the UI.
 - **Update check** is only a stored flag until Phase 7 ships the updater;
   the app makes no network call either way.
+
+## ADR-015 · 2026-09-09 · Distribution channels and update policy
+Status: accepted. Context: Phase 7.4 needed a way to ship installers for
+macOS and Windows, to update them, and to do both without breaking the
+"no telemetry, no network calls" rule. Decisions:
+- **Channel.** Builds come only from the `release` GitHub Actions
+  workflow on a `v*` tag: macOS `.dmg` + `.app` for `aarch64` and
+  `x86_64`, Windows per-user NSIS `.exe` (`installMode: currentUser`, no
+  admin prompt) and `.msi`, plus the updater artifacts and `latest.json`.
+  CI uploads them to a **draft** GitHub release; a person smoke-tests both
+  installers and publishes the draft (`docs/RELEASE.md` §6). No other
+  distribution (no store listings, no third-party download sites) in v1.
+- **Signing.** macOS builds are signed with a Developer ID Application
+  certificate and notarized; Windows builds are signed through Azure
+  Artifact Signing (preferred) or an OV/EV certificate. Until the secrets
+  exist the same workflow produces unsigned installers so the pipeline is
+  exercised, but **unsigned builds are never published as a release**; the
+  CHANGELOG says so while it is the case. Adding the secrets is the whole
+  remaining step; nothing in the code changes.
+- **Updater.** `tauri-plugin-updater` with a static `latest.json` on the
+  latest published release (`https://github.com/<owner>/StatasMon/releases/latest/download/latest.json`),
+  verified with a minisign key pair: the public key is in
+  `tauri.conf.json`, the private key lives outside the repository
+  (`~/.tauri/statasmon.key`, the team password manager, and the
+  `TAURI_SIGNING_PRIVATE_KEY` secret). Artifacts whose signature does not
+  verify are rejected by the plugin; there is no way to turn that off.
+- **Policy.** The check is **opt-in** (Settings → "Check for updates on
+  launch", default off, ADR-014) and runs once per launch. A found update
+  becomes a notice ("Update available: vX (…)"); nothing is downloaded or
+  installed until the user invokes `install_update` (the button is a
+  Phase 8 UI step). Both commands answer with a clear "updater not
+  configured" error when the endpoint still holds the `OWNER` placeholder
+  or the public key is empty, instead of a failed request. Windows installs
+  in `passive` mode (progress bar, no questions) and relaunches; macOS
+  swaps the `.app` in place and relaunches via `tauri-plugin-process`.
+- **No telemetry, restated.** The update check is the only network
+  request the app makes on its own, it is off by default, and it sends
+  nothing but the plain GET for `latest.json` (the plugin adds no
+  identifiers). Device data, serials, logs and settings never leave the
+  user's app-data folder unless the user exports them. Crash reporting,
+  usage analytics and download counters stay out of scope; a change to
+  this needs its own ADR and the user's decision.
+- **Versions.** One version string across `Cargo.toml` (workspace),
+  `tauri.conf.json` and the package manifests, moved by
+  `scripts/bump-version.sh`; the tag is `v<version>`. `CHANGELOG.md`
+  follows Keep a Changelog and is the release body's source of truth.
+Consequences: releases are reproducible from a tag; a lost private key
+means one manual reinstall for every user (documented); the draft step
+adds a human in the loop by design.
