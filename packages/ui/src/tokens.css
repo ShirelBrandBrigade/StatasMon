@@ -1,4 +1,196 @@
-/* StatasMon tokens — filled in step 0.6 from docs/DESIGN-SYSTEM.md */
+/*
+ * StatasMon design tokens — the only file that may contain literal colors.
+ * Every value is lifted from docs/DESIGN-SYSTEM.md (direction AD-1 "Dark Glass").
+ */
+
 :root {
+  /* Ground and mesh glows (static, never animated) */
   --bg: #0f1219;
+  --mesh-1: rgba(90, 208, 230, 0.14);
+  --mesh-2: rgba(160, 140, 240, 0.14);
+  --mesh-3: rgba(111, 211, 154, 0.1);
+
+  /* Surfaces */
+  --card: rgba(255, 255, 255, 0.05);
+  --edge: rgba(255, 255, 255, 0.09);
+  --side: rgba(255, 255, 255, 0.025);
+  --row-alt: rgba(255, 255, 255, 0.035);
+  --grid: rgba(255, 255, 255, 0.06);
+  --track: rgba(255, 255, 255, 0.08);
+  --bar-track: rgba(255, 255, 255, 0.07);
+  --tile: rgba(255, 255, 255, 0.12);
+  --other: rgba(255, 255, 255, 0.12);
+
+  /* Text */
+  --fg: #e6e9f2;
+  --mut: #8b93a7;
+  --dim: #5c6478;
+  --on-accent: #0b1117;
+
+  /* Series and status */
+  --cyan: #5ad0e6;
+  --cyan-2: #3d8fa0;
+  --vio: #a08cf0;
+  --mint: #6fd39a;
+  --amber: #f0b64a;
+  --red: #ef6f6f;
+
+  /* Tinted pill fills: rgba(<series>, .16) */
+  --cyan-tint: rgba(90, 208, 230, 0.16);
+  --vio-tint: rgba(160, 140, 240, 0.16);
+  --mint-tint: rgba(111, 211, 154, 0.16);
+  --amber-tint: rgba(240, 182, 74, 0.16);
+  --red-tint: rgba(239, 111, 111, 0.18);
+  --neutral-tint: rgba(255, 255, 255, 0.08);
+  --fault-row: rgba(239, 111, 111, 0.1);
+  --fault-edge: rgba(239, 111, 111, 0.3);
+
+  /* Radii */
+  --r-card: 18px;
+  --r-ctl: 11px;
+  --r-pill: 999px;
+  --r-tile: 6px;
+  --r-inner: 8px;
+
+  /* Depth */
+  --shadow-card: 0 12px 30px rgba(0, 0, 0, 0.2);
+  --shadow-device: 0 8px 24px rgba(0, 0, 0, 0.25);
+  --glow-primary: 0 6px 18px rgba(90, 208, 230, 0.3);
+  --blur-card: 18px;
+  --blur-side: 20px;
+
+  /* Spacing */
+  --gap-card: 14px;
+  --gap-stack: 9px;
+  --pad-page-y: 22px;
+  --pad-page-x: 26px;
+  --pad-card-y: 16px;
+  --pad-card-x: 18px;
+  --sidebar-w: 250px;
+
+  /* Type */
+  --font-ui: "Manrope Variable", "Manrope", system-ui, sans-serif;
+  --font-mono:
+    "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --fs-headline: 24px;
+  --fs-support: 13.5px;
+  --fs-title: 12.5px;
+  --fs-subtitle: 11.5px;
+  --fs-figure: 22px;
+  --fs-figure-lg: 24px;
+  --fs-body: 12px;
+  --fs-body-lg: 13px;
+  --fs-log: 11.5px;
+  --fs-label: 11px;
+  --fs-axis: 10.5px;
+
+  /* Motion */
+  --reveal-ms: 240ms;
+  --reveal-stagger-ms: 30ms;
+}
+
+/* Tailwind v4 theme: exposes the tokens as utilities (bg-card, text-mut, rounded-card, font-mono …). */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-edge: var(--edge);
+  --color-side: var(--side);
+  --color-track: var(--track);
+  --color-tile: var(--tile);
+  --color-fg: var(--fg);
+  --color-mut: var(--mut);
+  --color-dim: var(--dim);
+  --color-on-accent: var(--on-accent);
+  --color-cyan: var(--cyan);
+  --color-cyan-2: var(--cyan-2);
+  --color-vio: var(--vio);
+  --color-mint: var(--mint);
+  --color-amber: var(--amber);
+  --color-red: var(--red);
+
+  --font-sans: var(--font-ui);
+  --font-ui: var(--font-ui);
+  --font-mono: var(--font-mono);
+
+  --radius-card: var(--r-card);
+  --radius-ctl: var(--r-ctl);
+  --radius-pill: var(--r-pill);
+  --radius-tile: var(--r-tile);
+  --radius-inner: var(--r-inner);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-glow: var(--glow-primary);
+
+  --spacing-card: var(--gap-card);
+  --spacing-stack: var(--gap-stack);
+  --spacing-page-x: var(--pad-page-x);
+  --spacing-page-y: var(--pad-page-y);
+
+  --text-headline: var(--fs-headline);
+  --text-support: var(--fs-support);
+  --text-title: var(--fs-title);
+  --text-subtitle: var(--fs-subtitle);
+  --text-figure: var(--fs-figure);
+  --text-body: var(--fs-body);
+  --text-log: var(--fs-log);
+  --text-label: var(--fs-label);
+  --text-axis: var(--fs-axis);
+}
+
+/* Data face: every number, timestamp, identifier and log line. */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Glass card surface. */
+.glass {
+  background: var(--card);
+  border: 1px solid var(--edge);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(var(--blur-card));
+  -webkit-backdrop-filter: blur(var(--blur-card));
+}
+
+/* App ground: three static radial glows over --bg. */
+.app-mesh {
+  background:
+    radial-gradient(700px 460px at 10% 0%, var(--mesh-1) 0%, transparent 60%),
+    radial-gradient(760px 500px at 92% 20%, var(--mesh-2) 0%, transparent 60%),
+    radial-gradient(640px 460px at 55% 110%, var(--mesh-3) 0%, transparent 60%), var(--bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: var(--fs-support);
+}
+
+/* Section label: 11px / 700, uppercase, .1em tracking, --dim. */
+.section-label {
+  font-size: var(--fs-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* One reveal on connect; disabled under reduced motion. */
+.reveal {
+  animation: sm-reveal var(--reveal-ms) ease-out both;
+}
+
+@keyframes sm-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation: none;
+  }
 }

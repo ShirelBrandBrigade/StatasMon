@@ -1,0 +1,416 @@
+/*
+ * Structural styles for @statasmon/ui primitives. No literal colors here:
+ * every color, radius, size and shadow is a token from tokens.css.
+ */
+
+.sm-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-stack);
+  min-height: 0;
+  padding: var(--pad-card-y) var(--pad-card-x);
+  color: var(--fg);
+  font-family: var(--font-ui);
+}
+
+.sm-card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-weight: 700;
+  font-size: var(--fs-title);
+  line-height: 1.3;
+}
+
+.sm-card-title > span {
+  font-weight: 500;
+  font-size: var(--fs-subtitle);
+  color: var(--dim);
+  text-align: right;
+}
+
+.sm-card-footer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--edge);
+  font-size: var(--fs-subtitle);
+  color: var(--dim);
+}
+
+/* Ring */
+.sm-ring {
+  flex-shrink: 0;
+  display: block;
+}
+
+.sm-ring-label {
+  fill: var(--fg);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* StackBar + Legend */
+.sm-stack {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--grid);
+}
+
+.sm-stack > i {
+  display: block;
+  height: 100%;
+}
+
+.sm-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: var(--fs-label);
+  color: var(--mut);
+}
+
+.sm-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sm-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.sm-legend em {
+  font-style: normal;
+  color: var(--fg);
+}
+
+/* CoreBars */
+.sm-cores {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+
+.sm-cores-bars {
+  display: flex;
+  gap: 5px;
+  align-items: flex-end;
+  height: 44px;
+}
+
+.sm-cores-bars > i {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--bar-track);
+}
+
+.sm-cores-bars > i > b {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 3px;
+}
+
+.sm-cores-bars > i.is-offline {
+  opacity: 0.4;
+}
+
+.sm-cores-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-axis);
+  color: var(--dim);
+}
+
+/* KeyValue */
+.sm-kv {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--fs-body);
+}
+
+.sm-kv > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.sm-kv > div > span:first-child {
+  color: var(--mut);
+}
+
+.sm-kv-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg);
+}
+
+/* Pill */
+.sm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+  font-family: var(--font-ui);
+}
+
+.sm-pill.is-sm {
+  padding: 2px 7px;
+  font-size: var(--fs-axis);
+}
+
+/* Buttons */
+.sm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 15px;
+  border: 1px solid transparent;
+  border-radius: var(--r-ctl);
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: var(--fs-title);
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    filter 120ms ease,
+    background-color 120ms ease;
+}
+
+.sm-btn.is-sm {
+  min-height: 32px;
+  padding: 0 11px;
+  font-size: var(--fs-body);
+  font-weight: 700;
+  border-radius: var(--r-inner);
+}
+
+.sm-btn.is-md {
+  min-height: 36px;
+}
+
+.sm-btn.is-primary {
+  background: var(--cyan);
+  color: var(--on-accent);
+  box-shadow: var(--glow-primary);
+}
+
+.sm-btn.is-primary:hover {
+  filter: brightness(1.06);
+}
+
+.sm-btn.is-ghost {
+  background: var(--card);
+  border-color: var(--edge);
+  color: var(--fg);
+}
+
+.sm-btn.is-ghost:hover {
+  background: var(--track);
+}
+
+.sm-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  filter: none;
+}
+
+.sm-btn:focus-visible,
+.sm-icon-btn:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.sm-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-inner);
+  background: var(--card);
+  color: var(--mut);
+  cursor: pointer;
+}
+
+.sm-icon-btn:hover {
+  color: var(--fg);
+  background: var(--track);
+}
+
+.sm-icon-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Segment: native radio inputs, visually covered by their labels. */
+.sm-seg {
+  display: inline-flex;
+  margin: 0;
+  padding: 2px;
+  gap: 1px;
+  background: var(--card);
+  border: 1px solid var(--edge);
+  border-radius: var(--r-ctl);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  font-family: var(--font-ui);
+}
+
+.sm-seg > label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 11px;
+  border-radius: var(--r-inner);
+  color: var(--mut);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sm-seg > label > input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.sm-seg > label:hover {
+  color: var(--fg);
+}
+
+.sm-seg > label[data-checked="true"] {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.sm-seg > label > input:focus-visible + span {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* AppTile, StatusDot */
+.sm-tile {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: var(--r-tile);
+  background: var(--tile);
+}
+
+.sm-tile.is-me {
+  background: linear-gradient(135deg, var(--cyan), var(--vio));
+}
+
+.sm-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.sm-dot.is-glow {
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* MetricFigure */
+.sm-figure {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1;
+}
+
+.sm-figure-value {
+  font-size: var(--fs-figure);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.sm-figure.is-lg .sm-figure-value {
+  font-size: var(--fs-figure-lg);
+}
+
+.sm-figure-unit {
+  margin-left: 3px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--mut);
+  letter-spacing: 0;
+}
+
+.sm-figure-caption {
+  margin-top: 4px;
+  font-size: var(--fs-label);
+  color: var(--dim);
+  line-height: 1.4;
+}
+
+.sm-figure-mark {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 2px;
+  vertical-align: 2px;
+}
+
+/* Dash */
+.sm-dash {
+  color: var(--dim);
+  cursor: help;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+/* Icon */
+.sm-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sm-btn {
+    transition: none;
+  }
+}

@@ -6,6 +6,6 @@
 body {
   margin: 0;
   background: var(--bg);
-  color: #e6e9f2;
-  font-family: "Manrope Variable", system-ui, sans-serif;
+  color: var(--fg);
+  font-family: var(--font-ui);
 }

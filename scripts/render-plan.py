@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Render docs/PLAN.md phases into a progress page. Usage: render-plan.py <out.html>"""
-import re, sys, html, datetime, pathlib
+import re, sys, html, datetime, pathlib, os
 root = pathlib.Path(__file__).resolve().parents[1]
 plan = (root / "docs" / "PLAN.md").read_text()
 status = re.search(r"Status line \(keep current\): \*\*(.+?)\*\*", plan).group(1)
@@ -19,10 +19,11 @@ for m in re.finditer(r"^### (Phase \d+ — .+?)\n(.*?)(?=^### |^---|\Z)", plan, 
             cur = None; acc = line[len("Acceptance:"):].strip()
         elif acc and line.strip() and not line.startswith(("###", "-")) and cur is None:
             acc += " " + line.strip()
+    now_ids = set(filter(None, os.environ.get("PLAN_NOW", "").split(",")))
     for st in steps:
         t = st["text"]
         d = re.search(r"· done (\d{4}-\d{2}-\d{2})", t)
-        st["state"] = "done" if d else ("now" if "· in progress" in t else "todo")
+        st["state"] = "done" if d else ("now" if ("· in progress" in t or st["id"] in now_ids) else "todo")
         st["date"] = d.group(1) if d else ""
         t = re.sub(r"\s*· (done \d{4}-\d{2}-\d{2}|in progress)", "", t)
         parts = [p.strip() for p in t.split(" · ")]
