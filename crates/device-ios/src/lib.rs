@@ -12,12 +12,14 @@
 //!   (steps 3.1–3.4).
 //! - `ostrace`, `thermal`, `crash`, `pcap`: the log stream and what is
 //!   derived from it, crash reports, capture (steps 3.5–3.7).
-//! - `tunnel`, `dvt`: tier 2 (Phase 4).
+//! - `tunnel`, `dvt/*`: the developer tunnel and the DVT loops (steps
+//!   4.1–4.6); `source` upgrades to tier 2 when Developer Mode is on.
 //!
 //! Every parser is a pure function tested against `fixtures/ios/**`.
 
 pub mod battery;
 pub mod crash;
+pub mod dvt;
 pub mod error;
 pub mod info;
 pub mod lockdown;
@@ -27,8 +29,13 @@ pub mod pcap;
 pub mod source;
 pub mod storage;
 pub mod thermal;
+pub mod tunnel;
 
 pub use error::IosError;
 pub use info::{ConnectionFacts, InfoInputs, build_info, load_inputs, read_info};
 pub use muxd::{IosProvider, MuxdDiscovery};
-pub use source::{IosSeed, IosSource, TrustHandle, app_data_dir, device_id, tier1_capabilities};
+pub use source::{
+    IosSeed, IosSource, TrustHandle, app_data_dir, device_id, tier1_capabilities,
+    tier2_capabilities,
+};
+pub use tunnel::Tunnel;

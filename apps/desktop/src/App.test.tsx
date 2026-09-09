@@ -38,7 +38,7 @@ test("shows the empty state when no device is attached", () => {
   expect(screen.getByRole("heading", { name: "No device connected" })).toBeInTheDocument();
 });
 
-test("routes to the Overview by default and to placeholder pages by hash", () => {
+test("routes to the Overview by default and to the Logs screen by hash", () => {
   act(() => {
     for (const { message } of synthesize(1000)) dispatch(message);
   });
@@ -48,8 +48,7 @@ test("routes to the Overview by default and to placeholder pages by hash", () =>
     window.location.hash = "#logs";
     window.dispatchEvent(new HashChangeEvent("hashchange"));
   });
-  expect(screen.getByRole("heading", { name: "Logs" })).toBeInTheDocument();
-  expect(screen.getByText("Coming in Phase 6")).toBeInTheDocument();
+  expect(screen.getByTestId("logs-screen")).toBeInTheDocument();
 });
 
 test("keeps the #gallery route", () => {

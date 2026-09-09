@@ -1,0 +1,188 @@
+/*
+ * Settings screen (docs/PLAN.md 6.6): a column of section cards with
+ * labelled fields, a sticky footer with Save. Tokens only.
+ */
+
+.st {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-card);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.st-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gap-card);
+  flex-shrink: 0;
+}
+
+.st-head h1 {
+  margin: 0;
+  font-size: var(--fs-headline);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.st-head p {
+  margin: 5px 0 0;
+  max-width: 64ch;
+  color: var(--mut);
+  font-size: var(--fs-support);
+  line-height: 1.5;
+}
+
+.st-head-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.st-saved {
+  color: var(--mint);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+
+.st-saved.is-bad {
+  color: var(--red);
+}
+
+.st-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap-card);
+  align-items: start;
+}
+
+.st-note {
+  margin: 0;
+  color: var(--dim);
+  font-size: var(--fs-subtitle);
+  line-height: 1.5;
+}
+
+.st-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.st-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "label control"
+    "hint hint";
+  align-items: center;
+  gap: 2px 12px;
+  font-size: var(--fs-body);
+}
+
+.st-field > label {
+  grid-area: label;
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.st-field-control {
+  grid-area: control;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mut);
+}
+
+.st-field-hint {
+  grid-area: hint;
+  color: var(--dim);
+  font-size: var(--fs-subtitle);
+}
+
+.st-field-hint.is-error {
+  color: var(--red);
+}
+
+.st-input {
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-ctl);
+  background: var(--card);
+  color: var(--fg);
+  font-size: var(--fs-body);
+  text-align: right;
+}
+
+.st-input.is-num {
+  width: 96px;
+}
+
+.st-input.is-text {
+  width: 100%;
+  text-align: left;
+}
+
+.st-input:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: -1px;
+}
+
+.st-input[aria-invalid="true"] {
+  border-color: var(--red);
+}
+
+.st-path {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.st-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  font-size: var(--fs-body);
+  color: var(--fg);
+}
+
+.st-check input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--cyan);
+}
+
+.st-storage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-stack);
+}
+
+.st-storage .sm-kv-value {
+  min-width: 0;
+  justify-content: flex-end;
+  text-align: right;
+  word-break: break-all;
+}
+
+.st-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.st-about a {
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+.st-about a:hover {
+  text-decoration: underline;
+}

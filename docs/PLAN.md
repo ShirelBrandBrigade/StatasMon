@@ -346,16 +346,24 @@ Developer Mode reason.
 
 ### Phase 4 — iOS tier 2 (tunnel + DVT)
 4.1 CoreDeviceProxy userspace tunnel + RSD with `idevice` (`tunnel_tcp_stack`),
-    iOS 17.4–26 matrix in fixtures; TLS-PSK for 18.2+ · core-ios.
-4.2 Developer Mode detection (`amfi`) and enable guidance · core-ios + ui.
+    iOS 17.4–26 matrix in fixtures; TLS-PSK for 18.2+ · core-ios · done
+    2026-09-09 (live check pending the iPad; `tunnel.rs`, ADR-013; the
+    fixture matrix has only the shape-only set until devices are captured).
+4.2 Developer Mode detection (`amfi`) and enable guidance · core-ios + ui ·
+    core done 2026-09-09 (re-checked every 30 s at tier 1, RSD table as the
+    second signal, hints on the errors; the UI guidance screen is 7.2/6.5).
 4.3 sysmontap: request system attributes discovered at runtime
     (`PerCPUUsage`, memory, net counters) and process attributes; parsers
-    with fixtures per iOS major · core-ios.
+    with fixtures per iOS major · core-ios · done 2026-09-09 (live check
+    pending the iPad; `dvt/sysmontap.rs`, shape-only fixture).
 4.4 DVT networking service: interfaces, per-pid connections, RTT,
-    retransmits · core-ios.
+    retransmits · core-ios · done 2026-09-09 (live check pending the iPad;
+    `dvt/network.rs`).
 4.5 `deviceinfo.hardwareInformation` (RAM, cores), `machTimeInfo` uptime ·
-    core-ios.
-4.6 Optional energy gauge behind a capability flag · core-ios.
+    core-ios · done 2026-09-09 (live check pending the iPad; `dvt/deviceinfo.rs`).
+4.6 Optional energy gauge behind a capability flag · core-ios · done
+    2026-09-09 (off by default, `IosSource::set_energy_enabled`; live check
+    pending the iPad; `dvt/energy.rs`).
 4.7 Fallback decision: if `idevice` fails on a supported iOS, evaluate
     go-ios sidecar (ADR) · lead.
 Acceptance: full Overview on a real iPhone with Developer Mode on; tier
@@ -375,16 +383,17 @@ timings within budget.
 
 ### Phase 6 — Remaining screens and per-app views
 6.1 Performance screen (per-core detail, frequencies, memory breakdown
-    history, thermal history, battery history) · ui.
+    history, thermal history, battery history) · ui · done 2026-09-09.
 6.2 Network screen (interfaces, per-process table, capture controls,
-    Wi-Fi details) · ui.
-6.3 Apps & processes screen + app detail (metrics + that app's log) · ui.
+    Wi-Fi details) · ui · done 2026-09-09.
+6.3 Apps & processes screen + app detail (metrics + that app's log) · ui · done 2026-09-09.
 6.4 Logs screen (full height, regex, time range, buffers, per-app tabs,
-    crash/ANR attachments) · ui.
+    crash/ANR attachments) · ui · done 2026-09-09.
 6.5 Device screen (every DeviceInfo field grouped: identity, hardware,
-    software, connection, capabilities with reasons) · ui.
+    software, connection, capabilities with reasons) · ui · done 2026-09-09.
 6.6 Settings (adb location, sampling rates, retention, theme reserved,
-    update check opt-in) · ui + core.
+    update check opt-in) · ui + core · done 2026-09-09 (saved values are
+    read at launch; a live engine setter is a core follow-up, ADR-014).
 Acceptance: every FEATURES.md item has a home; Playwright covers each screen.
 
 ### Phase 7 — Hardening and release

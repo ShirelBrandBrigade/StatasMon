@@ -1,5 +1,5 @@
-//! `IosSource`: one iOS / iPadOS device at tier 1 behind the
-//! [`DeviceSource`] trait (steps 3.1–3.4; docs/PLAN.md §3.7).
+//! `IosSource`: one iOS / iPadOS device behind the [`DeviceSource`] trait
+//! (steps 3.1–3.4 for tier 1, 4.1–4.6 for tier 2; docs/PLAN.md §3.7).
 //!
 //! Construction reads the info sheet once (`connect`) so `summary()`,
 //! `capabilities()` and `info()` are ready before the engine sees the
@@ -9,6 +9,16 @@
 //! finds the device gone ends everything with one `DeviceState
 //! Disconnected` + `Error DeviceLost`. An `untrusted` source is what the
 //! discovery attaches while the Trust dialog is pending.
+//!
+//! Tier 2 ([`supervise`]): when Developer Mode is on the supervisor opens
+//! the developer tunnel ([`Tunnel`]), reads `deviceinfo`, emits
+//! `DeviceState Tier2` with the tier-2 capabilities and info, and runs the
+//! sysmontap (fast), networking (medium) and optional energy loops plus a
+//! slow `deviceinfo` refresh. When the tunnel dies the source degrades to
+//! tier 1 with one `Error TunnelFailed` and retries with backoff
+//! ([`TUNNEL_BACKOFF_MIN`] → [`TUNNEL_BACKOFF_MAX`]); while Developer Mode
+//! is off it is re-read every [`DEV_MODE_RECHECK`] so turning it on is
+//! picked up without replugging.
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -28,11 +38,14 @@ use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
 
 use crate::crash::{self, CrashReport};
+use crate::dvt::deviceinfo::{self as dvt_info, DeviceFacts};
+use crate::dvt::{self, LoopEnd, SharedState, Tier2Shared};
 use crate::error::IosError;
 use crate::info::{self, ConnectionFacts, InfoInputs};
 use crate::muxd::IosProvider;
 use crate::storage::{AppSize, AppTable};
-use crate::{battery, ostrace, pcap, storage};
+use crate::tunnel::{self, Tunnel};
+use crate::{battery, lockdown, ostrace, pcap, storage};
 
 /// How long `stop` waits for the loops before aborting them.
 const STOP_GRACE: Duration = Duration::from_secs(3);
@@ -40,6 +53,13 @@ const STOP_GRACE: Duration = Duration::from_secs(3);
 pub const CRASH_POLL: Duration = Duration::from_secs(60);
 /// Tier label shown under `DeviceInfo::connection.tier`.
 pub const TIER1: &str = "tier 1 (no tunnel)";
+/// Tier-2 label (`dvt::deviceinfo::TIER2`).
+pub const TIER2: &str = dvt_info::TIER2;
+/// While tier 1 because Developer Mode is off, re-read it this often.
+pub const DEV_MODE_RECHECK: Duration = Duration::from_secs(30);
+/// Retry delay after a tunnel failure, doubled up to the maximum.
+pub const TUNNEL_BACKOFF_MIN: Duration = Duration::from_secs(5);
+pub const TUNNEL_BACKOFF_MAX: Duration = Duration::from_secs(60);
 
 /// Reasons for the tier-1 capability gaps (user-facing, docs/PLAN.md §2).
 pub mod reasons {
@@ -54,6 +74,17 @@ pub mod reasons {
     pub const BATTERY_DETAIL_REFUSED: &str =
         "The device refused the IORegistry battery query (diagnostics_relay)";
     pub const THERMAL_FROM_LOG: &str = "Derived from the device log (thermalmonitord)";
+    pub const TUNNEL_FAILED: &str = "The developer tunnel could not be opened; retrying (unplug and reconnect the device if it persists)";
+    pub const TUNNEL_LOST: &str = "The developer tunnel dropped; reconnecting";
+    pub const NO_FRONT_APP: &str = "The developer services do not report the front-most app";
+    pub const WIFI_DETAILS_TIER2: &str = "Not exposed by the developer services";
+    pub const ENERGY_OFF: &str = "The energy gauge is off by default (it breaks on some iOS 18 builds); enable it in the device settings";
+    pub const ENERGY_FAILED: &str = "The energy gauge failed on this device; labels stay off";
+    pub const NO_LOAD_AVERAGE: &str = "iOS does not report a load average to the host";
+    pub const NO_MEMORY_PRESSURE: &str =
+        "sysmontap reports no memory-pressure level; memory warnings come from the device log";
+    pub const NETWORKING_FAILED: &str =
+        "The DVT networking service failed on this device; system totals still come from sysmontap";
 }
 
 /// The device id for a UDID.
@@ -106,11 +137,52 @@ impl IosSeed {
 /// The tier-1 capability set. `developer_mode` decides the reason for the
 /// DVT gaps; `battery_detail` is whether IORegistry answered.
 pub fn tier1_capabilities(developer_mode: Option<bool>, battery_detail: bool) -> CapabilitySet {
-    use Capability as C;
     let dvt_reason = match developer_mode {
         Some(false) => reasons::DEV_MODE_OFF,
         _ => reasons::NEEDS_TUNNEL,
     };
+    capabilities_for(dvt_reason, battery_detail)
+}
+
+/// The tier-2 capability set: everything sysmontap, networking and
+/// deviceinfo provide; the gaps carry what the developer services still
+/// do not report. `energy` is whether the gauge is enabled.
+pub fn tier2_capabilities(battery_detail: bool, energy: bool) -> CapabilitySet {
+    use Capability as C;
+    let mut set = capabilities_for(reasons::NEEDS_TUNNEL, battery_detail);
+    for cap in [
+        C::CpuTotal,
+        C::CpuPerCore,
+        C::MemoryBreakdown,
+        C::Processes,
+        C::ProcessThreads,
+        C::NetworkThroughput,
+        C::NetworkPackets,
+        C::NetworkPerProcess,
+    ] {
+        set.set(cap, Availability::Available);
+    }
+    let unavailable = |reason: &str| Availability::Unavailable {
+        reason: reason.to_owned(),
+    };
+    set.set(C::LoadAverage, unavailable(reasons::NO_LOAD_AVERAGE));
+    set.set(C::MemoryPressure, unavailable(reasons::NO_MEMORY_PRESSURE));
+    set.set(C::ForegroundApp, unavailable(reasons::NO_FRONT_APP));
+    set.set(C::WifiDetails, unavailable(reasons::WIFI_DETAILS_TIER2));
+    set.set(
+        C::Energy,
+        if energy {
+            Availability::Available
+        } else {
+            unavailable(reasons::ENERGY_OFF)
+        },
+    );
+    set
+}
+
+/// The tier-1 shape with `dvt_reason` on every developer-service gap.
+pub fn capabilities_for(dvt_reason: &str, battery_detail: bool) -> CapabilitySet {
+    use Capability as C;
     let mut set = CapabilitySet::default();
     let mut put = |cap: Capability, ok: bool, reason: &str| {
         set.set(
@@ -162,7 +234,8 @@ pub fn tier1_capabilities(developer_mode: Option<bool>, battery_detail: bool) ->
     set
 }
 
-/// State shared between the source and the discovery's [`TrustHandle`].
+/// State shared between the source, the discovery's [`TrustHandle`] and
+/// the tier-2 supervisor.
 #[derive(Debug)]
 struct Shared {
     id: DeviceId,
@@ -170,6 +243,27 @@ struct Shared {
     summary: RwLock<DeviceSummary>,
     capabilities: RwLock<CapabilitySet>,
     sink: Mutex<Option<EventSink>>,
+    info: RwLock<Option<DeviceInfo>>,
+    developer_mode: RwLock<Option<bool>>,
+    battery_detail: RwLock<bool>,
+    /// Energy gauge opt-in (off by default).
+    energy: AtomicBool,
+    /// The last deviceinfo facts and tunnel description while tier 2 is up.
+    tier2: Mutex<Option<Tier2Facts>>,
+}
+
+#[derive(Debug, Clone)]
+struct Tier2Facts {
+    facts: DeviceFacts,
+    ram_fallback: Option<u64>,
+    tunnel: String,
+}
+
+impl Shared {
+    fn set_state(&self, state: ConnectionState) {
+        *self.state.write() = state.clone();
+        self.summary.write().state = state;
+    }
 }
 
 /// Lets the discovery update an untrusted source's state and reason while
@@ -213,9 +307,6 @@ pub struct IosSource {
     provider: Arc<IosProvider>,
     pair: Option<PairingFile>,
     shared: Arc<Shared>,
-    info: RwLock<Option<DeviceInfo>>,
-    developer_mode: RwLock<Option<bool>>,
-    battery_detail: RwLock<bool>,
     apps: AppTable,
     running: Mutex<Option<Running>>,
     pcap: Mutex<Option<PcapRun>>,
@@ -260,12 +351,14 @@ impl IosSource {
                 summary: RwLock::new(summary),
                 capabilities: RwLock::new(caps),
                 sink: Mutex::new(None),
+                info: RwLock::new(Some(sheet)),
+                developer_mode: RwLock::new(inputs.developer_mode),
+                battery_detail: RwLock::new(battery_detail),
+                energy: AtomicBool::new(false),
+                tier2: Mutex::new(None),
             }),
             provider,
             pair,
-            info: RwLock::new(Some(sheet)),
-            developer_mode: RwLock::new(inputs.developer_mode),
-            battery_detail: RwLock::new(battery_detail),
             apps: Arc::new(RwLock::new(Vec::new())),
             running: Mutex::new(None),
             pcap: Mutex::new(None),
@@ -284,12 +377,14 @@ impl IosSource {
                 summary: RwLock::new(summary),
                 capabilities: RwLock::new(CapabilitySet::none(reason)),
                 sink: Mutex::new(None),
+                info: RwLock::new(None),
+                developer_mode: RwLock::new(None),
+                battery_detail: RwLock::new(false),
+                energy: AtomicBool::new(false),
+                tier2: Mutex::new(None),
             }),
             provider,
             pair: None,
-            info: RwLock::new(None),
-            developer_mode: RwLock::new(None),
-            battery_detail: RwLock::new(false),
             apps: Arc::new(RwLock::new(Vec::new())),
             running: Mutex::new(None),
             pcap: Mutex::new(None),
@@ -322,7 +417,24 @@ impl IosSource {
 
     /// Developer Mode as last read.
     pub fn developer_mode(&self) -> Option<bool> {
-        *self.developer_mode.read()
+        *self.shared.developer_mode.read()
+    }
+
+    /// Turn the optional energy gauge on or off (off by default; takes
+    /// effect at the next tunnel open, or at once if the source is at tier
+    /// 1). See `dvt::energy`.
+    pub fn set_energy_enabled(&self, on: bool) {
+        self.shared.energy.store(on, Ordering::SeqCst);
+    }
+
+    /// Whether the energy gauge is enabled.
+    pub fn energy_enabled(&self) -> bool {
+        self.shared.energy.load(Ordering::SeqCst)
+    }
+
+    /// The last `deviceinfo` facts while tier 2 is up.
+    pub fn tier2_facts(&self) -> Option<DeviceFacts> {
+        self.shared.tier2.lock().as_ref().map(|t| t.facts.clone())
     }
 
     fn facts(seed: &IosSeed, pairing: &str) -> ConnectionFacts {
@@ -387,15 +499,22 @@ impl IosSource {
         let inputs = info::read_inputs(&*self.provider, &pair)
             .await
             .map_err(|e| to_device_error(self.id_str(), e))?;
-        let sheet = info::build_info(&inputs, &Self::facts(&self.seed, "paired"));
-        let detail = inputs.ioregistry_battery.is_some() || *self.battery_detail.read();
-        let caps = tier1_capabilities(inputs.developer_mode, detail);
-        *self.developer_mode.write() = inputs.developer_mode;
-        *self.battery_detail.write() = detail;
+        let mut sheet = info::build_info(&inputs, &Self::facts(&self.seed, "paired"));
+        let detail = inputs.ioregistry_battery.is_some() || *self.shared.battery_detail.read();
+        let tier2 = self.shared.tier2.lock().clone();
+        let caps = match (&*self.shared.state.read(), &tier2) {
+            (ConnectionState::Tier2, Some(t)) => {
+                dvt_info::apply(&mut sheet, &t.facts, t.ram_fallback, &t.tunnel);
+                tier2_capabilities(detail, self.energy_enabled())
+            }
+            _ => tier1_capabilities(inputs.developer_mode, detail),
+        };
+        *self.shared.developer_mode.write() = inputs.developer_mode;
+        *self.shared.battery_detail.write() = detail;
         *self.shared.summary.write() =
             Self::make_summary(&self.seed, Some(&sheet), self.shared.state.read().clone());
         *self.shared.capabilities.write() = caps.clone();
-        *self.info.write() = Some(sheet.clone());
+        *self.shared.info.write() = Some(sheet.clone());
         let sink = self.shared.sink.lock().clone();
         if let Some(sink) = sink {
             let lost = |_| DeviceError::device_lost(self.id_str());
@@ -533,7 +652,7 @@ impl DeviceSource for IosSource {
     }
 
     async fn info(&self) -> DeviceResult<DeviceInfo> {
-        if let Some(info) = self.info.read().clone() {
+        if let Some(info) = self.shared.info.read().clone() {
             return Ok(info);
         }
         Err(self
@@ -560,7 +679,7 @@ impl DeviceSource for IosSource {
         sink.capabilities(&id, self.capabilities())
             .await
             .map_err(lost)?;
-        let info = self.info.read().clone();
+        let info = self.shared.info.read().clone();
         if let Some(info) = info {
             sink.info(&id, info).await.map_err(lost)?;
         }
@@ -578,7 +697,7 @@ impl DeviceSource for IosSource {
             sink.clone(),
             id.clone(),
             Duration::from_millis(u64::from(cfg.medium_ms)),
-            *self.battery_detail.read(),
+            *self.shared.battery_detail.read(),
             cancel.clone(),
             Arc::clone(&gone),
         )));
@@ -606,6 +725,15 @@ impl DeviceSource for IosSource {
             id.clone(),
             cancel.child_token(),
         )));
+        tasks.push(tokio::spawn(supervise(Tier2Ctx {
+            provider: Arc::clone(&self.provider),
+            shared: Arc::clone(&self.shared),
+            sink: sink.clone(),
+            cfg,
+            cancel: cancel.child_token(),
+            gone: Arc::clone(&gone),
+            root: cancel.clone(),
+        })));
         // Watchdog: one Disconnected + DeviceLost when a loop saw the device go.
         {
             let sink = sink.clone();
@@ -616,8 +744,8 @@ impl DeviceSource for IosSource {
             tasks.push(tokio::spawn(async move {
                 cancel.cancelled().await;
                 if gone.load(Ordering::SeqCst) {
-                    *shared.state.write() = ConnectionState::Disconnected;
-                    shared.summary.write().state = ConnectionState::Disconnected;
+                    shared.set_state(ConnectionState::Disconnected);
+                    *shared.tier2.lock() = None;
                     let _ = sink
                         .state(
                             &id,
@@ -727,6 +855,352 @@ async fn crash_poll(
     }
 }
 
+/// What the tier-2 supervisor needs.
+struct Tier2Ctx {
+    provider: Arc<IosProvider>,
+    shared: Arc<Shared>,
+    sink: EventSink,
+    cfg: SamplingConfig,
+    /// Cancelled by `stop` (child of the source's token).
+    cancel: CancellationToken,
+    gone: Arc<AtomicBool>,
+    /// The source's token, cancelled when the device is gone.
+    root: CancellationToken,
+}
+
+impl Tier2Ctx {
+    fn id(&self) -> &str {
+        &self.shared.id
+    }
+
+    async fn wait(&self, d: Duration) -> bool {
+        tokio::select! {
+            _ = self.cancel.cancelled() => false,
+            _ = tokio::time::sleep(d) => !self.sink.is_closed(),
+        }
+    }
+
+    fn device_gone(&self) {
+        self.gone.store(true, Ordering::SeqCst);
+        self.root.cancel();
+    }
+
+    /// Store and emit a capability set.
+    async fn set_capabilities(&self, caps: CapabilitySet) {
+        *self.shared.capabilities.write() = caps.clone();
+        let _ = self.sink.capabilities(self.id(), caps).await;
+    }
+
+    /// Mark some capabilities unavailable with `reason` and emit.
+    async fn withdraw(&self, caps: &[Capability], reason: &str) {
+        let set = {
+            let mut set = self.shared.capabilities.write();
+            for cap in caps {
+                set.set(
+                    *cap,
+                    Availability::Unavailable {
+                        reason: reason.to_owned(),
+                    },
+                );
+            }
+            set.clone()
+        };
+        let _ = self.sink.capabilities(self.id(), set).await;
+    }
+
+    async fn set_state(&self, state: ConnectionState, detail: String) {
+        self.shared.set_state(state.clone());
+        let _ = self.sink.state(self.id(), state, Some(detail)).await;
+    }
+
+    async fn emit_info(&self) {
+        let info = self.shared.info.read().clone();
+        if let Some(info) = info {
+            let _ = self.sink.info(self.id(), info).await;
+        }
+    }
+
+    /// Developer Mode changed (or was learned): update the sheet and, at
+    /// tier 1, the capability reasons.
+    async fn set_developer_mode(&self, on: Option<bool>) {
+        *self.shared.developer_mode.write() = on;
+        if let Some(info) = self.shared.info.write().as_mut() {
+            info.state.developer_mode = on;
+        }
+        if *self.shared.state.read() != ConnectionState::Tier2 {
+            let caps = tier1_capabilities(on, *self.shared.battery_detail.read());
+            self.set_capabilities(caps).await;
+        }
+        self.emit_info().await;
+    }
+
+    /// Overlay the deviceinfo facts on the sheet, remember them, emit.
+    async fn apply_tier2_info(&self, facts: &DeviceFacts, ram_fallback: Option<u64>, tunnel: &str) {
+        {
+            let mut guard = self.shared.info.write();
+            if let Some(info) = guard.as_mut() {
+                dvt_info::apply(info, facts, ram_fallback, tunnel);
+            }
+        }
+        *self.shared.tier2.lock() = Some(Tier2Facts {
+            facts: facts.clone(),
+            ram_fallback,
+            tunnel: tunnel.to_owned(),
+        });
+        self.emit_info().await;
+    }
+
+    /// Back to tier 1 after the tunnel died: state, capabilities, one error.
+    async fn degrade(&self, why: &str, retry_in: Duration) {
+        *self.shared.tier2.lock() = None;
+        {
+            let mut guard = self.shared.info.write();
+            if let Some(info) = guard.as_mut() {
+                info.connection.tier = Some(TIER1.to_owned());
+                info.connection.tunnel = Some(format!("lost: {why}"));
+            }
+        }
+        let reason = format!("{} ({why})", reasons::TUNNEL_LOST);
+        let caps = capabilities_for(&reason, *self.shared.battery_detail.read());
+        self.set_state(
+            ConnectionState::Tier1,
+            format!(
+                "developer tunnel lost: {why}; retrying in {} s",
+                retry_in.as_secs()
+            ),
+        )
+        .await;
+        self.set_capabilities(caps).await;
+        self.emit_info().await;
+        let err = DeviceError::new(
+            ErrorCode::TunnelFailed,
+            format!("the developer tunnel dropped: {why}"),
+        )
+        .with_hint(tunnel::hints::RETRY);
+        let _ = self.sink.error(Some(self.id()), &err).await;
+    }
+}
+
+/// The tier-2 supervisor (see the module docs).
+async fn supervise(ctx: Tier2Ctx) {
+    let mut backoff = TUNNEL_BACKOFF_MIN;
+    let mut failure_reported = false;
+    loop {
+        if ctx.cancel.is_cancelled() || ctx.sink.is_closed() {
+            return;
+        }
+        let dev = *ctx.shared.developer_mode.read();
+        if dev != Some(true) {
+            if !ctx.wait(DEV_MODE_RECHECK).await {
+                return;
+            }
+            match lockdown::developer_mode_status(&*ctx.provider).await {
+                Ok(on) => {
+                    if Some(on) != dev {
+                        tracing::info!(device = %ctx.id(), on, "Developer Mode changed");
+                        ctx.set_developer_mode(Some(on)).await;
+                    }
+                }
+                Err(e) if battery::is_device_gone(&e) => {
+                    ctx.device_gone();
+                    return;
+                }
+                Err(e) => {
+                    tracing::debug!(device = %ctx.id(), error = %e, "Developer Mode re-check failed")
+                }
+            }
+            continue;
+        }
+
+        tracing::info!(device = %ctx.id(), "opening the developer tunnel");
+        match Tunnel::open(Arc::clone(&ctx.provider)).await {
+            Ok(t) => {
+                backoff = TUNNEL_BACKOFF_MIN;
+                failure_reported = false;
+                let tunnel = Arc::new(t);
+                let end = run_tier2(&ctx, Arc::clone(&tunnel)).await;
+                match Arc::try_unwrap(tunnel) {
+                    Ok(t) => t.close().await,
+                    Err(t) => t.mark_dead("closed by the supervisor"),
+                }
+                match end {
+                    LoopEnd::Cancelled | LoopEnd::SinkClosed => return,
+                    LoopEnd::TunnelDead(why) | LoopEnd::ServiceFailed(why) => {
+                        if ctx.cancel.is_cancelled() {
+                            return;
+                        }
+                        ctx.degrade(&why, backoff).await;
+                    }
+                }
+            }
+            Err(IosError::DeveloperModeOff) => {
+                tracing::info!(device = %ctx.id(), "RSD lists no developer services: Developer Mode is off");
+                ctx.set_developer_mode(Some(false)).await;
+                continue;
+            }
+            Err(e) if battery::is_device_gone(&e) => {
+                ctx.device_gone();
+                return;
+            }
+            Err(e) => {
+                tracing::warn!(device = %ctx.id(), error = %e, retry_s = backoff.as_secs(), "developer tunnel failed");
+                if !failure_reported {
+                    failure_reported = true;
+                    let err = to_device_error(ctx.id(), e).with_hint(tunnel::hints::RETRY);
+                    let _ = ctx.sink.error(Some(ctx.id()), &err).await;
+                    let caps =
+                        capabilities_for(reasons::TUNNEL_FAILED, *ctx.shared.battery_detail.read());
+                    ctx.set_capabilities(caps).await;
+                    ctx.set_state(
+                        ConnectionState::Tier1,
+                        format!("developer tunnel failed: {}", err.message()),
+                    )
+                    .await;
+                }
+            }
+        }
+        if !ctx.wait(backoff).await {
+            return;
+        }
+        backoff = (backoff * 2).min(TUNNEL_BACKOFF_MAX);
+    }
+}
+
+/// Tier 2 on an open tunnel until it (or the sysmontap service) fails.
+async fn run_tier2(ctx: &Tier2Ctx, tunnel: Arc<Tunnel>) -> LoopEnd {
+    let id = ctx.shared.id.clone();
+    let facts = match dvt_info::read(&tunnel).await {
+        Ok(f) => f,
+        Err(e) => {
+            return if tunnel.is_alive() {
+                LoopEnd::ServiceFailed(e.to_string())
+            } else {
+                LoopEnd::TunnelDead(e.to_string())
+            };
+        }
+    };
+    let (ram_fallback, layout) = {
+        let info = ctx.shared.info.read();
+        let hw = info.as_ref().map(|i| &i.hardware);
+        (
+            hw.and_then(|h| h.ram_bytes),
+            hw.and_then(|h| {
+                Some(statasmon_idmap::apple::CoreLayout {
+                    total: h.cpu_cores?,
+                    performance: h.performance_cores?,
+                    efficiency: h.efficiency_cores?,
+                })
+            }),
+        )
+    };
+    let shared2: SharedState = Arc::new(RwLock::new(Tier2Shared {
+        ram_total: facts.hardware.ram_bytes.or(ram_fallback),
+        layout,
+        ..Tier2Shared::default()
+    }));
+    let description = tunnel.describe();
+    ctx.apply_tier2_info(&facts, ram_fallback, &description)
+        .await;
+    let energy = ctx.shared.energy.load(Ordering::SeqCst);
+    let battery_detail = *ctx.shared.battery_detail.read();
+    ctx.set_capabilities(tier2_capabilities(battery_detail, energy))
+        .await;
+    ctx.set_state(ConnectionState::Tier2, description.clone())
+        .await;
+    tracing::info!(device = %id, cores = ?facts.hardware.cpu_cores, ram = ?facts.hardware.ram_bytes, uptime_s = ?facts.uptime_secs(), "tier 2 ready");
+
+    let child = ctx.cancel.child_token();
+    let fast = Duration::from_millis(u64::from(ctx.cfg.fast_ms));
+    let medium = Duration::from_millis(u64::from(ctx.cfg.medium_ms));
+    let slow = Duration::from_millis(u64::from(ctx.cfg.slow_ms)).max(Duration::from_secs(5));
+    let mut sys_task = tokio::spawn(dvt::sysmontap::run(
+        Arc::clone(&tunnel),
+        ctx.sink.clone(),
+        id.clone(),
+        fast,
+        medium,
+        Arc::clone(&shared2),
+        child.clone(),
+    ));
+    let mut net_task = tokio::spawn(dvt::network::run(
+        Arc::clone(&tunnel),
+        ctx.sink.clone(),
+        id.clone(),
+        medium,
+        Arc::clone(&shared2),
+        child.clone(),
+    ));
+    let mut energy_task = energy.then(|| {
+        tokio::spawn(dvt::energy::run(
+            Arc::clone(&tunnel),
+            medium,
+            Arc::clone(&shared2),
+            child.clone(),
+        ))
+    });
+    let mut net_running = true;
+    let mut refresh = tokio::time::interval(slow);
+    refresh.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+    refresh.tick().await;
+
+    let end = loop {
+        tokio::select! {
+            _ = child.cancelled() => break LoopEnd::Cancelled,
+            r = &mut sys_task => {
+                break r.unwrap_or_else(|e| LoopEnd::ServiceFailed(format!("sysmontap task: {e}")));
+            }
+            r = &mut net_task, if net_running => {
+                net_running = false;
+                let outcome = r.unwrap_or_else(|e| LoopEnd::ServiceFailed(format!("networking task: {e}")));
+                match outcome {
+                    LoopEnd::TunnelDead(why) => break LoopEnd::TunnelDead(why),
+                    LoopEnd::ServiceFailed(why) => {
+                        tracing::warn!(device = %id, why, "networking service failed; per-process network is off");
+                        ctx.withdraw(&[Capability::NetworkPerProcess], reasons::NETWORKING_FAILED).await;
+                    }
+                    LoopEnd::Cancelled | LoopEnd::SinkClosed => break outcome,
+                }
+            }
+            r = async { match energy_task.as_mut() { Some(t) => t.await, None => std::future::pending().await } }, if energy_task.is_some() => {
+                energy_task = None;
+                let outcome = r.unwrap_or_else(|e| LoopEnd::ServiceFailed(format!("energy task: {e}")));
+                match outcome {
+                    LoopEnd::TunnelDead(why) => break LoopEnd::TunnelDead(why),
+                    LoopEnd::ServiceFailed(_) => {
+                        ctx.withdraw(&[Capability::Energy], reasons::ENERGY_FAILED).await;
+                    }
+                    LoopEnd::Cancelled | LoopEnd::SinkClosed => break outcome,
+                }
+            }
+            _ = refresh.tick() => {
+                if !tunnel.is_alive() {
+                    break LoopEnd::TunnelDead(
+                        tunnel.death_reason().unwrap_or_else(|| "heartbeat failed".to_owned()),
+                    );
+                }
+                match dvt_info::read(&tunnel).await {
+                    Ok(facts) => {
+                        let ram = { shared2.read().ram_total };
+                        ctx.apply_tier2_info(&facts, ram.or(ram_fallback), &description).await;
+                    }
+                    Err(e) if !tunnel.is_alive() => break LoopEnd::TunnelDead(e.to_string()),
+                    Err(e) => tracing::debug!(device = %id, error = %e, "deviceinfo refresh failed"),
+                }
+            }
+        }
+    };
+    child.cancel();
+    for task in [Some(sys_task), net_running.then_some(net_task), energy_task]
+        .into_iter()
+        .flatten()
+    {
+        if tokio::time::timeout(STOP_GRACE, task).await.is_err() {
+            tracing::debug!(device = %id, "a tier-2 loop did not stop in time");
+        }
+    }
+    end
+}
+
 impl Drop for IosSource {
     fn drop(&mut self) {
         if let Some(run) = self.pcap.lock().take() {
@@ -793,6 +1267,64 @@ mod tests {
         );
         // Every capability has an entry.
         assert_eq!(off.entries.len(), Capability::ALL.len());
+    }
+
+    #[test]
+    fn tier2_capabilities_cover_the_developer_services() {
+        let on = tier2_capabilities(true, false);
+        for cap in [
+            Capability::CpuTotal,
+            Capability::CpuPerCore,
+            Capability::MemoryBreakdown,
+            Capability::Processes,
+            Capability::ProcessThreads,
+            Capability::NetworkThroughput,
+            Capability::NetworkPackets,
+            Capability::NetworkPerProcess,
+            Capability::BatteryDetail,
+            Capability::Logs,
+        ] {
+            assert!(on.is_available(cap), "{cap:?}");
+        }
+        assert_eq!(on.reason(Capability::Energy), Some(reasons::ENERGY_OFF));
+        assert_eq!(
+            on.reason(Capability::ForegroundApp),
+            Some(reasons::NO_FRONT_APP)
+        );
+        assert_eq!(
+            on.reason(Capability::WifiDetails),
+            Some(reasons::WIFI_DETAILS_TIER2)
+        );
+        assert_eq!(
+            on.reason(Capability::LoadAverage),
+            Some(reasons::NO_LOAD_AVERAGE)
+        );
+        assert_eq!(
+            on.reason(Capability::MemoryPressure),
+            Some(reasons::NO_MEMORY_PRESSURE)
+        );
+        assert_eq!(
+            on.reason(Capability::CpuFrequency),
+            Some(reasons::NO_FREQUENCY)
+        );
+        assert!(tier2_capabilities(false, true).is_available(Capability::Energy));
+        assert_eq!(
+            tier2_capabilities(false, true).reason(Capability::BatteryDetail),
+            Some(reasons::BATTERY_DETAIL_REFUSED)
+        );
+        assert_eq!(on.entries.len(), Capability::ALL.len());
+
+        // Tunnel failed: tier-1 shape with the tunnel reason on every DVT gap.
+        let failed = capabilities_for(reasons::TUNNEL_FAILED, true);
+        assert_eq!(
+            failed.reason(Capability::CpuPerCore),
+            Some(reasons::TUNNEL_FAILED)
+        );
+        assert_eq!(
+            failed.reason(Capability::Energy),
+            Some(reasons::TUNNEL_FAILED)
+        );
+        assert!(failed.is_available(Capability::Logs));
     }
 
     #[test]

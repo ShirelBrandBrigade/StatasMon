@@ -11,7 +11,7 @@ description = "iOS/iPadOS provider via the idevice crate: usbmuxd, lockdown, dia
 statasmon-protocol = { workspace = true }
 statasmon-device = { workspace = true }
 statasmon-idmap = { workspace = true }
-idevice = { version = "0.1.65", default-features = false, features = ["ring", "usbmuxd", "pair", "diagnostics_relay", "installation_proxy", "syslog_relay", "pcapd", "crashreportcopymobile", "afc", "amfi", "heartbeat", "tcp", "rsd"] }
+idevice = { version = "0.1.65", default-features = false, features = ["ring", "usbmuxd", "pair", "diagnostics_relay", "installation_proxy", "syslog_relay", "pcapd", "crashreportcopymobile", "afc", "amfi", "heartbeat", "tcp", "rsd", "core_device_proxy", "tunnel_tcp_stack", "xpc", "dvt", "sysmontap", "network_monitor", "device_info", "energy_monitor"] }
 plist = "1.8"
 serde = { workspace = true }
 serde_json = { workspace = true }

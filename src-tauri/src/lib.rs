@@ -3,14 +3,15 @@
 //! receives every `Message` over a Channel (docs/PLAN.md §3.6).
 
 mod commands;
+mod settings;
 mod state;
 
 use std::path::PathBuf;
 use std::sync::Arc;
 
 use parking_lot::Mutex;
-use statasmon_core::{Engine, EngineConfig, StoreConfig};
-use statasmon_device_android::adb::{AdbDiscovery, AdbLocation};
+use statasmon_core::Engine;
+use statasmon_device_android::adb::{AdbDiscovery, AdbLocation, AdbServer};
 use statasmon_device_fake::FakeDiscovery;
 use statasmon_device_ios::MuxdDiscovery;
 use tauri::Manager;
@@ -30,9 +31,16 @@ fn source_mode() -> SourceMode {
 /// re-running the locator, so the device appears once platform-tools is
 /// installed; the hint is logged here (surfacing it on the bus needs an
 /// engine-side notice API, see the step 2.2 report).
-fn attach_android(engine: &Engine) {
+fn attach_android(engine: &Engine, adb_path: Option<PathBuf>) {
     let engine = engine.clone();
     tauri::async_runtime::spawn(async move {
+        // Settings > locator: an explicit adb path from settings.json is
+        // used as is (it was validated to exist when saved).
+        if let Some(path) = adb_path {
+            tracing::info!(adb = %path.display(), "android: adb from settings");
+            engine.attach_discovery(Box::new(AdbDiscovery::new(AdbServer::new(path))));
+            return;
+        }
         match statasmon_device_android::adb::locate().await {
             AdbLocation::Found {
                 path,
@@ -110,13 +118,18 @@ pub fn run() {
             let store_root = std::env::var_os("STATASMON_STORE_DIR")
                 .map(PathBuf::from)
                 .or_else(|| app_data_dir.clone());
-            let config = match &store_root {
-                Some(root) => {
-                    tracing::info!(root = %root.display(), "session store root");
-                    EngineConfig::default().with_store(StoreConfig::new(root))
-                }
-                None => EngineConfig::default(),
+            // Settings live next to the store (`settings.json`) and shape
+            // the engine before it starts: sampling cadence, retention,
+            // and the adb path (ADR-014).
+            let settings_dir = store_root.clone();
+            let settings = match &settings_dir {
+                Some(dir) => settings::load(dir),
+                None => statasmon_protocol::Settings::default(),
             };
+            if let Some(root) = &store_root {
+                tracing::info!(root = %root.display(), "session store root");
+            }
+            let config = settings::engine_config(store_root.as_deref(), &settings);
             let engine = tauri::async_runtime::block_on(async { Engine::new(config) });
             let fake = match mode {
                 SourceMode::Fake => {
@@ -130,7 +143,7 @@ pub fn run() {
                     Some(handle)
                 }
                 SourceMode::Real => {
-                    attach_android(&engine);
+                    attach_android(&engine, settings.adb_path.as_deref().map(PathBuf::from));
                     attach_ios(&engine);
                     tracing::info!("device source: real (android over adb, iOS over usbmuxd)");
                     None
@@ -142,6 +155,8 @@ pub fn run() {
                 fake,
                 forwarder: Arc::new(Mutex::new(None)),
                 app_data_dir,
+                settings_dir,
+                settings: Mutex::new(settings),
             });
             Ok(())
         })
@@ -163,6 +178,8 @@ pub fn run() {
             commands::open_session,
             commands::delete_session,
             commands::store_stats,
+            commands::get_settings,
+            commands::set_settings,
             commands::device_action,
             commands::fake_detach,
             commands::fake_reattach,

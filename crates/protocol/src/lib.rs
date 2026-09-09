@@ -17,7 +17,8 @@ pub mod status;
 pub use capabilities::{Availability, Capability, CapabilityEntry, CapabilitySet};
 pub use commands::{
     DeviceAction, ExportFormat, ExportRequest, ExportResult, ExportScope, HistoryPoint,
-    HistoryQuery, LogFilter, LogPage, SamplingConfig, SessionDetail, SessionSummary, StoredEvent,
+    HistoryQuery, LogFilter, LogPage, RetentionConfig, SETTINGS_VERSION, SamplingConfig,
+    SessionDetail, SessionSummary, Settings, StoredEvent,
 };
 pub use device::{
     ConnectionInfo, ConnectionState, DeviceHardware, DeviceId, DeviceIdentity, DeviceInfo,

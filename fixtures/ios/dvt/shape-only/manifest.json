@@ -1,0 +1,17 @@
+{
+  "shape_only": true,
+  "note": "Hand-built from the sysmontap message shape documented by pymobiledevice3 (sysmontap.py) and go-ios (instruments/sysmontap.go), not captured from a device. Replace with the output of `cargo run -p statasmon-device-ios --example capture_dvt_fixture` once an iPad with Developer Mode on is connected.",
+  "system_attributes": [
+    "physMemSize", "vmPageSize", "vmFreeCount", "vmWireCount", "vmIntPageCount",
+    "vmExtPageCount", "vmCompressorPageCount", "vmPurgeableCount", "vmSpeculativeCount",
+    "netBytesIn", "netBytesOut", "netPacketsIn", "netPacketsOut", "diskBytesWritten"
+  ],
+  "process_attributes": ["pid", "name", "cpuUsage", "physFootprint", "memResidentSize", "threadCount"],
+  "units": {
+    "CPU_TotalLoad": "percent 0-100 (system and per core)",
+    "vm*Count": "pages of vmPageSize",
+    "physMemSize": "bytes",
+    "net*/disk*": "cumulative bytes/packets since boot",
+    "cpuUsage": "fraction of one core (assumed; verify live)"
+  }
+}

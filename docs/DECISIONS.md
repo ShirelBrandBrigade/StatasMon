@@ -203,3 +203,115 @@ Consequences: the UI queries a stored session by passing `session_id` in
 notice when the store cannot open. Retention settings reach the UI in
 6.6; a store-side `EngineError::Store` variant is a small follow-up (store
 errors currently map onto `Device` errors with an `Io`/`Unsupported` code).
+
+## ADR-013 · 2026-09-09 · iOS tier 2: tunnel strategy, sysmontap mapping, cadences
+Status: accepted (live check on the iPad pending; see docs/PLAN.md 4.1–4.6).
+Context: Phase 4 needed the developer tunnel and the DVT loops built on
+top of the tier-1 `IosSource` without changing tier-1 behaviour.
+Decisions:
+- **Tunnel.** `CoreDeviceProxy` is opened like any lockdown service (pair
+  record, TLS), and the `idevice` crate's userspace TCP stack (`jktcp`,
+  `tunnel_tcp_stack`) carries the tunnel's IPv6 packets in-process. No TUN
+  device, no root, no OS permission, no extra port on the host on either
+  OS. One RSD handshake reads the service table; each DVT loop opens its
+  own `dtservicehub` connection so a hung service never blocks another.
+  iOS 18.2's TCP + TLS-PSK change concerns the network (remoted) transport
+  only; the USB CDTunnel framing is the same from 17.4 on, so no per-major
+  branch. Developer Mode off is detected two ways: `amfi` at connect (and
+  every 30 s while tier 1) and the RSD table lacking `dtservicehub`.
+  Tunnel death = a transport error on any service open/read, or the
+  heartbeat (one TCP connect to the RSD port every 15 s) failing; the
+  supervisor then emits `DeviceState Tier1` + one `Error TunnelFailed`
+  and retries with 5 s → 60 s backoff. `stop()` cancels the loops and
+  closes the stack.
+- **sysmontap attributes** are chosen at runtime: `deviceinfo.sysmon
+  SystemAttributes`/`ProcessAttributes` ∩ our wanted lists (both the
+  `vm*`/`net*`/`disk*` names iOS 16–17 advertise and the Instruments
+  display names), falling back to the five system and seven process
+  attributes every tool since iOS 13 uses. Interval = `fast_ms` (1 s);
+  the process table (top 250 by CPU) is emitted every `medium_ms`.
+- **Units and mapping** (to verify on each major with a captured
+  fixture): `CPU_TotalLoad` is a percentage, system-wide and per core;
+  `CPU_UserLoad`/`CPU_SystemLoad` of −1 mean "not split" and are not
+  emitted; process `cpuUsage` is a fraction of one core, published ×100
+  in the `top` convention of ADR-010; memory pages × `vmPageSize` (16 KiB
+  default), `mem.app` = internal pages, `mem.cached` = external
+  (file-backed) pages, `mem.wired`, `mem.compressed` = compressor pages,
+  `mem.used` = app + wired + compressed (Activity Monitor's figure), else
+  total − free; `mem.total` = `hardwareInformation` RAM, else sysmontap
+  `physMemSize`, else tier-1 MobileGestalt; net/disk counters are
+  cumulative since boot → rates from deltas (bytes×8 → `net.*_bps`),
+  totals count from the first tick like Android.
+- **Per-core kinds.** Apple silicon numbers efficiency cores first and
+  performance cores last (`powermetrics` on M1: E-Cluster CPU 0–3,
+  P-Cluster CPU 4–7), so with the idmap layout (A14 = 2P + 4E) cores
+  0–3 are Efficiency and 4–5 Performance; `sysmontap::PERFORMANCE_CORES_
+  LAST` is the single switch if a chip proves otherwise; a layout that
+  does not fit the reported count yields `Unknown`. Frequencies stay
+  dashed (iOS does not report them).
+- **Networking.** The DVT networking service's connection-update events
+  are cumulative per connection: per-pid throughput is the windowed
+  delta (bits/s), joined into `ProcessRow.net_bps`; `net.connections` =
+  connections updated in the last 10 s; `net.retransmits` = retransmitted
+  segments in the window; `net.latency_ms` = mean of the reported
+  `avg_rtt` (kernel TCP RTT, milliseconds — `RTT_DIVISOR` is the one
+  knob), only when the service reported one; nothing is probed. It
+  reports no RSSI, so `WifiDetails` stays unavailable at tier 2.
+- **Not available at tier 2, with reasons:** load average (iOS has none
+  for the host), a memory-pressure level (warnings come from the log),
+  the front-most app (the developer services do not report it; the
+  brief's "ForegroundApp available" was not honoured because it would
+  fabricate a state), core frequencies, temperature sensors.
+- **Energy gauge** is off by default (`IosSource::set_energy_enabled`)
+  because it breaks on some iOS 18 builds; when on, the top five pids by
+  CPU are sampled every `medium_ms` and `energy.cost` is bucketed low
+  < 1 ≤ medium < 10 ≤ high (provisional thresholds until compared with
+  Xcode's gauge); a failure withdraws `Capability::Energy` with a reason
+  and nothing else changes.
+- **Dependencies:** no new crates; `idevice` features `core_device_proxy`,
+  `tunnel_tcp_stack` (pulls `jktcp`, MIT, same author), `xpc`, `dvt`
+  (`ns-keyed-archive`, MIT), `sysmontap`, `network_monitor`,
+  `device_info`, `energy_monitor`.
+Consequences: `IosSource` publishes `Tier2` with the developer services'
+capabilities and degrades to `Tier1` with a visible reason; the sheet
+gains RAM, core count, uptime/boot time and the tunnel description;
+fixtures under `fixtures/ios/dvt/` are shape-only until the iPad with
+Developer Mode on is captured with `capture_dvt_fixture`.
+
+## ADR-014 · 2026-09-09 · Settings file and what it can change at runtime
+Status: accepted. Context: step 6.6 needed user settings (sampling rates,
+retention, adb location, update-check opt-in, a reserved theme) that
+survive restarts and reach the core. Decisions:
+- **Shape.** `Settings { sampling: SamplingConfig, retention:
+  { max_session_hours (4), keep_days (30), max_total_gb (none) }, adb_path
+  (none), update_check (false), theme ("dark", reserved), version (1) }`
+  lives in `crates/protocol` (`commands.rs`) so the UI and the core share
+  one type; bindings are generated like every other protocol type.
+- **File.** `settings.json` (pretty JSON) in the same folder as the
+  session store: the app data folder, or `STATASMON_STORE_DIR` in dev runs.
+  Written as `settings.json.<pid>.tmp` then renamed into place. A missing
+  file means defaults; an unreadable, unparsable or out-of-range file means
+  defaults plus a `tracing` warning (never a crash, never a silent partial
+  merge). A file from a newer `version` is read with unknown fields
+  dropped and restamped on the next save.
+- **Validation** happens in the core (`src-tauri/src/settings.rs`) on
+  every `set_settings`, and the UI mirrors the same bounds for inline
+  messages: fast ≥ 250 ms, medium ≥ 1 000 ms, slow ≥ 5 000 ms, heavy 0 or
+  ≥ 30 000 ms; hours per session 1–48; days to keep 1–365; the size cap,
+  when set, a positive number of GB (1 GB = 1024³ bytes, matching how the
+  UI formats bytes); `adb_path`, when set, must be an existing file; only
+  the dark theme is accepted. `set_settings` answers with what it stored.
+- **When settings take effect.** `lib.rs` loads the file before creating
+  the engine and passes sampling into `EngineConfig` and retention into
+  `StoreConfig`; an explicit `adb_path` builds the Android discovery with
+  `AdbDiscovery::new(AdbServer::new(path))` instead of the locator. The
+  engine's config and the store's retention are immutable after
+  construction and the workspace forbids `unsafe` (so `STATASMON_ADB`
+  cannot be set from inside the process), therefore saved values take
+  effect **at the next launch**; the Settings screen says so on each
+  section rather than implying a live change. Consequence: a small core
+  follow-up (`Engine::set_sampling` for devices that start later,
+  `Store::set_retention`, a re-locate hook on `AdbDiscovery`) would make
+  the three live without changing the file or the UI.
+- **Update check** is only a stored flag until Phase 7 ships the updater;
+  the app makes no network call either way.

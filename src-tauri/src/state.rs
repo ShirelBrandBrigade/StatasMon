@@ -6,6 +6,7 @@ use std::sync::Arc;
 use parking_lot::Mutex;
 use statasmon_core::Engine;
 use statasmon_device_fake::FakeHandle;
+use statasmon_protocol::Settings;
 use tauri::async_runtime::JoinHandle;
 
 /// Which device sources the app was started with.
@@ -27,6 +28,10 @@ pub struct AppState {
     pub forwarder: Arc<Mutex<Option<JoinHandle<()>>>>,
     /// The app data folder (store root, `crashes/`, `pcap/`), when resolved.
     pub app_data_dir: Option<PathBuf>,
+    /// Folder holding `settings.json` (the app data folder), when resolved.
+    pub settings_dir: Option<PathBuf>,
+    /// The settings in effect (loaded at startup, replaced by `set_settings`).
+    pub settings: Mutex<Settings>,
 }
 
 impl std::fmt::Debug for AppState {
@@ -34,6 +39,7 @@ impl std::fmt::Debug for AppState {
         f.debug_struct("AppState")
             .field("mode", &self.mode)
             .field("app_data_dir", &self.app_data_dir)
+            .field("settings_dir", &self.settings_dir)
             .finish_non_exhaustive()
     }
 }

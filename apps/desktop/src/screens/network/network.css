@@ -1,0 +1,185 @@
+/*
+ * Network screen (docs/PLAN.md 6.2): throughput across the top, then
+ * interface + capture on the left and the per-process table on the right.
+ * Structure only; every color, size and radius is a token.
+ */
+
+.net-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    "throughput throughput"
+    "interface processes"
+    "capture processes";
+  gap: var(--gap-card);
+  flex-shrink: 0;
+}
+
+@media (max-width: 1320px) {
+  .net-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "throughput"
+      "interface"
+      "processes"
+      "capture";
+  }
+}
+
+.net-card {
+  min-width: 0;
+}
+
+.net-throughput {
+  grid-area: throughput;
+}
+
+.net-interface {
+  grid-area: interface;
+}
+
+.net-procs {
+  grid-area: processes;
+}
+
+.net-capture {
+  grid-area: capture;
+}
+
+.net-figures {
+  display: flex;
+  gap: 22px;
+  align-items: flex-start;
+}
+
+.net-figure {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.net-caption {
+  margin-top: 2px;
+  font-size: var(--fs-subtitle);
+  color: var(--dim);
+}
+
+.net-chart-off,
+.net-capture-off {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px dashed var(--edge);
+  border-radius: var(--r-inner);
+  color: var(--dim);
+  font-size: var(--fs-subtitle);
+}
+
+.net-capture-off {
+  padding: 10px;
+}
+
+/* Per-process rows: tile · name · pid · bar · rate. */
+.net-proc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: 420px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  font-size: var(--fs-body);
+}
+
+.net-proc-list > li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.net-proc-list b {
+  flex-shrink: 0;
+  width: 128px;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.net-proc-pid {
+  flex-shrink: 0;
+  width: 44px;
+  color: var(--dim);
+  font-size: var(--fs-subtitle);
+}
+
+.net-proc-bar {
+  flex: 1;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--bar-track);
+}
+
+.net-proc-bar > i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--cyan);
+}
+
+.net-proc-list em {
+  flex-shrink: 0;
+  width: 84px;
+  font-style: normal;
+  font-size: var(--fs-subtitle);
+  color: var(--mut);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Packet capture controls. */
+.net-capture-path {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.net-capture-label {
+  flex-shrink: 0;
+  color: var(--mut);
+  font-size: var(--fs-body);
+}
+
+.net-capture-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.net-capture-elapsed {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--dim);
+  font-size: var(--fs-subtitle);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.net-capture-error {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--fault-edge);
+  border-radius: var(--r-inner);
+  background: var(--fault-row);
+  font-size: var(--fs-body);
+}
+
+.net-capture-hint {
+  color: var(--mut);
+}

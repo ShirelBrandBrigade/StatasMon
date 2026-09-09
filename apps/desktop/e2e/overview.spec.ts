@@ -75,9 +75,14 @@ test("range segment and pause/resume update the store and the recording card", a
   await rec.getByRole("button", { name: /Mark/ }).click();
 });
 
-test("navigation renders the other views as placeholders and the gallery", async ({ page }) => {
+test("navigation renders the other views and the gallery", async ({ page }) => {
   await page.getByRole("navigation", { name: "Views" }).getByRole("link", { name: "Logs" }).click();
-  await expect(page.getByText(/Coming in Phase 6/)).toBeVisible();
+  await expect(page.getByTestId("logs-screen")).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Views" })
+    .getByRole("link", { name: "Apps & processes" })
+    .click();
+  await expect(page.getByTestId("apps-screen")).toBeVisible();
   await page.goto("/#gallery");
   await expect(page.getByRole("heading", { name: /gallery/i })).toBeVisible();
 });

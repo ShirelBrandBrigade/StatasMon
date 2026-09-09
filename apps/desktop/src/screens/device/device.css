@@ -1,0 +1,185 @@
+/*
+ * Device sheet (docs/PLAN.md 6.5): header, then a grid of grouped KeyValue
+ * cards, the capability list and the raw keys. Tokens only.
+ */
+
+.dv {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-card);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.dv-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.dv-head-ic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-ctl);
+  background: var(--grid);
+  color: var(--cyan);
+}
+
+.dv-head-text {
+  min-width: 0;
+}
+
+.dv-head-text h1 {
+  margin: 0;
+  font-size: var(--fs-headline);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.dv-head-text p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 5px 0 0;
+  color: var(--mut);
+  font-size: var(--fs-support);
+}
+
+.dv-id {
+  color: var(--dim);
+  font-size: var(--fs-body);
+}
+
+.dv-head-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.dv-status {
+  color: var(--mint);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+
+.dv-status.is-bad {
+  color: var(--red);
+}
+
+.dv-pending {
+  margin: 0;
+  color: var(--mut);
+  font-size: var(--fs-body);
+}
+
+.dv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap-card);
+  align-items: start;
+}
+
+.dv-grid .sm-kv > div > span:first-child {
+  flex-shrink: 0;
+}
+
+.dv-grid .sm-kv-value {
+  min-width: 0;
+  justify-content: flex-end;
+  text-align: right;
+  word-break: break-all;
+}
+
+.dv-caps-card {
+  grid-column: span 2;
+}
+
+.dv-caps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-cap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 28px;
+  padding: 2px 6px;
+  border-radius: var(--r-inner);
+  font-size: var(--fs-body);
+}
+
+.dv-cap:nth-child(4n + 1),
+.dv-cap:nth-child(4n + 2) {
+  background: var(--row-alt);
+}
+
+.dv-cap-name {
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+.dv-cap-reason {
+  color: var(--mut);
+  text-align: right;
+}
+
+.dv-raw-card {
+  grid-column: span 1;
+}
+
+.dv-raw {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-log);
+}
+
+.dv-raw th,
+.dv-raw td {
+  padding: 4px 6px;
+  text-align: left;
+  vertical-align: top;
+  word-break: break-all;
+}
+
+.dv-raw thead th {
+  color: var(--dim);
+  font-weight: 600;
+  border-bottom: 1px solid var(--edge);
+}
+
+.dv-raw tbody th {
+  color: var(--mut);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.dv-raw tbody tr:nth-child(even) {
+  background: var(--row-alt);
+}
+
+@media (max-width: 1320px) {
+  .dv-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dv-caps-card,
+  .dv-raw-card {
+    grid-column: span 2;
+  }
+}

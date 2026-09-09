@@ -12,6 +12,7 @@ import type {
   SessionDetail,
   SessionState,
   SessionSummary,
+  Settings,
   StoredEvent,
 } from "@statasmon/protocol";
 import type { DeviceStream } from "./stream";
@@ -25,6 +26,18 @@ const DAY_MS = 86_400_000;
 const EXPORT_STEP_MS = 120;
 
 const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/** What the core answers `get_settings` with on a fresh install (mirrors `Settings::default()`). */
+export function defaultSettings(): Settings {
+  return {
+    sampling: { fast_ms: 1000, medium_ms: 3000, slow_ms: 15000, heavy_ms: 0 },
+    retention: { max_session_hours: 4, keep_days: 30, max_total_gb: null },
+    adb_path: null,
+    update_check: false,
+    theme: "dark",
+    version: 1,
+  };
+}
 
 /**
  * Two stored sessions from "yesterday" (different lengths) so the Sessions
@@ -236,6 +249,8 @@ class ReplayState {
   /** Synthetic stored sessions (created on first use so "yesterday" is relative to now). */
   private stored: SessionSummary[] | undefined;
   private exportSeq = 0;
+  /** In-memory settings (the browser has no settings.json). */
+  private settings: Settings = defaultSettings();
   /** Shifts timestamps (and log sequence numbers) for the n-th loop of the fixture. */
   rebase(m: Message, offset: number, loop = 0): Message {
     if (offset === 0 && loop === 0) return m;
@@ -359,6 +374,14 @@ class ReplayState {
       }
       case "export_data":
         return this.exportData(args.request as ExportRequest, emit);
+      case "get_settings":
+        return structuredClone(this.settings);
+      case "set_settings": {
+        const next = structuredClone(args.settings as Settings);
+        next.adb_path = next.adb_path?.trim() ? next.adb_path.trim() : null;
+        this.settings = next;
+        return structuredClone(next);
+      }
       case "store_stats": {
         const stored = this.storedSessions();
         return {

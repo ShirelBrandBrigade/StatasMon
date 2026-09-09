@@ -1,0 +1,173 @@
+/*
+ * Performance screen (docs/PLAN.md 6.1): two-column grid of full-history
+ * cards. Structure only; every color, size and radius is a token.
+ */
+
+.perf-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap-card);
+  flex-shrink: 0;
+}
+
+@media (max-width: 1320px) {
+  .perf-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.perf-card {
+  min-width: 0;
+}
+
+.perf-chart {
+  position: relative;
+  min-width: 0;
+}
+
+.perf-history-note {
+  position: absolute;
+  top: 2px;
+  right: 8px;
+  font-size: var(--fs-axis);
+  color: var(--dim);
+}
+
+/* Dashed box where a chart would be, carrying the reason. */
+.perf-chart-off {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px dashed var(--edge);
+  border-radius: var(--r-inner);
+  color: var(--dim);
+  font-size: var(--fs-subtitle);
+}
+
+/* Per-core rows: label · usage bar · percent · frequency. */
+.perf-cores {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-body);
+}
+
+.perf-cores > li {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 56px 76px;
+  align-items: center;
+  gap: 10px;
+}
+
+.perf-core-label {
+  color: var(--mut);
+}
+
+.perf-core-bar {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--bar-track);
+}
+
+.perf-core-bar > i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+}
+
+.perf-core-pct,
+.perf-core-freq {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.perf-core-freq {
+  color: var(--mut);
+}
+
+.perf-cores > li[data-online="false"] .perf-core-label {
+  color: var(--dim);
+}
+
+.perf-load {
+  font-size: var(--fs-axis);
+  color: var(--dim);
+  line-height: 1.4;
+}
+
+/* Event rows: time · kind pill · detail · process. */
+.perf-events {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-body);
+}
+
+.perf-events > li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.perf-events time {
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+.perf-ev-detail {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perf-ev-proc {
+  color: var(--mut);
+  white-space: nowrap;
+}
+
+.perf-empty {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  color: var(--dim);
+  font-size: var(--fs-subtitle);
+}
+
+/* Battery: three small charts side by side, each with a caption row. */
+.perf-small-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap-card);
+}
+
+.perf-small {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.perf-chart-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: var(--fs-subtitle);
+  color: var(--mut);
+}
+
+.perf-chart-label > .mono {
+  color: var(--fg);
+}

@@ -31,6 +31,62 @@ impl Default for SamplingConfig {
     }
 }
 
+/// Retention policy of the session store (docs/PLAN.md §3.9, ADR-012).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct RetentionConfig {
+    /// A session is split past this many hours of recording: default 4.
+    pub max_session_hours: u32,
+    /// Ended sessions older than this many days are deleted: default 30.
+    pub keep_days: u32,
+    /// Optional cap on the total size of all sessions, in GB.
+    pub max_total_gb: Option<f64>,
+}
+
+impl Default for RetentionConfig {
+    fn default() -> Self {
+        Self {
+            max_session_hours: 4,
+            keep_days: 30,
+            max_total_gb: None,
+        }
+    }
+}
+
+/// User settings persisted by the app (`settings.json` in the app data
+/// folder, docs/PLAN.md 6.6, ADR-014).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct Settings {
+    /// Sampling cadence handed to devices when they start.
+    pub sampling: SamplingConfig,
+    pub retention: RetentionConfig,
+    /// Explicit adb binary; `None` lets the locator search.
+    pub adb_path: Option<String>,
+    /// Opt-in update check on launch (off by default; no network otherwise).
+    pub update_check: bool,
+    /// Reserved: only "dark" exists today.
+    pub theme: String,
+    /// Settings file format version.
+    pub version: u32,
+}
+
+/// Current settings file format version.
+pub const SETTINGS_VERSION: u32 = 1;
+
+impl Default for Settings {
+    fn default() -> Self {
+        Self {
+            sampling: SamplingConfig::default(),
+            retention: RetentionConfig::default(),
+            adb_path: None,
+            update_check: false,
+            theme: "dark".to_owned(),
+            version: SETTINGS_VERSION,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, TS)]
 #[ts(export)]
 pub struct LogFilter {

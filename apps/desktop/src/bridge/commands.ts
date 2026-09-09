@@ -11,6 +11,7 @@ import type {
   SessionDetail,
   SessionState,
   SessionSummary,
+  Settings,
 } from "@statasmon/protocol";
 
 /** `store_stats` (Phase 5.1): where the sessions live and how much they take. */
@@ -49,6 +50,11 @@ export const commands = {
   deleteSession: async (sessionId: string) =>
     (await getStream()).invoke<void>("delete_session", { sessionId }),
   storeStats: async () => (await getStream()).invoke<StoreStats>("store_stats"),
+  /** The settings in effect (Phase 6.6). */
+  getSettings: async () => (await getStream()).invoke<Settings>("get_settings"),
+  /** Validates, saves and returns the stored (normalised) settings; rejects with `{ code, message }`. */
+  setSettings: async (settings: Settings) =>
+    (await getStream()).invoke<Settings>("set_settings", { settings }),
   deviceAction: async (deviceId: string, action: DeviceAction) =>
     (await getStream()).invoke<unknown>("device_action", { deviceId, action }),
   fakeDetach: async (deviceId: string) =>

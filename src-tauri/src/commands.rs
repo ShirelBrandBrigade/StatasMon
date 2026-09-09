@@ -9,12 +9,13 @@ use statasmon_device::ActionResult;
 use statasmon_protocol::{
     DeviceAction, DeviceSummary, ErrorCode, ExportRequest, ExportResult, HistoryPoint,
     HistoryQuery, LogFilter, LogPage, Message, MetricId, MetricMeta, SessionDetail, SessionState,
-    SessionSummary,
+    SessionSummary, Settings,
 };
 use statasmon_store::StoreStats;
 use tauri::State;
 use tauri::ipc::Channel;
 
+use crate::settings;
 use crate::state::AppState;
 
 /// Error shape delivered to the UI (`{ code, message, hint }`).
@@ -229,6 +230,54 @@ pub fn store_stats(state: State<'_, AppState>) -> CmdResult<StoreStats> {
         message: e.to_string(),
         hint: Some("Check the app data folder is readable.".to_owned()),
     })
+}
+
+/// The settings in effect.
+#[tauri::command]
+pub fn get_settings(state: State<'_, AppState>) -> Settings {
+    state.settings.lock().clone()
+}
+
+/// Validate, save and adopt new settings. What is returned is what was
+/// stored (normalised). Sampling, retention and the adb path are read by
+/// the engine, the store and the adb locator at startup, so they take
+/// effect at the next launch; the UI says so (an engine-side setter is a
+/// core follow-up, see ADR-014).
+#[tauri::command]
+pub fn set_settings(state: State<'_, AppState>, settings: Settings) -> CmdResult<Settings> {
+    let settings = settings::normalise(settings);
+    settings::validate(&settings).map_err(|reason| CommandError {
+        code: ErrorCode::Unsupported,
+        message: reason,
+        hint: None,
+    })?;
+    let dir = state.settings_dir.as_deref().ok_or_else(|| {
+        CommandError::unsupported(
+            "Settings cannot be saved",
+            "The app data folder is unavailable in this run; settings apply until the app quits.",
+        )
+    });
+    match dir {
+        Ok(dir) => settings::save(dir, &settings).map_err(|e| CommandError {
+            code: ErrorCode::Io,
+            message: format!("Settings could not be written: {e}"),
+            hint: Some(format!(
+                "Check that {} is writable.",
+                settings::path_in(dir).display()
+            )),
+        })?,
+        Err(e) => {
+            tracing::warn!(message = %e.message, "settings kept in memory only");
+        }
+    }
+    *state.settings.lock() = settings.clone();
+    tracing::info!(
+        fast_ms = settings.sampling.fast_ms,
+        keep_days = settings.retention.keep_days,
+        adb = settings.adb_path.as_deref().unwrap_or("auto"),
+        "settings saved"
+    );
+    Ok(settings)
 }
 
 static EXPORT_SEQ: AtomicU64 = AtomicU64::new(1);
