@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "@statasmon/ui/tokens.css";
+@import "@fontsource-variable/manrope";
+@import "@fontsource-variable/jetbrains-mono";
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: #e6e9f2;
+  font-family: "Manrope Variable", system-ui, sans-serif;
+}

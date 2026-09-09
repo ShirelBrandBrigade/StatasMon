@@ -1,0 +1,33 @@
+{
+  "name": "statasmon",
+  "private": true,
+  "version": "0.1.0",
+  "description": "StatasMon: multi-device monitor for iPhone, iPad and Android on macOS and Windows",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tauri dev",
+    "dev:mock": "cross-env STATASMON_SOURCE=fake tauri dev",
+    "web": "pnpm --filter @statasmon/desktop dev",
+    "web:mock": "cross-env VITE_STATASMON_SOURCE=fake pnpm --filter @statasmon/desktop dev",
+    "build": "tauri build",
+    "tauri": "tauri",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "e2e": "pnpm --filter @statasmon/desktop e2e",
+    "protocol:gen": "cargo test -p statasmon-protocol --features ts-export export_bindings",
+    "plan": "python3 scripts/render-plan.py .plan.html"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.12",
+    "@tauri-apps/cli": "2.11.4",
+    "cross-env": "^10.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "5.0.0"
+  }
+}

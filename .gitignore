@@ -1,0 +1,15 @@
+node_modules/
+dist/
+target/
+.DS_Store
+*.log
+.env
+.env.*
+apps/desktop/dist/
+src-tauri/gen/
+src-tauri/target/
+test-results/
+playwright-report/
+coverage/
+packages/protocol/generated/*.ts
+!packages/protocol/generated/.gitkeep

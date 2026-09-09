@@ -1,0 +1,62 @@
+[workspace]
+resolver = "3"
+members = [
+  "crates/protocol",
+  "crates/core",
+  "crates/store",
+  "crates/export",
+  "crates/device",
+  "crates/device-fake",
+  "crates/device-android",
+  "crates/device-ios",
+  "crates/idmap",
+  "src-tauri",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "UNLICENSED"
+publish = false
+rust-version = "1.98"
+
+[workspace.dependencies]
+statasmon-protocol = { path = "crates/protocol" }
+statasmon-core = { path = "crates/core" }
+statasmon-store = { path = "crates/store" }
+statasmon-export = { path = "crates/export" }
+statasmon-device = { path = "crates/device" }
+statasmon-device-fake = { path = "crates/device-fake" }
+statasmon-device-android = { path = "crates/device-android" }
+statasmon-device-ios = { path = "crates/device-ios" }
+statasmon-idmap = { path = "crates/idmap" }
+
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+tokio = { version = "1.53", features = ["rt-multi-thread", "macros", "sync", "time", "process", "io-util", "net"] }
+ts-rs = { version = "12.0", features = ["serde-compat", "no-serde-warnings"] }
+thiserror = "2.0"
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+parking_lot = "0.12"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.26", features = ["v4", "serde"] }
+async-trait = "0.1"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_debug_implementations = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+unwrap_used = "warn"
+expect_used = "warn"
+dbg_macro = "warn"
+todo = "warn"
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+strip = true
+opt-level = 3

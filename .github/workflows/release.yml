@@ -1,0 +1,35 @@
+name: release
+on:
+  push: { tags: ["v*"] }
+  workflow_dispatch:
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            args: --target aarch64-apple-darwin
+          - os: macos-latest
+            args: --target x86_64-apple-darwin
+          - os: windows-latest
+            args: ""
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - uses: dtolnay/rust-toolchain@stable
+        with: { targets: aarch64-apple-darwin,x86_64-apple-darwin }
+      - uses: swatinem/rust-cache@v2
+      - run: pnpm install --frozen-lockfile
+      - uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Signing secrets are added in Phase 7 (APPLE_*, TAURI_SIGNING_*, Azure signing).
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "StatasMon ${{ github.ref_name }}"
+          releaseDraft: true
+          args: ${{ matrix.args }}

@@ -1,0 +1,32 @@
+[package]
+name = "statasmon-app"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+description = "StatasMon desktop app"
+
+[lib]
+name = "statasmon_app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.6", features = [] }
+
+[dependencies]
+tauri = { version = "2.11", features = [] }
+tauri-plugin-shell = "2.3"
+tauri-plugin-dialog = "2.7"
+tauri-plugin-fs = "2.5"
+tauri-plugin-log = "2.9"
+tauri-plugin-opener = "2.5"
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+statasmon-protocol = { workspace = true }
+statasmon-core = { workspace = true }
+
+[lints]
+workspace = true

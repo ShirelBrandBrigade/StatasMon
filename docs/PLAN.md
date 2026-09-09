@@ -1,6 +1,6 @@
 # StatasMon — development plan
 
-Status line (keep current): **Phase 0 in progress (0.1) · 2026-09-09 · plan v1.1**
+Status line (keep current): **Phase 0 in progress (0.2) · 2026-09-09 · plan v1.1**
 
 This is the working document for the lead session and every sub-agent. It
 says what we are building, what the platforms can actually provide, the
@@ -257,9 +257,9 @@ Commands (defined in Phase 0): `pnpm i`, `pnpm dev` (real devices),
 Each step: deliverable · owner role · verification. Mark done with a date.
 
 ### Phase 0 — Bootstrap (foundation everyone builds on)
-0.1 Repo, workspaces, toolchains pinned, Biome/clippy configs, CI matrix
+0.1 Repo, workspaces, toolchains pinned, Biome/clippy configs, CI matrix · done 2026-09-09
     building an empty Tauri app on macOS and Windows · release · CI green.
-0.2 `crates/protocol`: events, `MetricId` catalog with units, `DeviceInfo`
+0.2 `crates/protocol`: events, `MetricId` catalog with units, `DeviceInfo` · in progress
     document, `CapabilitySet`; `ts-rs` generation into `packages/protocol`
     · protocol · `cargo test` + generated TS compiles.
 0.3 `crates/device` trait + `crates/device-fake` (seeded generator for every
