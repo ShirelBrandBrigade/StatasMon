@@ -373,7 +373,8 @@ impl DeviceSource for AndroidSource {
             (Cadence::Slow, u64::from(cfg.slow_ms), Vec::new()),
             (Cadence::Heavy, u64::from(cfg.heavy_ms), Vec::new()),
         ];
-        for s in samplers::build(&probe) {
+        let shared = samplers::Shared::default();
+        for s in samplers::build_shared(&probe, &shared) {
             if let Some(slot) = by_cadence.iter_mut().find(|(c, _, _)| *c == s.cadence()) {
                 slot.2.push(s);
             }
@@ -398,7 +399,10 @@ impl DeviceSource for AndroidSource {
                 Arc::clone(&self.shell),
                 sink.clone(),
                 self.id.clone(),
-                LogcatConfig::default(),
+                LogcatConfig {
+                    pids: shared.pids.clone(),
+                    ..LogcatConfig::default()
+                },
                 cancel.child_token(),
             )));
         }

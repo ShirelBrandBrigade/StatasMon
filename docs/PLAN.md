@@ -303,14 +303,14 @@ Acceptance: the Overview matches AD-1 on the fake device; perf budgets met.
     proc fields, SoC name mapping) · core-android · fixtures from the
     user's Android device · done 2026-09-09.
 2.3 1 s batch sampler: `/proc/stat` per core, cpufreq, meminfo, loadavg,
-    `/proc/net/dev`; parsers with fixture tests · core-android.
+    `/proc/net/dev`; parsers with fixture tests · core-android · done 2026-09-09.
 2.4 2–5 s sampler: `dumpsys battery` + power_supply sysfs, process
     snapshot with `/proc/<pid>/stat` deltas, `cmd wifi status` ·
-    core-android.
+    core-android · done 2026-09-09.
 2.5 Slow sampler: thermalservice, netstats per UID, diskstats, meminfo PSS
-    (opt-in), foreground app · core-android.
+    (opt-in), foreground app · core-android · done 2026-09-09.
 2.6 logcat stream → `LogEntry`, `--pid` per-app filter, LMK kill and crash
-    events, dropbox crash/ANR fetch · core-android.
+    events, dropbox crash/ANR fetch · core-android · done 2026-09-09.
 2.7 Wireless pairing dialog (`adb pair`/`connect`, mDNS list) · ui + core
     · core done 2026-09-09 (`AdbHandle::pair/connect`, `DeviceAction::AdbPair/
     AdbConnect`); dialog + mDNS list pending (ui).
