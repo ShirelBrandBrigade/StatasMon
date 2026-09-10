@@ -84,7 +84,9 @@ function useElapsedMs(deviceId: string): number {
 export function RecordingCard({ deviceId }: { deviceId: string }) {
   const entry = useDevice(deviceId);
   const streamKind = useAppStore((s) => s.streamKind);
-  const count = useLogCount(deviceId);
+  // The mirror holds at most 50 000 lines; the session count keeps growing.
+  const mirrorCount = useLogCount(deviceId);
+  const count = Math.max(mirrorCount, Number(entry?.session?.log_count ?? 0));
   const elapsed = useElapsedMs(deviceId);
   const [prompting, setPrompting] = useState(false);
   const confirmMark = useCallback(

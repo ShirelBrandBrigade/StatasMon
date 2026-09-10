@@ -280,7 +280,8 @@ both OSes from CI artifacts.
 
 ### Phase 1 — Overview screen on the fake device
 1.1 App shell: sidebar with multi-device list, nav, RecordingCard, · done 2026-09-09
-    headline, range segment, export button · ui.
+    headline, range segment, export button · ui. (Header shows the device
+    name; the headline is a pill since 2026-09-10, ADR-016.)
 1.2 Metric cards: CPU (ring + core bars), Memory (ring + stack), Storage,
     Battery · ui · done 2026-09-09.
 1.3 Network card with uPlot area chart (down/up), packets, totals ·

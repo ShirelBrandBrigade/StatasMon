@@ -182,7 +182,8 @@ impl Tunnel {
     /// One line for `DeviceInfo.connection.tunnel`.
     pub fn describe(&self) -> String {
         format!(
-            "Userspace tunnel · RSD port {} · {} services",
+            "Userspace tunnel · RSD v{} port {} · {} services",
+            self.protocol_version,
             self.info.server_rsd_port,
             self.services.len()
         )

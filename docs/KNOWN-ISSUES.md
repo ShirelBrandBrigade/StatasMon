@@ -3,6 +3,22 @@
 Open items that are real but not blocking the current phase. Remove an
 entry when it is fixed; reference the commit.
 
+- **Hands-on visual QA on the live iPad, 2026-09-10** (fixed in this
+  pass, listed so the next pass re-checks them): header reflow from the
+  changing headline (ADR-016), raw `com.apple.…[pid]<…>` tokens in the
+  header, log rows, top apps, crash strip and chart marker chips, chart
+  marker chips overlapping into unreadable text on the Network chart,
+  per-core CPU labels wrapping, y-axis clipping on the temperature chart,
+  loopback/tunnel traffic counted as device throughput, 4 000 log
+  lines/s. Still to verify on a re-recorded session: every screen at
+  1180 × 720, and the Notice-level log default keeps the app under test's
+  own lines.
+- **Unit tests cannot run on the 8 GB QA Mac while the desktop app, the
+  Claude app and the browser are open**: Vitest workers are SIGKILLed by
+  the kernel (out of memory), and even `git status` stalls for minutes
+  when swap is busy. Run `pnpm --filter @statasmon/desktop exec vitest run
+  --pool=forks --maxWorkers=1 --no-file-parallelism <file>` with the dev
+  server stopped, or run the suite on CI.
 - **Dev-only console warnings on first mount** (2026-09-09, Phase 1): React
   reports a missing list key attributed to `ThermalCard` and react-virtuoso
   sets `paddingBottom: NaN` once on the log list's first paint. Neither

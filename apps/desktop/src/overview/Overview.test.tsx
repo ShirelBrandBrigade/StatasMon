@@ -18,7 +18,7 @@ beforeEach(() => {
 
 test("renders the headline and every card slot as a placeholder", () => {
   const { container } = render(<Overview />);
-  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("iPhone 16 Pro looks normal");
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Elia's iPhone");
   const slots = [...container.querySelectorAll("[data-slot]")].map((el) =>
     el.getAttribute("data-slot"),
   );

@@ -364,3 +364,34 @@ macOS and Windows, to update them, and to do both without breaking the
 Consequences: releases are reproducible from a tag; a lost private key
 means one manual reinstall for every user (documented); the draft step
 adds a human in the loop by design.
+
+## ADR-016 · 2026-09-10 · The header shows the device name; the headline is a pill
+Status: accepted. Context: hands-on QA with the live iPad showed the
+headline sentence ("iPad (10th generation): com.apple.xpc.launchd[1]<…>
+was closed…") changing several times a minute, wrapping to two lines and
+reflowing every card below it; the user asked for the device name alone
+at the top. Decisions:
+- **`TopBar` renders the device's own name** (`DeviceSummary.name`, model
+  name as fallback) as the `h1`, one fixed line with an ellipsis, and a
+  one-line subtitle `model · link` that never changes during a session.
+- **The headline becomes one pill** in the status row: a two-or-three-word
+  label per rule (`RULE_LABEL` in `TopBar.tsx`, e.g. "App crashed",
+  "Low memory", "Running hot"), toned by severity, hidden while the
+  severity is nominal. The full sentence and cause are the pill's tooltip.
+  The status row is one non-wrapping line with a minimum height, so the
+  header keeps one height whatever the device reports.
+- **Names are shortened everywhere they are displayed** (`shortName` in
+  `packages/protocol`, `display_name` in `crates/core/src/rules.rs`): the
+  `<…>` wrapper and `[pid]` suffix go, and a reverse-DNS id keeps its last
+  component. The raw identifier stays in the `title` attribute.
+- **Chart marker chips never overlap**: a chip that would collide with one
+  already drawn is skipped (its line is still drawn) and labels are cut
+  at 140 px with an ellipsis (`drawMarkers` in `TimeSeriesChart.tsx`).
+- **iOS log admission defaults to Notice at 200 lines/s** (was Info at
+  500): Notice is os_log's "Default" level, so an app's ordinary logging
+  still arrives while the ~4 000 lines/s of system Info/Debug chatter
+  does not. `STATASMON_IOS_LOG_MIN_LEVEL=info|debug` widens it.
+Consequences: the rules engine and `Headline` contract are unchanged
+(the sentence is still stored, exported and used by the sidebar dot);
+`docs/PLAN.md` 1.4 "headline sentence in the header" is superseded by
+this ADR; the Overview e2e checks the `h1` for the device name.

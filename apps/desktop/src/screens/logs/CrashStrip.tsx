@@ -1,4 +1,4 @@
-import type { StoredEvent } from "@statasmon/protocol";
+import { type StoredEvent, shortName } from "@statasmon/protocol";
 import { Button, Pill } from "@statasmon/ui";
 import { useMemo, useState } from "react";
 import { commands } from "../../bridge/commands";
@@ -85,7 +85,9 @@ export function CrashStrip({ deviceId, onShowAround }: CrashStripProps) {
                   <Pill tone={meta.tone} size="sm">
                     {meta.label}
                   </Pill>
-                  <b>{e.process ?? "unknown process"}</b>
+                  <b title={e.process ?? undefined}>
+                    {e.process ? shortName(e.process) : "unknown process"}
+                  </b>
                   {e.pid !== null ? <span className="mono">pid {e.pid}</span> : null}
                   <time className="mono">{formatClock(e.ts_ms)}</time>
                 </div>

@@ -297,7 +297,6 @@ body,
 
 .hd-text {
   min-width: 0;
-  min-width: 0;
   flex: 1;
 }
 
@@ -307,33 +306,35 @@ body,
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.15;
-  overflow-wrap: anywhere;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
   min-width: 0;
 }
 
-.hd p {
-  margin: 5px 0 0;
-  max-width: 64ch;
+.hd p.hd-sub {
+  margin: 4px 0 0;
   color: var(--mut);
   font-size: var(--fs-support);
   line-height: 1.5;
-  overflow-wrap: anywhere;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
   min-width: 0;
 }
 
+/* One row, never wraps: the header keeps one height whatever the device reports. */
 .hd-pills {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
   margin-top: 8px;
+  min-height: 22px;
+  overflow: hidden;
+}
+
+.hd-pills > li {
+  flex-shrink: 0;
 }
 
 .hd-tools {

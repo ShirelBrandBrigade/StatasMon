@@ -81,6 +81,14 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.sm-legend > span > :not(i):not(em) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sm-legend i {
@@ -136,8 +144,18 @@
 .sm-cores-labels {
   display: flex;
   justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: nowrap;
+  white-space: nowrap;
   font-size: var(--fs-axis);
   color: var(--dim);
+}
+
+.sm-cores-labels > * {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* KeyValue */
@@ -157,6 +175,10 @@
 
 .sm-kv > div > span:first-child {
   color: var(--mut);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sm-kv-value {
@@ -164,6 +186,9 @@
   align-items: center;
   gap: 6px;
   color: var(--fg);
+  white-space: nowrap;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 /* Pill */

@@ -1,4 +1,4 @@
-import { formatValue, type ProcessRow, type Unit } from "@statasmon/protocol";
+import { formatValue, type ProcessRow, shortName, type Unit } from "@statasmon/protocol";
 import { AppTile, Card } from "@statasmon/ui";
 import { useCapability, useProcesses } from "../../hooks/useDevice";
 import { DetailDash, ME_APP_ID, Subtitle } from "../../overview/cards/shared";
@@ -41,7 +41,7 @@ export function PerProcessCard({ deviceId }: { deviceId: string }) {
             return (
               <li key={r.pid} data-pid={r.pid} data-testid="net-proc-row">
                 <AppTile me={r.app_id === ME_APP_ID} label={r.app_id ?? undefined} />
-                <b title={r.app_id ?? r.name}>{r.name}</b>
+                <b title={r.app_id ?? r.name}>{shortName(r.name)}</b>
                 <span className="net-proc-pid mono">{r.pid}</span>
                 <div className="net-proc-bar" aria-hidden>
                   <i style={{ width: `${share.toFixed(2)}%` }} />

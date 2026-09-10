@@ -7,6 +7,7 @@
 //! [`BATCH_LATENCY`]), feeds each entry through [`Derive`] and reconnects
 //! with backoff while the device is still reachable.
 
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -169,12 +170,20 @@ struct StreamState {
 }
 
 /// Lines below this level are hidden unless `STATASMON_IOS_LOG_MIN_LEVEL`
-/// says otherwise (`debug` shows everything). iPadOS emits ~4 000 lines/s
-/// of Debug chatter with all pids traced; the UI keeps 50 000 lines.
-pub const DEFAULT_MIN_LEVEL: LogLevel = LogLevel::Info;
+/// says otherwise (`info` or `debug` show more). Notice is os_log's
+/// "Default" level, the one apps log at unless they opt into Info/Debug;
+/// an idle iPadOS emits ~4 000 lines/s below it with all pids traced, and
+/// the UI keeps 50 000 lines.
+pub const DEFAULT_MIN_LEVEL: LogLevel = LogLevel::Notice;
 /// Per-second cap for lines at or above the minimum level (errors and
 /// faults always pass).
-pub const MAX_LINES_PER_SECOND: u32 = 500;
+pub const MAX_LINES_PER_SECOND: u32 = 200;
+/// Per-process, per-second cap for lines below Error. On the live iPad a
+/// dozen daemons (runningboardd, lockdownd, trustd, containermanagerd…)
+/// each log 5–40 Notice lines/s of routine chatter; two a second keeps a
+/// trace of each while an app's own occasional lines are untouched.
+/// `STATASMON_IOS_LOG_PER_PROCESS=0` lifts it.
+pub const PER_PROCESS_LINES_PER_SECOND: u32 = 2;
 /// How often a summary line reports what was dropped.
 pub const DROP_REPORT_SECS: i64 = 10;
 
@@ -182,10 +191,13 @@ pub const DROP_REPORT_SECS: i64 = 10;
 #[derive(Debug)]
 struct Admission {
     min_level: LogLevel,
+    per_process: u32,
     window_sec: i64,
     window_count: u32,
+    process_counts: HashMap<String, u32>,
     dropped_low: u64,
     dropped_rate: u64,
+    dropped_process: u64,
     last_report_sec: i64,
 }
 
@@ -199,17 +211,25 @@ impl Admission {
     fn from_env() -> Self {
         let min_level = match std::env::var("STATASMON_IOS_LOG_MIN_LEVEL").as_deref() {
             Ok("debug") => LogLevel::Debug,
+            Ok("info") => LogLevel::Info,
             Ok("notice") => LogLevel::Notice,
             Ok("warning") => LogLevel::Warning,
             Ok("error") => LogLevel::Error,
             _ => DEFAULT_MIN_LEVEL,
         };
+        let per_process = std::env::var("STATASMON_IOS_LOG_PER_PROCESS")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(PER_PROCESS_LINES_PER_SECOND);
         Self {
             min_level,
+            per_process,
             window_sec: 0,
             window_count: 0,
+            process_counts: HashMap::new(),
             dropped_low: 0,
             dropped_rate: 0,
+            dropped_process: 0,
             last_report_sec: 0,
         }
     }
@@ -224,9 +244,21 @@ impl Admission {
         if sec != self.window_sec {
             self.window_sec = sec;
             self.window_count = 0;
+            self.process_counts.clear();
         }
         if entry.level >= LogLevel::Error {
             return true;
+        }
+        if self.per_process > 0 {
+            let n = self
+                .process_counts
+                .entry(entry.process.clone())
+                .or_insert(0);
+            if *n >= self.per_process {
+                self.dropped_process += 1;
+                return false;
+            }
+            *n += 1;
         }
         if self.window_count >= MAX_LINES_PER_SECOND {
             self.dropped_rate += 1;
@@ -244,20 +276,23 @@ impl Admission {
             self.last_report_sec = sec;
         }
         if sec - self.last_report_sec < DROP_REPORT_SECS
-            || (self.dropped_low == 0 && self.dropped_rate == 0)
+            || (self.dropped_low == 0 && self.dropped_rate == 0 && self.dropped_process == 0)
         {
             return None;
         }
         let msg = format!(
-            "StatasMon hid {} lines below {:?} and {} over the {}/s limit in the last {} s (set STATASMON_IOS_LOG_MIN_LEVEL=debug to keep everything)",
+            "StatasMon hid {} lines below {:?}, {} over {} lines/s per process and {} over {}/s in the last {} s (STATASMON_IOS_LOG_MIN_LEVEL=debug and STATASMON_IOS_LOG_PER_PROCESS=0 keep everything)",
             self.dropped_low,
             self.min_level,
+            self.dropped_process,
+            self.per_process,
             self.dropped_rate,
             MAX_LINES_PER_SECOND,
             sec - self.last_report_sec
         );
         self.last_report_sec = sec;
         self.dropped_low = 0;
+        self.dropped_process = 0;
         self.dropped_rate = 0;
         Some(LogEntry {
             seq,
@@ -505,6 +540,58 @@ mod tests {
         });
         let e = to_entry(1, &l);
         assert!(e.subsystem.is_none() && e.category.is_none());
+    }
+
+    #[test]
+    fn admission_caps_each_process_and_lets_errors_through() {
+        let mut a = Admission {
+            min_level: LogLevel::Notice,
+            per_process: 2,
+            window_sec: 0,
+            window_count: 0,
+            process_counts: HashMap::new(),
+            dropped_low: 0,
+            dropped_rate: 0,
+            dropped_process: 0,
+            last_report_sec: 0,
+        };
+        let entry = |process: &str, level: LogLevel, ts_ms: i64| LogEntry {
+            seq: 0,
+            ts_ms,
+            pid: None,
+            process: process.to_owned(),
+            tag: None,
+            subsystem: None,
+            category: None,
+            buffer: None,
+            level,
+            message: String::new(),
+        };
+        // Below the minimum level: hidden.
+        assert!(!a.admit(&entry("runningboardd", LogLevel::Info, 1_000)));
+        // Two Notice lines per process per second pass, the third does not.
+        assert!(a.admit(&entry("runningboardd", LogLevel::Notice, 1_000)));
+        assert!(a.admit(&entry("runningboardd", LogLevel::Notice, 1_200)));
+        assert!(!a.admit(&entry("runningboardd", LogLevel::Notice, 1_400)));
+        // Another process has its own budget; errors are never capped.
+        assert!(a.admit(&entry("FieldKit", LogLevel::Notice, 1_400)));
+        assert!(a.admit(&entry("runningboardd", LogLevel::Error, 1_500)));
+        // The next second starts fresh.
+        assert!(a.admit(&entry("runningboardd", LogLevel::Notice, 2_000)));
+        assert_eq!(
+            (a.dropped_low, a.dropped_process, a.dropped_rate),
+            (1, 1, 0)
+        );
+        // The first call only starts the reporting clock.
+        assert!(a.report(2_000, 8).is_none());
+        let report = a.report(2_000 + DROP_REPORT_SECS * 1000, 9).unwrap();
+        assert!(
+            report
+                .message
+                .contains("hid 1 lines below Notice, 1 over 2 lines/s per process")
+        );
+        assert_eq!(report.level, LogLevel::Notice);
+        assert_eq!((a.dropped_low, a.dropped_process), (0, 0));
     }
 
     #[test]

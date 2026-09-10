@@ -363,7 +363,9 @@ export function SettingsScreen() {
             Check for updates on launch (opt-in)
           </label>
           <p className="st-note">
-            When enabled, StatasMon checks once at launch and shows a notice if a newer version exists. Nothing is installed without your action.</p>
+            When enabled, StatasMon checks once at launch and shows a notice if a newer version
+            exists. Nothing is installed without your action.
+          </p>
         </Card>
 
         <Card title="About" aria-label="About" className="st-about">

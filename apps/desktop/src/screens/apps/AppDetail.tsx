@@ -1,5 +1,5 @@
 import type { LogEntry, ProcessRow } from "@statasmon/protocol";
-import { formatValue } from "@statasmon/protocol";
+import { formatValue, shortName } from "@statasmon/protocol";
 import { AppTile, Button, IconButton, Pill } from "@statasmon/ui";
 import { useMemo } from "react";
 import { Virtuoso } from "react-virtuoso";
@@ -100,7 +100,7 @@ export function AppDetail({ deviceId, row, exited, onClose, initialItemCount }: 
       <header className="ad-head">
         <AppTile me={me} label={row.app_id ?? undefined} className="ad-tile" />
         <div className="ad-title">
-          <b>{row.name}</b>
+          <b title={row.name}>{shortName(row.name)}</b>
           <span className="mono">
             {row.app_id ?? "no app id"} · pid {row.pid}
           </span>

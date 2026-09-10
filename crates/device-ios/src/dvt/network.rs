@@ -1,6 +1,6 @@
 //! `com.apple.instruments.server.services.networking` (step 4.4): the
 //! device pushes interface-detection, connection-detection (pid, addresses,
-//! interface) and connection-update (cumulative rx/tx bytes and packets,
+//! interface) and connection-update (lifetime totals once, then per-interval rx/tx bytes and packets,
 //! retransmits, RTT) events. [`NetAggregator`] folds them into per-pid
 //! throughput, the number of active connections, retransmits per window
 //! and the mean RTT the service reported (no probe of ours), flushed at
@@ -37,11 +37,12 @@ pub const MAX_RTT_MS: f64 = 10_000.0;
 struct Conn {
     pid: u32,
     interface: u32,
-    rx_bytes: Option<u64>,
-    tx_bytes: Option<u64>,
-    rx_packets: Option<u64>,
-    tx_packets: Option<u64>,
-    tx_retx: Option<u64>,
+    /// The first update after detection carries the connection's lifetime
+    /// totals; every later one carries the bytes, packets and retransmits
+    /// of the interval since the previous update (recorded from the iPad
+    /// in `fixtures/ios/dvt/iPad13,18-17.4.1/networking_events.plist`:
+    /// serial 296 reports 3 012 273 rx bytes, then 260, 63, 71, 71…).
+    baselined: bool,
     last_update_ms: i64,
 }
 
@@ -206,11 +207,7 @@ impl NetAggregator {
                     Conn {
                         pid: c.pid,
                         interface: c.interface_index,
-                        rx_bytes: None,
-                        tx_bytes: None,
-                        rx_packets: None,
-                        tx_packets: None,
-                        tx_retx: None,
+                        baselined: false,
                         last_update_ms: now_ms,
                     },
                 );
@@ -220,21 +217,25 @@ impl NetAggregator {
                     self.orphans += 1;
                     return;
                 };
-                let d_rx = conn.rx_bytes.map_or(0, |p| u.rx_bytes.saturating_sub(p));
-                let d_tx = conn.tx_bytes.map_or(0, |p| u.tx_bytes.saturating_sub(p));
-                let d_rxp = conn
-                    .rx_packets
-                    .map_or(0, |p| u.rx_packets.saturating_sub(p));
-                let d_txp = conn
-                    .tx_packets
-                    .map_or(0, |p| u.tx_packets.saturating_sub(p));
-                let d_retx = conn.tx_retx.map_or(0, |p| u.tx_retx.saturating_sub(p));
-                conn.rx_bytes = Some(u.rx_bytes);
-                conn.tx_bytes = Some(u.tx_bytes);
-                conn.rx_packets = Some(u.rx_packets);
-                conn.tx_packets = Some(u.tx_packets);
-                conn.tx_retx = Some(u.tx_retx);
                 conn.last_update_ms = now_ms;
+                if !conn.baselined {
+                    // Lifetime totals of a connection that may predate the
+                    // session: not this window's traffic.
+                    conn.baselined = true;
+                    let rtt = u.avg_rtt as f64 / RTT_DIVISOR;
+                    if rtt > 0.0 && rtt < MAX_RTT_MS {
+                        self.rtt_sum += rtt;
+                        self.rtt_n += 1;
+                    }
+                    return;
+                }
+                let (d_rx, d_tx, d_rxp, d_txp, d_retx) = (
+                    u.rx_bytes,
+                    u.tx_bytes,
+                    u.rx_packets,
+                    u.tx_packets,
+                    u.tx_retx,
+                );
                 let (pid, iface) = (conn.pid, conn.interface);
                 *self.pid_bytes.entry(pid).or_insert(0) += d_rx + d_tx;
                 if self.is_real(iface) {
@@ -355,6 +356,7 @@ pub async fn run(
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
     use idevice::dvt::network_monitor::{
@@ -402,11 +404,11 @@ mod tests {
         );
         agg.on_event(&detect(1, 100), 0);
         agg.on_event(&detect(2, 200), 0);
-        // First updates establish the baseline: no bytes attributed yet.
+        // First updates carry lifetime totals: nothing attributed yet.
         agg.on_event(&update(1, 1000, 500, 2, 20), 100);
         agg.on_event(&update(2, 0, 0, 0, 0), 100);
-        // Second updates carry deltas.
-        agg.on_event(&update(1, 3000, 1500, 5, 30), 900);
+        // Later updates carry the interval's bytes as they are.
+        agg.on_event(&update(1, 2000, 1000, 3, 30), 900);
         agg.on_event(&update(2, 4000, 0, 0, 10), 900);
         // Unknown serial: counted, not attributed.
         agg.on_event(&update(9, 10, 10, 1, 1), 900);
@@ -415,6 +417,9 @@ mod tests {
         assert_eq!(s.pid_bps.get(&200).copied(), Some(4000.0 * 8.0 / 2.0));
         assert_eq!(s.connections, 2);
         assert_eq!(s.retransmits, 3);
+        let dev = s.device.as_ref().unwrap();
+        assert_eq!(dev.rx_bps, 6000.0 * 8.0 / 2.0);
+        assert_eq!(dev.rx_total, 6000);
         // RTTs reported: 20, 30, 10 (zeros ignored).
         assert_eq!(s.latency_ms, Some(20.0));
         assert_eq!(s.interfaces.get(&1).map(String::as_str), Some("en0"));
@@ -431,7 +436,14 @@ mod tests {
         assert!(s2.pid_bps.is_empty());
         assert_eq!(s2.retransmits, 0);
         assert_eq!(s2.latency_ms, None);
-        assert_eq!(s2.metrics().len(), 2);
+        // Connections + retransmits, plus the six device-traffic values (all
+        // zero rates now) because en0 is a real interface.
+        assert_eq!(s2.metrics().len(), 8);
+        assert!(
+            s2.metrics()
+                .iter()
+                .any(|v| v.id == MetricId::NetRxBps && v.value == 0.0)
+        );
         assert_eq!(s2.connections, 2);
         // Idle connections leave the active count, then are forgotten.
         let s3 = agg.flush(900 + ACTIVE_WINDOW_MS + 1);

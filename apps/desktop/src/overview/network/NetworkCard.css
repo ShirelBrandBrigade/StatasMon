@@ -1,8 +1,10 @@
 /* NetworkCard layout (docs/design-reference: the Network card). Tokens only. */
 
+/* Figures never break inside; in a narrow card the side counters drop to a second line, still right-aligned. */
 .sm-net-figures {
   display: flex;
-  gap: 22px;
+  flex-wrap: wrap;
+  gap: 8px 22px;
   align-items: flex-start;
 }
 
@@ -10,6 +12,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  white-space: nowrap;
 }
 
 .sm-net-figure > .sm-figure-caption {

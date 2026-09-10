@@ -1,4 +1,4 @@
-import type { LogEntry } from "@statasmon/protocol";
+import { type LogEntry, shortName } from "@statasmon/protocol";
 import { AppTile, cx, LevelPill } from "@statasmon/ui";
 import { memo } from "react";
 import { formatClock, isAppUnderTest } from "./format";
@@ -32,8 +32,11 @@ export const LogRow = memo(function LogRow({ entry, alt, selected, onToggle }: L
     >
       <AppTile me={isAppUnderTest(entry)} />
       <span className="log-time mono">{formatClock(entry.ts_ms)}</span>
-      <span className="log-proc" title={entry.subsystem ?? entry.tag ?? undefined}>
-        {entry.process}
+      <span
+        className="log-proc"
+        title={[entry.process, entry.subsystem ?? entry.tag].filter(Boolean).join(" · ")}
+      >
+        {shortName(entry.process)}
       </span>
       <LevelPill level={entry.level} />
       <span className="log-msg mono" title={entry.message}>

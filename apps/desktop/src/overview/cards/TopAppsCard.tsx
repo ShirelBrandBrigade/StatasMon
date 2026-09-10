@@ -1,5 +1,5 @@
 import type { ProcessRow } from "@statasmon/protocol";
-import { formatValue } from "@statasmon/protocol";
+import { formatValue, shortName } from "@statasmon/protocol";
 import { AppTile, Card, Dash } from "@statasmon/ui";
 import { useCapability, useLatest, useProcesses } from "../../hooks/useDevice";
 import { COUNT, capabilityReason, DetailDash, ME_APP_ID, PERCENT, Subtitle } from "./shared";
@@ -45,7 +45,7 @@ export function TopAppsCard({ deviceId }: { deviceId: string }) {
             return (
               <li key={r.pid} data-pid={r.pid}>
                 <AppTile me={r.app_id === ME_APP_ID} label={r.app_id ?? undefined} />
-                <b>{r.name}</b>
+                <b title={r.app_id ?? r.name}>{shortName(r.name)}</b>
                 <div className="ov-bar" aria-hidden>
                   <i style={{ width: `${share.toFixed(2)}%` }} />
                 </div>

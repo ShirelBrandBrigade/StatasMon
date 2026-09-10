@@ -1,5 +1,5 @@
 import type { ProcessRow } from "@statasmon/protocol";
-import { formatValue } from "@statasmon/protocol";
+import { formatValue, shortName } from "@statasmon/protocol";
 import { AppTile, cx, Dash, Pill } from "@statasmon/ui";
 import { type CSSProperties, memo } from "react";
 import { isAppUnderTest, maxCpu, type SortKey, type SortSpec } from "./processModel";
@@ -83,7 +83,7 @@ const ProcessRowView = memo(function ProcessRowView({
     >
       <td className="pt-app">
         <AppTile me={me || pinned} label={row.app_id ?? undefined} />
-        <b>{row.name}</b>
+        <b title={row.name}>{shortName(row.name)}</b>
       </td>
       <td className="pt-id mono">
         {row.app_id ?? <Dash reason="System process without an app id" />}

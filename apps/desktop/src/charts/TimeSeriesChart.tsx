@@ -72,6 +72,8 @@ export const MAX_MARKERS = 12;
 /** Cursor distance (CSS px) within which the tooltip names the nearest marker. */
 const MARKER_TIP_PX = 6;
 const MARKER_CHIP_PAD = 4;
+/** Widest label chip (CSS px) before the text is cut with an ellipsis. */
+const MARKER_CHIP_MAX_W = 140;
 const MARKER_CHIP_H = 14;
 const MARKER_CHIP_RADIUS = 4;
 const MARKER_CHIP_ALPHA = 0.18;
@@ -196,6 +198,19 @@ function roundedRect(
  * at the top (mono, `--fs-axis`), flipped to the left of the line when it
  * would leave the plot. Colors are the tone tokens resolved at mount.
  */
+/** `text` cut with an ellipsis so it measures at most `maxW` px in the current font. */
+function fitText(ctx: CanvasRenderingContext2D, text: string, maxW: number): string {
+  if (ctx.measureText(text).width <= maxW) return text;
+  let lo = 0;
+  let hi = text.length;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (ctx.measureText(`${text.slice(0, mid)}…`).width <= maxW) lo = mid;
+    else hi = mid - 1;
+  }
+  return lo === 0 ? "…" : `${text.slice(0, lo).trimEnd()}…`;
+}
+
 function drawMarkers(
   u: uPlot,
   markers: readonly ChartMarker[],
@@ -214,21 +229,28 @@ function drawMarkers(
   ctx.font = font;
   ctx.textBaseline = "middle";
   ctx.textAlign = "left";
+  const maxTextW = MARKER_CHIP_MAX_W * pr;
+  // Chips already drawn, as [x0, x1] spans: a chip that would overlap one of
+  // them is not drawn (its line still is), so clustered events stay legible.
+  const taken: Array<[number, number]> = [];
   for (const m of shown) {
     const x = Math.round(u.valToPos(m.tsMs / 1000, "x", true));
     if (!Number.isFinite(x)) continue;
     const color = tones[m.tone];
     ctx.fillStyle = color;
     ctx.fillRect(x, top, Math.max(1, Math.round(pr)), height);
-    const textW = ctx.measureText(m.label).width;
+    const label = fitText(ctx, m.label, maxTextW);
+    const textW = ctx.measureText(label).width;
     const w = textW + MARKER_CHIP_PAD * 2 * pr;
     const h = MARKER_CHIP_H * pr;
     const cx = x + w > left + width ? x - w - pr : x + pr;
+    if (taken.some(([a, b]) => cx < b + pr && cx + w > a - pr)) continue;
+    taken.push([cx, cx + w]);
     roundedRect(ctx, cx, top, w, h, MARKER_CHIP_RADIUS * pr);
     ctx.fillStyle = withAlpha(color, MARKER_CHIP_ALPHA);
     ctx.fill();
     ctx.fillStyle = color;
-    ctx.fillText(m.label, cx + MARKER_CHIP_PAD * pr, top + h / 2);
+    ctx.fillText(label, cx + MARKER_CHIP_PAD * pr, top + h / 2);
   }
   ctx.restore();
 }
@@ -366,12 +388,14 @@ function buildOptions(
         border: noLine,
         grid: gridLine,
         values: (_u, splits) => splits.map((v) => fmt(v)),
-        size: (u, values, _axisIdx, cycleNum) => {
-          if (cycleNum > 1 || !values || values.length === 0) return ySize;
+        size: (u, values) => {
+          // Measure every layout pass: the first pass sees short placeholder
+          // splits, and a cached width clipped "33.4 °C" to "3.4 °C".
+          if (!values || values.length === 0) return ySize;
           u.ctx.font = theme.font;
           let w = 0;
           for (const v of values) w = Math.max(w, u.ctx.measureText(String(v)).width);
-          ySize = Math.max(Y_AXIS_MIN_SIZE, Math.ceil(w) + Y_AXIS_GAP + 2);
+          ySize = Math.max(ySize, Y_AXIS_MIN_SIZE, Math.ceil(w) + Y_AXIS_GAP + 8);
           return ySize;
         },
       },

@@ -10,7 +10,7 @@ import { useMultiSeriesData } from "./useMultiSeries";
 export const SERIES_ORDER: readonly Series[] = ["cyan", "vio", "mint", "amber", "other"];
 
 export const CHART_HEIGHT = 150;
-export const SMALL_CHART_HEIGHT = 70;
+export const SMALL_CHART_HEIGHT = 96;
 
 export interface ChartMetric {
   id: MetricId;

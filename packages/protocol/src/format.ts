@@ -75,3 +75,24 @@ export function formatValue(
       return `${Number.isInteger(value) ? value : value.toFixed(1)}${unitSuffix(meta.unit)}`;
   }
 }
+
+/**
+ * A short display name for a process or app id: strips iOS log wrappers
+ * (`[osservice<com.apple.Foo>:268]` → `Foo`), keeps the last component of a
+ * reverse-DNS id (`com.example.fieldkit` → `fieldkit`) and leaves plain
+ * names alone. Show the full name in a tooltip where it matters.
+ */
+export function shortName(raw: string | null | undefined): string {
+  if (!raw) return "";
+  let s = raw.trim();
+  const lt = s.indexOf("<");
+  if (lt >= 0) s = s.slice(lt + 1);
+  const end = s.search(/[>(\]]/);
+  if (end >= 0) s = s.slice(0, end);
+  s = s.trim();
+  if (s.includes(".") && !s.includes(" ")) {
+    const last = s.split(".").filter(Boolean).pop();
+    if (last) s = last;
+  }
+  return s || raw;
+}

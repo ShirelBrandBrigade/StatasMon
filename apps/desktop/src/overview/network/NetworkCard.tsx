@@ -4,6 +4,7 @@ import {
   formatValue,
   type Mark,
   type StoredEvent,
+  shortName,
   type Unit,
   unitSuffix,
 } from "@statasmon/protocol";
@@ -62,7 +63,11 @@ export function chartMarkers(
     const tone = EVENT_TONE[e.kind];
     if (!tone) continue;
     const label = e.kind === "mark" ? e.detail : (EVENT_LABEL[e.kind] ?? e.kind);
-    out.push({ tsMs: e.ts_ms, label: e.process ? `${label} · ${e.process}` : label, tone });
+    out.push({
+      tsMs: e.ts_ms,
+      label: e.process ? `${label} · ${shortName(e.process)}` : label,
+      tone,
+    });
   }
   return out.sort((a, b) => a.tsMs - b.tsMs);
 }
@@ -122,8 +127,16 @@ export function NetworkCard({ deviceId }: { deviceId: string }) {
 
   const subtitle = (
     <span data-testid="net-subtitle">
-      Wi-Fi · {rssi === undefined ? <Dash reason={why(wifi)} /> : minus(formatValue(DBM, rssi))} ·{" "}
-      {latency === undefined ? <Dash reason={why(throughput)} /> : formatValue(MS, latency)}
+      {rssi === undefined && latency === undefined ? (
+        <>
+          Interface details <Dash reason={why(wifi)} />
+        </>
+      ) : (
+        <>
+          Wi-Fi · {rssi === undefined ? <Dash reason={why(wifi)} /> : minus(formatValue(DBM, rssi))}{" "}
+          · {latency === undefined ? <Dash reason={why(throughput)} /> : formatValue(MS, latency)}
+        </>
+      )}
       {data.loadingHistory ? <span data-testid="net-history-note"> · loading history…</span> : null}
     </span>
   );
