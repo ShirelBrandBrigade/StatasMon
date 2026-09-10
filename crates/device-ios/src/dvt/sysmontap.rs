@@ -16,7 +16,8 @@
 //! - `vm*Count` attributes are pages (`vmPageSize`, else 16 KiB on Apple
 //!   silicon); `physMemSize` and `net*`/`disk*` are bytes/packets, cumulative
 //!   since boot.
-//! - process `cpuUsage` is a fraction of one core (1.0 = one core busy),
+//! - process `cpuUsage` is a percentage of one core (100 = one core busy;
+//!   the rows sum to `SystemCPUUsage.CPU_TotalLoad`),
 //!   reported ×100 in the `top` convention of ADR-010; `physFootprint` and
 //!   `memResidentSize` are bytes.
 
@@ -207,6 +208,10 @@ pub struct SysmonMessage {
     /// `Processes`: pid (as a string) → values aligned with `Attrs::process`.
     pub processes: Option<Dictionary>,
     pub end_mach_abs_time: Option<u64>,
+    /// `ProcessesAttributes`: the device's value order (first message only).
+    pub process_attrs: Option<Vec<String>>,
+    /// `SystemAttributes`: the device's value order (first message only).
+    pub system_attrs: Option<Vec<String>>,
 }
 
 impl SysmonMessage {
@@ -248,6 +253,20 @@ pub fn collect(data: &Value) -> SysmonMessage {
         if let Some(v) = get_uint(row, "EndMachAbsTime") {
             out.end_mach_abs_time = Some(v);
         }
+        for (key, slot) in [
+            ("ProcessesAttributes", &mut out.process_attrs),
+            ("SystemAttributes", &mut out.system_attrs),
+        ] {
+            if let Some(v) = row.get(key).and_then(Value::as_array) {
+                let names: Vec<String> = v
+                    .iter()
+                    .filter_map(|x| x.as_string().map(str::to_owned))
+                    .collect();
+                if !names.is_empty() {
+                    *slot = Some(names);
+                }
+            }
+        }
     }
     out
 }
@@ -280,6 +299,9 @@ pub struct SysmonState {
     prev: Option<Counters>,
     base: Option<Counters>,
     last_processes_ms: Option<i64>,
+    /// Attribute orders announced by the device (later messages omit them).
+    process_attrs: Option<Vec<String>>,
+    system_attrs: Option<Vec<String>>,
 }
 
 /// What the other loops contribute to one tick.
@@ -346,6 +368,21 @@ pub fn parse_tick(
     ts_ms: i64,
     ctx: &TickContext,
 ) -> SysmonTick {
+    if let Some(a) = &msg.process_attrs {
+        state.process_attrs = Some(a.clone());
+    }
+    if let Some(a) = &msg.system_attrs {
+        state.system_attrs = Some(a.clone());
+    }
+    // The device's announced order wins over the requested one.
+    let mut effective = attrs.clone();
+    if let Some(a) = &state.process_attrs {
+        effective.process = a.clone();
+    }
+    if let Some(a) = &state.system_attrs {
+        effective.system = a.clone();
+    }
+    let attrs = &effective;
     let sys = system_map(attrs, msg);
     let mut samples = Vec::new();
     let mut push = |id: MetricId, value: f64| {
@@ -371,25 +408,33 @@ pub fn parse_tick(
                 .collect()
         })
         .unwrap_or_default();
+    // `SystemCPUUsage` loads are summed over all cores (600 = six cores
+    // busy) and negative when unavailable; the UI wants 0–100 of the whole.
     let cpu = msg.system_cpu.as_ref();
-    let total = cpu
-        .and_then(|d| pct(get_num(d, "CPU_TotalLoad")))
-        .or_else(|| pct(first_num(&sys, &["CPU_TotalLoad"])))
+    let n_cores = per_cpu
+        .len()
+        .max(
+            msg.cpu_count
+                .and_then(|c| usize::try_from(c).ok())
+                .unwrap_or(0),
+        )
+        .max(1) as f64;
+    let whole = |v: Option<f64>| pct(v.filter(|x| *x >= 0.0).map(|x| x / n_cores));
+    let total = whole(cpu.and_then(|d| get_num(d, "CPU_TotalLoad")))
+        .or_else(|| whole(first_num(&sys, &["CPU_TotalLoad"])))
         .or_else(|| {
             (!per_cpu.is_empty()).then(|| per_cpu.iter().sum::<f64>() / per_cpu.len() as f64)
         });
     if let Some(t) = total {
         push(MetricId::CpuTotal, t);
     }
-    if let Some(u) = cpu
-        .and_then(|d| pct(get_num(d, "CPU_UserLoad")))
-        .or_else(|| pct(first_num(&sys, &["CPU_UserLoad"])))
+    if let Some(u) = whole(cpu.and_then(|d| get_num(d, "CPU_UserLoad")))
+        .or_else(|| whole(first_num(&sys, &["CPU_UserLoad"])))
     {
         push(MetricId::CpuUser, u);
     }
-    if let Some(s) = cpu
-        .and_then(|d| pct(get_num(d, "CPU_SystemLoad")))
-        .or_else(|| pct(first_num(&sys, &["CPU_SystemLoad"])))
+    if let Some(s) = whole(cpu.and_then(|d| get_num(d, "CPU_SystemLoad")))
+        .or_else(|| whole(first_num(&sys, &["CPU_SystemLoad"])))
     {
         push(MetricId::CpuSystem, s);
     }
@@ -411,7 +456,15 @@ pub fn parse_tick(
         .filter(|p| *p >= 4096)
         .unwrap_or(DEFAULT_PAGE_SIZE);
     let pages = |keys: &[&str]| first_uint(&sys, keys).map(|p| p.saturating_mul(page));
-    let ram_total = first_uint(&sys, &["physMemSize"]).filter(|b| *b >= (1 << 28));
+    // `physMemSize` is a page count on iOS (244 748 × 16 KiB = 4 GB); a value
+    // above 256 MiB is taken as bytes for devices that report it that way.
+    let ram_total = first_uint(&sys, &["physMemSize"]).map(|v| {
+        if v >= (1 << 28) {
+            v
+        } else {
+            v.saturating_mul(page)
+        }
+    });
     let total_mem = ctx.ram_total.or(ram_total);
     let free = pages(&["vmFreeCount"]).or_else(|| first_uint(&sys, &["PhysicalMemoryFree"]));
     let wired = pages(&["vmWireCount"]).or_else(|| first_uint(&sys, &["PhysicalMemoryWired"]));
@@ -559,7 +612,7 @@ pub fn parse_processes(
         let cpu_pct = at(i_cpu)
             .and_then(num)
             .filter(|c| c.is_finite() && *c >= 0.0)
-            .map(|c| (c * 100.0) as f32);
+            .map(|c| c as f32);
         let mem_bytes = at(i_foot)
             .and_then(uint)
             .filter(|b| *b > 0)

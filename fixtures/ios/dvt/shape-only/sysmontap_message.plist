@@ -3,36 +3,107 @@
 <plist version="1.0">
 <array>
 	<dict>
-		<key>Type</key>
-		<integer>41</integer>
-		<key>StartMachAbsTime</key>
-		<integer>1234567890000</integer>
-		<key>EndMachAbsTime</key>
-		<integer>1234591890000</integer>
 		<key>CPUCount</key>
 		<integer>6</integer>
 		<key>EnabledCPUs</key>
 		<integer>6</integer>
-		<key>SystemCPUUsage</key>
-		<dict>
-			<key>CPU_NiceLoad</key>
-			<real>0.0</real>
-			<key>CPU_SystemLoad</key>
-			<real>-1.0</real>
-			<key>CPU_TotalLoad</key>
-			<real>12.4</real>
-			<key>CPU_UserLoad</key>
-			<real>-1.0</real>
-		</dict>
+		<key>EndMachAbsTime</key>
+		<integer>1234591890000</integer>
 		<key>PerCPUUsage</key>
 		<array>
-			<dict><key>CPU_NiceLoad</key><real>0.0</real><key>CPU_SystemLoad</key><real>-1.0</real><key>CPU_TotalLoad</key><real>3.5</real><key>CPU_UserLoad</key><real>-1.0</real></dict>
-			<dict><key>CPU_NiceLoad</key><real>0.0</real><key>CPU_SystemLoad</key><real>-1.0</real><key>CPU_TotalLoad</key><real>2.0</real><key>CPU_UserLoad</key><real>-1.0</real></dict>
-			<dict><key>CPU_NiceLoad</key><real>0.0</real><key>CPU_SystemLoad</key><real>-1.0</real><key>CPU_TotalLoad</key><real>1.0</real><key>CPU_UserLoad</key><real>-1.0</real></dict>
-			<dict><key>CPU_NiceLoad</key><real>0.0</real><key>CPU_SystemLoad</key><real>-1.0</real><key>CPU_TotalLoad</key><real>0.5</real><key>CPU_UserLoad</key><real>-1.0</real></dict>
-			<dict><key>CPU_NiceLoad</key><real>0.0</real><key>CPU_SystemLoad</key><real>-1.0</real><key>CPU_TotalLoad</key><real>40.0</real><key>CPU_UserLoad</key><real>-1.0</real></dict>
-			<dict><key>CPU_NiceLoad</key><real>0.0</real><key>CPU_SystemLoad</key><real>-1.0</real><key>CPU_TotalLoad</key><real>27.4</real><key>CPU_UserLoad</key><real>-1.0</real></dict>
+			<dict>
+				<key>CPU_NiceLoad</key>
+				<real>0.0</real>
+				<key>CPU_SystemLoad</key>
+				<real>-1.0</real>
+				<key>CPU_TotalLoad</key>
+				<real>3.5</real>
+				<key>CPU_UserLoad</key>
+				<real>-1.0</real>
+			</dict>
+			<dict>
+				<key>CPU_NiceLoad</key>
+				<real>0.0</real>
+				<key>CPU_SystemLoad</key>
+				<real>-1.0</real>
+				<key>CPU_TotalLoad</key>
+				<real>2.0</real>
+				<key>CPU_UserLoad</key>
+				<real>-1.0</real>
+			</dict>
+			<dict>
+				<key>CPU_NiceLoad</key>
+				<real>0.0</real>
+				<key>CPU_SystemLoad</key>
+				<real>-1.0</real>
+				<key>CPU_TotalLoad</key>
+				<real>1.0</real>
+				<key>CPU_UserLoad</key>
+				<real>-1.0</real>
+			</dict>
+			<dict>
+				<key>CPU_NiceLoad</key>
+				<real>0.0</real>
+				<key>CPU_SystemLoad</key>
+				<real>-1.0</real>
+				<key>CPU_TotalLoad</key>
+				<real>0.5</real>
+				<key>CPU_UserLoad</key>
+				<real>-1.0</real>
+			</dict>
+			<dict>
+				<key>CPU_NiceLoad</key>
+				<real>0.0</real>
+				<key>CPU_SystemLoad</key>
+				<real>-1.0</real>
+				<key>CPU_TotalLoad</key>
+				<real>40.0</real>
+				<key>CPU_UserLoad</key>
+				<real>-1.0</real>
+			</dict>
+			<dict>
+				<key>CPU_NiceLoad</key>
+				<real>0.0</real>
+				<key>CPU_SystemLoad</key>
+				<real>-1.0</real>
+				<key>CPU_TotalLoad</key>
+				<real>27.4</real>
+				<key>CPU_UserLoad</key>
+				<real>-1.0</real>
+			</dict>
 		</array>
+		<key>Processes</key>
+		<dict>
+			<key>0</key>
+			<array>
+				<integer>0</integer>
+				<string>kernel_task</string>
+				<real>5.0</real>
+				<integer>0</integer>
+				<integer>52428800</integer>
+				<integer>250</integer>
+			</array>
+			<key>1</key>
+			<array>
+				<integer>1</integer>
+				<string>launchd</string>
+				<real>0.1</real>
+				<integer>4194304</integer>
+				<integer>3145728</integer>
+				<integer>4</integer>
+			</array>
+			<key>4412</key>
+			<array>
+				<integer>4412</integer>
+				<string>FieldKit</string>
+				<real>35.0</real>
+				<integer>157286400</integer>
+				<integer>120000000</integer>
+				<integer>22</integer>
+			</array>
+		</dict>
+		<key>StartMachAbsTime</key>
+		<integer>1234567890000</integer>
 		<key>System</key>
 		<array>
 			<integer>4294967296</integer>
@@ -50,36 +121,19 @@
 			<integer>800</integer>
 			<integer>5000000</integer>
 		</array>
-		<key>Processes</key>
+		<key>SystemCPUUsage</key>
 		<dict>
-			<key>0</key>
-			<array>
-				<integer>0</integer>
-				<string>kernel_task</string>
-				<real>0.05</real>
-				<integer>0</integer>
-				<integer>52428800</integer>
-				<integer>250</integer>
-			</array>
-			<key>1</key>
-			<array>
-				<integer>1</integer>
-				<string>launchd</string>
-				<real>0.001</real>
-				<integer>4194304</integer>
-				<integer>3145728</integer>
-				<integer>4</integer>
-			</array>
-			<key>4412</key>
-			<array>
-				<integer>4412</integer>
-				<string>FieldKit</string>
-				<real>0.35</real>
-				<integer>157286400</integer>
-				<integer>120000000</integer>
-				<integer>22</integer>
-			</array>
+			<key>CPU_NiceLoad</key>
+			<real>0.0</real>
+			<key>CPU_SystemLoad</key>
+			<real>-1.0</real>
+			<key>CPU_TotalLoad</key>
+			<real>74.4</real>
+			<key>CPU_UserLoad</key>
+			<real>-1.0</real>
 		</dict>
+		<key>Type</key>
+		<integer>41</integer>
 	</dict>
 </array>
 </plist>

@@ -33,7 +33,7 @@ const CAPTURE: Duration = Duration::from_secs(10);
 fn write(dir: &std::path::Path, name: &str, v: &Value) {
     let path = dir.join(name);
     let f = std::fs::File::create(&path).unwrap();
-    plist::to_writer_xml(f, v).unwrap();
+    plist::to_writer_binary(f, v).unwrap();
     println!("wrote {}", path.display());
 }
 

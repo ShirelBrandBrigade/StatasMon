@@ -113,7 +113,7 @@ fn shape_only_message_parses_to_samples_cores_and_processes() {
     assert_eq!(value(&tick.samples, MetricId::DiskWriteBps), None);
     assert_eq!(value(&tick.samples, MetricId::ProcCount), Some(3.0));
 
-    // Processes: sorted by CPU, ×100 of the fraction, footprint as memory,
+    // Processes: sorted by CPU (percent of one core as reported), footprint as memory,
     // per-pid network and energy joined from the shared state.
     let rows = tick.processes.expect("table due on the first tick");
     assert_eq!(rows.len(), 3);

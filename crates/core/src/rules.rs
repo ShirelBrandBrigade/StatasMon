@@ -151,7 +151,11 @@ pub fn evaluate(input: &RulesInput<'_>) -> Headline {
             rule,
         )
     } else if let Some(e) = mem_event {
-        let who = e.process.clone().unwrap_or_else(|| "an app".to_owned());
+        let who = e
+            .process
+            .as_deref()
+            .map(display_name)
+            .unwrap_or_else(|| "an app".to_owned());
         let sentence = match e.kind {
             EventKind::MemoryWarning => {
                 format!("{who} got a memory warning {}", ago(input.now_ms, e.ts_ms))
@@ -334,11 +338,56 @@ fn pills(
     out
 }
 
+/// A short, human name for a process token as iOS logs print it:
+/// `[osservice<com.apple.AppSSODaemon>:268]` → `AppSSODaemon`,
+/// `xpcservice<com.apple.MTLCompilerService([osservice<…>:412])>:5123` →
+/// `MTLCompilerService`, `com.example.fieldkit` → `fieldkit`, plain names
+/// unchanged. Never longer than 40 characters.
+pub fn display_name(raw: &str) -> String {
+    let mut s = raw.trim();
+    // iOS log tokens: `[osservice<com.apple.AppSSODaemon>:268]`,
+    // `xpcservice<com.apple.MTLCompilerService([osservice<…>:412])>:5123`.
+    if let Some(i) = s.find('<') {
+        s = &s[i + 1..];
+    }
+    let end = s.find(['>', '(', ']']).unwrap_or(s.len());
+    s = s[..end].trim();
+    if s.is_empty() {
+        return "an app".to_owned();
+    }
+    if s.chars().count() > 40 {
+        let cut: String = s.chars().take(39).collect();
+        format!("{cut}…")
+    } else {
+        s.to_owned()
+    }
+}
+
 #[cfg(test)]
 #[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
     use statasmon_protocol::Availability;
+
+    #[test]
+    fn display_name_shortens_ios_process_tokens() {
+        assert_eq!(
+            super::display_name("[osservice<com.apple.AppSSODaemon>:268]"),
+            "com.apple.AppSSODaemon"
+        );
+        assert_eq!(
+            super::display_name(
+                "xpcservice<com.apple.MTLCompilerService([osservice<com.apple.x>:412])>:5123"
+            ),
+            "com.apple.MTLCompilerService"
+        );
+        assert_eq!(
+            super::display_name("com.example.fieldkit"),
+            "com.example.fieldkit"
+        );
+        assert_eq!(super::display_name("SpringBoard"), "SpringBoard");
+        assert_eq!(super::display_name(""), "an app");
+    }
 
     fn mv(id: MetricId, value: f64) -> MetricValue {
         MetricValue { id, value }

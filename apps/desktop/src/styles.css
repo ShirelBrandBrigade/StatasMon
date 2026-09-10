@@ -297,6 +297,8 @@ body,
 
 .hd-text {
   min-width: 0;
+  min-width: 0;
+  flex: 1;
 }
 
 .hd h1 {
@@ -305,6 +307,12 @@ body,
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.15;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .hd p {
@@ -313,6 +321,12 @@ body,
   color: var(--mut);
   font-size: var(--fs-support);
   line-height: 1.5;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .hd-pills {
