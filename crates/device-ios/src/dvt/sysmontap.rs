@@ -313,6 +313,8 @@ pub struct TickContext {
     pub energy: HashMap<u32, String>,
     /// Emit the process table when at least this long has passed.
     pub process_period: Duration,
+    /// Skip `net.*` (the networking service reports them without loopback).
+    pub suppress_net: bool,
 }
 
 /// One tick's output.
@@ -385,8 +387,18 @@ pub fn parse_tick(
     let attrs = &effective;
     let sys = system_map(attrs, msg);
     let mut samples = Vec::new();
+    let suppress_net = ctx.suppress_net;
     let mut push = |id: MetricId, value: f64| {
-        if value.is_finite() {
+        let is_net = matches!(
+            id,
+            MetricId::NetRxBps
+                | MetricId::NetTxBps
+                | MetricId::NetRxPps
+                | MetricId::NetTxPps
+                | MetricId::NetRxTotal
+                | MetricId::NetTxTotal
+        );
+        if value.is_finite() && !(suppress_net && is_net) {
             samples.push(MetricValue { id, value });
         }
     };
@@ -742,6 +754,7 @@ pub async fn run(
                 pid_net_bps: s.pid_net_bps.clone(),
                 energy: s.energy.clone(),
                 process_period: medium,
+                suppress_net: s.net_from_networking,
             }
         };
         let tick = parse_tick(&parsed, &attrs, &mut state, ts, &ctx);

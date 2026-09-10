@@ -33,6 +33,10 @@ pub struct Tier2Shared {
     pub layout: Option<CoreLayout>,
     /// Top pids by CPU from the last sysmontap tick (energy sampling set).
     pub top_pids: Vec<u32>,
+    /// The networking service has produced device-level rates over real
+    /// interfaces; sysmontap's device-wide counters (which include
+    /// loopback and the developer tunnel) are then not emitted.
+    pub net_from_networking: bool,
 }
 
 /// Shared handle.

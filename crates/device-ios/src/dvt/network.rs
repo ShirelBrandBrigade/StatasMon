@@ -39,8 +39,27 @@ struct Conn {
     interface: u32,
     rx_bytes: Option<u64>,
     tx_bytes: Option<u64>,
+    rx_packets: Option<u64>,
+    tx_packets: Option<u64>,
     tx_retx: Option<u64>,
     last_update_ms: i64,
+}
+
+/// Interfaces that carry the device's own or our tunnel traffic, not the
+/// user's network activity: loopback, utun (VPN and the developer tunnel),
+/// anpi (Apple private), ipsec, awdl/llw (peer to peer), bridge/ap.
+pub fn is_real_interface(name: &str) -> bool {
+    let n = name.to_ascii_lowercase();
+    !(n.starts_with("lo")
+        || n.starts_with("utun")
+        || n.starts_with("anpi")
+        || n.starts_with("ipsec")
+        || n.starts_with("awdl")
+        || n.starts_with("llw")
+        || n.starts_with("bridge")
+        || n.starts_with("ap")
+        || n.starts_with("stf")
+        || n.starts_with("gif"))
 }
 
 /// One flushed window.
@@ -56,6 +75,21 @@ pub struct NetSummary {
     pub latency_ms: Option<f64>,
     /// Interface names seen so far (index → name).
     pub interfaces: HashMap<u32, String>,
+    /// Device traffic over real interfaces in the window: bytes and
+    /// packets received / sent, and totals since the loop started.
+    /// `None` until at least one real interface is known.
+    pub device: Option<DeviceTraffic>,
+}
+
+/// Per-window device traffic over real interfaces (not loopback/tunnels).
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct DeviceTraffic {
+    pub rx_bps: f64,
+    pub tx_bps: f64,
+    pub rx_pps: f64,
+    pub tx_pps: f64,
+    pub rx_total: u64,
+    pub tx_total: u64,
 }
 
 impl NetSummary {
@@ -77,6 +111,34 @@ impl NetSummary {
                 value: l,
             });
         }
+        if let Some(d) = &self.device {
+            v.extend([
+                MetricValue {
+                    id: MetricId::NetRxBps,
+                    value: d.rx_bps,
+                },
+                MetricValue {
+                    id: MetricId::NetTxBps,
+                    value: d.tx_bps,
+                },
+                MetricValue {
+                    id: MetricId::NetRxPps,
+                    value: d.rx_pps,
+                },
+                MetricValue {
+                    id: MetricId::NetTxPps,
+                    value: d.tx_pps,
+                },
+                MetricValue {
+                    id: MetricId::NetRxTotal,
+                    value: d.rx_total as f64,
+                },
+                MetricValue {
+                    id: MetricId::NetTxTotal,
+                    value: d.tx_total as f64,
+                },
+            ]);
+        }
         v
     }
 }
@@ -93,6 +155,12 @@ pub struct NetAggregator {
     rtt_n: u32,
     /// Updates for serials never announced (counted, not attributed).
     pub orphans: u64,
+    /// Window sums over real interfaces: rx bytes, tx bytes, rx packets, tx packets.
+    dev_window: [u64; 4],
+    /// Totals since start over real interfaces.
+    dev_total: [u64; 2],
+    /// At least one real interface has been announced.
+    real_seen: bool,
 }
 
 impl NetAggregator {
@@ -106,7 +174,17 @@ impl NetAggregator {
             rtt_sum: 0.0,
             rtt_n: 0,
             orphans: 0,
+            dev_window: [0; 4],
+            dev_total: [0; 2],
+            real_seen: false,
         }
+    }
+
+    fn is_real(&self, index: u32) -> bool {
+        // Unannounced interfaces count as real until told otherwise.
+        self.interfaces
+            .get(&index)
+            .is_none_or(|n| is_real_interface(n))
     }
 
     /// Known connections (for tests and the capture example).
@@ -117,6 +195,9 @@ impl NetAggregator {
     pub fn on_event(&mut self, ev: &NetworkEvent, now_ms: i64) {
         match ev {
             NetworkEvent::InterfaceDetection(i) => {
+                if is_real_interface(&i.name) {
+                    self.real_seen = true;
+                }
                 self.interfaces.insert(i.interface_index, i.name.clone());
             }
             NetworkEvent::ConnectionDetection(c) => {
@@ -127,6 +208,8 @@ impl NetAggregator {
                         interface: c.interface_index,
                         rx_bytes: None,
                         tx_bytes: None,
+                        rx_packets: None,
+                        tx_packets: None,
                         tx_retx: None,
                         last_update_ms: now_ms,
                     },
@@ -139,12 +222,29 @@ impl NetAggregator {
                 };
                 let d_rx = conn.rx_bytes.map_or(0, |p| u.rx_bytes.saturating_sub(p));
                 let d_tx = conn.tx_bytes.map_or(0, |p| u.tx_bytes.saturating_sub(p));
+                let d_rxp = conn
+                    .rx_packets
+                    .map_or(0, |p| u.rx_packets.saturating_sub(p));
+                let d_txp = conn
+                    .tx_packets
+                    .map_or(0, |p| u.tx_packets.saturating_sub(p));
                 let d_retx = conn.tx_retx.map_or(0, |p| u.tx_retx.saturating_sub(p));
                 conn.rx_bytes = Some(u.rx_bytes);
                 conn.tx_bytes = Some(u.tx_bytes);
+                conn.rx_packets = Some(u.rx_packets);
+                conn.tx_packets = Some(u.tx_packets);
                 conn.tx_retx = Some(u.tx_retx);
                 conn.last_update_ms = now_ms;
-                *self.pid_bytes.entry(conn.pid).or_insert(0) += d_rx + d_tx;
+                let (pid, iface) = (conn.pid, conn.interface);
+                *self.pid_bytes.entry(pid).or_insert(0) += d_rx + d_tx;
+                if self.is_real(iface) {
+                    self.dev_window[0] += d_rx;
+                    self.dev_window[1] += d_tx;
+                    self.dev_window[2] += d_rxp;
+                    self.dev_window[3] += d_txp;
+                    self.dev_total[0] += d_rx;
+                    self.dev_total[1] += d_tx;
+                }
                 self.retx += d_retx;
                 let rtt = u.avg_rtt as f64 / RTT_DIVISOR;
                 if rtt > 0.0 && rtt < MAX_RTT_MS {
@@ -172,12 +272,22 @@ impl NetAggregator {
             .filter(|c| now_ms - c.last_update_ms <= ACTIVE_WINDOW_MS)
             .count();
         let latency_ms = (self.rtt_n > 0).then(|| self.rtt_sum / f64::from(self.rtt_n));
+        let device = self.real_seen.then(|| DeviceTraffic {
+            rx_bps: self.dev_window[0] as f64 * 8.0 / dt,
+            tx_bps: self.dev_window[1] as f64 * 8.0 / dt,
+            rx_pps: self.dev_window[2] as f64 / dt,
+            tx_pps: self.dev_window[3] as f64 / dt,
+            rx_total: self.dev_total[0],
+            tx_total: self.dev_total[1],
+        });
+        self.dev_window = [0; 4];
         let summary = NetSummary {
             pid_bps,
             connections,
             retransmits: self.retx,
             latency_ms,
             interfaces: self.interfaces.clone(),
+            device,
         };
         self.retx = 0;
         self.rtt_sum = 0.0;
@@ -225,7 +335,13 @@ pub async fn run(
                 }
                 let ts = now_ms();
                 let summary = agg.flush(ts);
-                shared.write().pid_net_bps = summary.pid_bps.clone();
+                {
+                    let mut sh = shared.write();
+                    sh.pid_net_bps = summary.pid_bps.clone();
+                    if summary.device.is_some() {
+                        sh.net_from_networking = true;
+                    }
+                }
                 if sink.samples(&device_id, ts, summary.metrics()).await.is_err() {
                     return LoopEnd::SinkClosed;
                 }

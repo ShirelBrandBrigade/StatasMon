@@ -182,12 +182,8 @@ impl Tunnel {
     /// One line for `DeviceInfo.connection.tunnel`.
     pub fn describe(&self) -> String {
         format!(
-            "CoreDeviceProxy userspace tunnel {} → {} (MTU {}), RSD port {} (protocol {}), {} services",
-            self.info.client_address,
-            self.info.server_address,
-            self.info.mtu,
+            "Userspace tunnel · RSD port {} · {} services",
             self.info.server_rsd_port,
-            self.protocol_version,
             self.services.len()
         )
     }

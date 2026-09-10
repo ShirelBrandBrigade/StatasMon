@@ -133,7 +133,11 @@ pub fn evaluate(input: &RulesInput<'_>) -> Headline {
             "thermal_serious",
         )
     } else if let Some(e) = crash {
-        let who = e.process.clone().unwrap_or_else(|| "An app".to_owned());
+        let who = e
+            .process
+            .as_deref()
+            .map(display_name)
+            .unwrap_or_else(|| "An app".to_owned());
         let verb = if e.kind == EventKind::Anr {
             "stopped responding"
         } else {
@@ -145,8 +149,8 @@ pub fn evaluate(input: &RulesInput<'_>) -> Headline {
             "app_crashed"
         };
         (
-            format!("{who} {verb} {}", ago(input.now_ms, e.ts_ms)),
-            e.detail.clone(),
+            format!("{name}: {who} {verb}"),
+            format!("{who} {verb} {}.", ago(input.now_ms, e.ts_ms)),
             Severity::Warning,
             rule,
         )
@@ -156,19 +160,18 @@ pub fn evaluate(input: &RulesInput<'_>) -> Headline {
             .as_deref()
             .map(display_name)
             .unwrap_or_else(|| "an app".to_owned());
+        let when = ago(input.now_ms, e.ts_ms);
         let sentence = match e.kind {
-            EventKind::MemoryWarning => {
-                format!("{who} got a memory warning {}", ago(input.now_ms, e.ts_ms))
-            }
-            _ => format!("{name} killed {who} to free memory"),
+            EventKind::MemoryWarning => format!("{name} is low on memory"),
+            _ => format!("{name} closed an app to free memory"),
+        };
+        let what = match e.kind {
+            EventKind::MemoryWarning => format!("{who} received a memory warning {when}"),
+            _ => format!("{who} was closed {when}"),
         };
         let cause = match pressure {
-            Some(p) => format!(
-                "{}; memory pressure is {}.",
-                e.detail.trim_end_matches('.'),
-                pressure_name(p)
-            ),
-            None => e.detail.clone(),
+            Some(p) => format!("{what}; memory pressure is {}.", pressure_name(p)),
+            None => format!("{what}."),
         };
         let rule = match e.kind {
             EventKind::MemoryWarning => "memory_warning",
@@ -278,7 +281,11 @@ fn pills(
     let mut out = Vec::new();
     let pill = |label: String, tone| Pill { label, tone };
     if let Some(e) = crash {
-        let who = e.process.as_deref().unwrap_or("App");
+        let who = e
+            .process
+            .as_deref()
+            .map(display_name)
+            .unwrap_or_else(|| "App".to_owned());
         let what = if e.kind == EventKind::Anr {
             "not responding"
         } else {
@@ -352,6 +359,13 @@ pub fn display_name(raw: &str) -> String {
     }
     let end = s.find(['>', '(', ']']).unwrap_or(s.len());
     s = s[..end].trim();
+    // Reverse-DNS ids read better by their last component ("MTLCompilerService").
+    if s.contains('.')
+        && !s.contains(' ')
+        && let Some(last) = s.rsplit('.').next().filter(|l| !l.is_empty())
+    {
+        s = last;
+    }
     if s.is_empty() {
         return "an app".to_owned();
     }
@@ -373,18 +387,15 @@ mod tests {
     fn display_name_shortens_ios_process_tokens() {
         assert_eq!(
             super::display_name("[osservice<com.apple.AppSSODaemon>:268]"),
-            "com.apple.AppSSODaemon"
+            "AppSSODaemon"
         );
         assert_eq!(
             super::display_name(
                 "xpcservice<com.apple.MTLCompilerService([osservice<com.apple.x>:412])>:5123"
             ),
-            "com.apple.MTLCompilerService"
+            "MTLCompilerService"
         );
-        assert_eq!(
-            super::display_name("com.example.fieldkit"),
-            "com.example.fieldkit"
-        );
+        assert_eq!(super::display_name("com.example.fieldkit"), "fieldkit");
         assert_eq!(super::display_name("SpringBoard"), "SpringBoard");
         assert_eq!(super::display_name(""), "an app");
     }
@@ -483,7 +494,7 @@ mod tests {
             &[ev(EventKind::Crash, "FieldKit", 88_000)],
             &CapabilitySet::all_available(),
         );
-        assert_eq!(h.sentence, "FieldKit crashed 12 s ago");
+        assert_eq!(h.sentence, "iPad (10th generation): FieldKit crashed");
         assert_eq!(h.severity, Severity::Warning);
         assert_eq!(h.rule, "app_crashed");
         assert!(
@@ -498,7 +509,7 @@ mod tests {
         );
         assert_eq!(
             h.sentence,
-            "com.example.fieldkit stopped responding just now"
+            "iPad (10th generation): fieldkit stopped responding"
         );
     }
 
@@ -511,7 +522,7 @@ mod tests {
         );
         assert_eq!(
             h.sentence,
-            "iPad (10th generation) killed com.example.fieldkit to free memory"
+            "iPad (10th generation) closed an app to free memory"
         );
         assert!(h.cause.ends_with("memory pressure is normal."));
         let mut l = base();
@@ -521,7 +532,7 @@ mod tests {
             &[ev(EventKind::MemoryWarning, "FieldKit", 95_000)],
             &CapabilitySet::all_available(),
         );
-        assert_eq!(h.sentence, "FieldKit got a memory warning 5 s ago");
+        assert_eq!(h.sentence, "iPad (10th generation) is low on memory");
         assert_eq!(h.severity, Severity::Warning);
         let mut l = base();
         with(&mut l, MetricId::MemPressure, 2.0);
@@ -660,7 +671,10 @@ mod tests {
             "iPad (10th generation) is running hot"
         );
         with(&mut l, MetricId::ThermalState, 1.0);
-        assert_eq!(run(&l, &crash, &caps).sentence, "FieldKit crashed 1 s ago");
+        assert_eq!(
+            run(&l, &crash, &caps).sentence,
+            "iPad (10th generation): FieldKit crashed"
+        );
         assert_eq!(
             run(&l, &[], &caps).sentence,
             "iPad (10th generation) is low on memory"

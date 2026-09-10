@@ -56,6 +56,7 @@ fn shape_only_message_parses_to_samples_cores_and_processes() {
         pid_net_bps: [(4412u32, 1_200_000.0)].into_iter().collect(),
         energy: [(4412u32, "medium".to_owned())].into_iter().collect(),
         process_period: Duration::from_secs(3),
+        suppress_net: false,
     };
     let mut state = SysmonState::default();
     let tick = parse_tick(&msg, &attrs, &mut state, 1_000, &ctx);
