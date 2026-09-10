@@ -122,9 +122,18 @@ function seed(info: DeviceInfo | null = INFO, caps: CapabilitySet | null = CAPS)
 test("header and grouped fields render for the active device", () => {
   seed();
   render(<DeviceScreen />);
-  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("iPhone 16 Pro");
+  // The shared header carries the device's own name; the hero names the model.
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Elia's iPhone");
+  expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("iPhone 16 Pro");
   expect(screen.getByText("fake:iphone")).toHaveClass("mono");
-  expect(within(screen.getByRole("banner")).getByText("iOS")).toBeInTheDocument();
+  const hero = within(screen.getByTestId("device-hero"));
+  expect(hero.getByText("iOS")).toBeInTheDocument();
+  const specs = within(screen.getByTestId("device-specs"));
+  expect(specs.getByText("iOS 27.0")).toBeInTheDocument();
+  expect(specs.getByText("build 25A354")).toBeInTheDocument();
+  expect(specs.getByText("A18 Pro")).toBeInTheDocument();
+  expect(specs.getByText("8.0 GB")).toBeInTheDocument();
+  expect(specs.getByText("3 582 mAh")).toBeInTheDocument();
 
   const identity = within(screen.getByRole("region", { name: "Identity" }));
   expect(identity.getByText("iPhone17,1")).toBeInTheDocument();
@@ -176,21 +185,23 @@ test("without info the sheet is all dashes and says it is waiting", () => {
 test("capabilities list every entry with a pill or the honest reason", () => {
   seed();
   render(<DeviceScreen />);
-  const list = screen.getByRole("list", { name: "Capability list" });
-  expect(list).toHaveAttribute("data-count", "3");
-  const items = within(list).getAllByRole("listitem");
-  expect(items).toHaveLength(3);
-  expect(items[0]).toHaveAttribute("data-available", "true");
-  expect(within(items[0]).getByText("CPU per core")).toBeInTheDocument();
-  expect(within(items[0]).getByText("Available")).toBeInTheDocument();
-  expect(items[1]).toHaveAttribute("data-available", "false");
-  expect(
-    within(items[1]).getByText("iOS does not report core frequencies to the host"),
-  ).toBeInTheDocument();
-  expect(within(items[1]).queryByText("Available")).toBeNull();
-  expect(screen.getByRole("region", { name: "Capabilities" })).toHaveTextContent(
-    "2 of 3 available",
+  const region = screen.getByRole("region", { name: "Capabilities" });
+  expect(region).toHaveAttribute("data-count", "3");
+  const chips = within(screen.getByRole("list", { name: "Available capabilities" })).getAllByRole(
+    "listitem",
   );
+  expect(chips.map((c) => c.textContent)).toEqual(["CPU per core", "Logs"]);
+  expect(chips[0]).toHaveAttribute("data-available", "true");
+  const missing = within(
+    screen.getByRole("list", { name: "Unavailable capabilities" }),
+  ).getAllByRole("listitem");
+  expect(missing).toHaveLength(1);
+  expect(missing[0]).toHaveAttribute("data-available", "false");
+  expect(within(missing[0]).getByText("CPU frequency")).toBeInTheDocument();
+  expect(
+    within(missing[0]).getByText("iOS does not report core frequencies to the host"),
+  ).toBeInTheDocument();
+  expect(region).toHaveTextContent("2 of 3 available");
 });
 
 test("raw keys are sorted, collapsible and copied as JSON", async () => {
@@ -242,7 +253,7 @@ test("an explicit deviceId wins over the active device; none selected is stated"
     useAppStore.getState().upsertDevice({ ...IPHONE, id: "fake:ipad", model_name: "iPad" });
   });
   render(<DeviceScreen deviceId="fake:ipad" />);
-  expect(screen.getByRole("heading", { level: 1, name: "iPad" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { level: 2, name: "iPad" })).toBeInTheDocument();
 });
 
 test("model helpers: labels, ages, uptime, sorted raw, core line", () => {

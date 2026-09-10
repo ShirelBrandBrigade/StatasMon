@@ -392,6 +392,7 @@ timings within budget.
     crash/ANR attachments) · ui · done 2026-09-09.
 6.5 Device screen (every DeviceInfo field grouped: identity, hardware,
     software, connection, capabilities with reasons) · ui · done 2026-09-09.
+    (Hero card + spec strip layout and chips since 2026-09-10, ADR-017.)
 6.6 Settings (adb location, sampling rates, retention, theme reserved,
     update check opt-in) · ui + core · done 2026-09-09 (saved values are
     read at launch; a live engine setter is a core follow-up, ADR-014).

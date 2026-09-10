@@ -15,6 +15,8 @@
   --edge: rgba(255, 255, 255, 0.09);
   --side: rgba(255, 255, 255, 0.025);
   --row-alt: rgba(255, 255, 255, 0.035);
+  --scroll-thumb: rgba(255, 255, 255, 0.16);
+  --scroll-thumb-hover: rgba(255, 255, 255, 0.28);
   --grid: rgba(255, 255, 255, 0.06);
   --track: rgba(255, 255, 255, 0.08);
   --bar-track: rgba(255, 255, 255, 0.07);

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { dispatch } from "../../bridge/dispatch";
 import { useExportStore } from "../../export/exportStore";
@@ -88,33 +88,41 @@ test("no W toggle before any warning line", () => {
   ).toEqual(["D", "I", "N", "E", "F"]);
 });
 
-test("app pills: top processes by line count, multi-select, All apps resets", () => {
+test("app pills: only the selection gets a pill; the picker selects, adds and clears", () => {
   seed();
   render(<LogCard deviceId={ID} initialItemCount={7} />);
   const pills = () =>
     Array.from(screen.getByRole("toolbar").querySelectorAll<HTMLButtonElement>(".log-pill")).map(
       (b) => b.textContent,
     );
-  expect(pills()).toEqual([
-    "All apps",
-    "FieldKit",
-    "com.example.fieldkit",
-    "Safari",
-    "SpringBoard",
-    "+ filter",
-  ]);
+  expect(pills()).toEqual(["All apps", "+ app", "+ filter"]);
   expect(button("All apps")).toHaveAttribute("aria-pressed", "true");
-  fireEvent.click(button("SpringBoard"));
+
+  fireEvent.click(button("Filter by app"));
+  const dialog = screen.getByRole("dialog", { name: "Filter by app" });
+  expect(
+    within(dialog)
+      .getAllByRole("option")
+      .map((o) => o.getAttribute("data-process")),
+  ).toEqual(["FieldKit", "com.example.fieldkit", "Safari", "SpringBoard"]);
+  fireEvent.click(within(dialog).getByRole("option", { name: /SpringBoard/ }));
   expect(button("All apps")).toHaveAttribute("aria-pressed", "false");
+  expect(pills()).toEqual(["All apps", "SpringBoard", "+ app", "+ filter"]);
+  expect(button("SpringBoard")).toHaveAttribute("aria-pressed", "true");
   expect(list().dataset.count).toBe("1");
-  fireEvent.click(button("FieldKit"));
+
+  fireEvent.click(button("Filter by app"));
+  fireEvent.click(screen.getByRole("option", { name: /FieldKit/ }), { shiftKey: true });
   expect(list().dataset.count).toBe("5");
-  fireEvent.click(button("All apps"));
+  fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Clear" }));
   expect(list().dataset.count).toBe("7");
-  // A selected process outside the top list keeps its pill.
+  expect(button("All apps")).toHaveAttribute("aria-pressed", "true");
+  // Clicking a selected pill removes it from the selection.
   act(() => useLogFilterStore.getState().setProcesses(ID, ["thermalmonitord"]));
   expect(pills()).toContain("thermalmonitord");
   expect(list().dataset.count).toBe("1");
+  fireEvent.click(button("thermalmonitord"));
+  expect(list().dataset.count).toBe("7");
 });
 
 test("free-text and regex search, invalid regex note, Escape clears", () => {

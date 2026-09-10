@@ -1,6 +1,7 @@
 /*
- * Device sheet (docs/PLAN.md 6.5): header, then a grid of grouped KeyValue
- * cards, the capability list and the raw keys. Tokens only.
+ * Device sheet (docs/PLAN.md 6.5, ADR-016): the shared header, a hero card
+ * (model, spec strip), grouped KeyValue cards in two columns, capabilities as
+ * chips, raw keys last. Tokens only.
  */
 
 .dv {
@@ -11,39 +12,49 @@
   min-height: 0;
 }
 
-.dv-head {
+/* Hero */
+.dv-hero {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 16px;
+}
+
+.dv-hero-head {
   display: flex;
   align-items: center;
   gap: 14px;
-  flex-shrink: 0;
 }
 
-.dv-head-ic {
+.dv-hero-ic {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   border: 1px solid var(--edge);
   border-radius: var(--r-ctl);
-  background: var(--grid);
+  background: var(--cyan-tint);
   color: var(--cyan);
 }
 
-.dv-head-text {
+.dv-hero-text {
   min-width: 0;
 }
 
-.dv-head-text h1 {
+.dv-hero-text h2 {
   margin: 0;
-  font-size: var(--fs-headline);
+  font-size: var(--fs-figure-lg);
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.dv-head-text p {
+.dv-hero-text p {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -58,7 +69,7 @@
   font-size: var(--fs-body);
 }
 
-.dv-head-tools {
+.dv-hero-tools {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -82,11 +93,66 @@
   font-size: var(--fs-body);
 }
 
-.dv-grid {
+/* Spec strip: one figure per column, separated by hairlines. */
+.dv-specs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  row-gap: 16px;
+  border-top: 1px solid var(--edge);
+  padding-top: 14px;
+}
+
+.dv-spec {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 0 14px;
+  border-left: 1px solid var(--edge);
+}
+
+.dv-spec:nth-child(4n + 1) {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.dv-spec-label {
+  color: var(--dim);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dv-spec-value {
+  color: var(--fg);
+  font-size: var(--fs-figure);
+  font-weight: 600;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dv-spec-sub {
+  color: var(--mut);
+  font-size: var(--fs-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Grouped cards */
+.dv-grid {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--gap-card);
   align-items: start;
+}
+
+.dv-grid .sm-kv {
+  gap: 8px;
 }
 
 .dv-grid .sm-kv > div > span:first-child {
@@ -100,47 +166,81 @@
   word-break: break-all;
 }
 
-.dv-caps-card {
-  grid-column: span 2;
-}
-
-.dv-caps {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px 14px;
+/* Capabilities: available ones as chips, missing ones with their reason. */
+.dv-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.dv-cap {
-  display: flex;
+.dv-chip {
+  display: inline-flex;
   align-items: center;
+  gap: 6px;
+  padding: 3px 9px 3px 7px;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-pill);
+  background: var(--row-alt);
+  color: var(--fg);
+  font-size: var(--fs-body);
+  white-space: nowrap;
+}
+
+.dv-chip > i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mint);
+}
+
+.dv-caps-sub {
+  margin: 14px 0 6px;
+  color: var(--dim);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dv-missing-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-missing {
+  display: flex;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 10px;
-  min-height: 28px;
-  padding: 2px 6px;
+  gap: 12px;
+  padding: 4px 6px;
   border-radius: var(--r-inner);
   font-size: var(--fs-body);
 }
 
-.dv-cap:nth-child(4n + 1),
-.dv-cap:nth-child(4n + 2) {
+.dv-missing:nth-child(odd) {
   background: var(--row-alt);
 }
 
-.dv-cap-name {
-  color: var(--fg);
+.dv-missing-name {
+  color: var(--mut);
   white-space: nowrap;
 }
 
-.dv-cap-reason {
-  color: var(--mut);
+.dv-missing-reason {
+  color: var(--dim);
   text-align: right;
 }
 
+/* Raw keys */
 .dv-raw-card {
-  grid-column: span 1;
+  grid-column: span 2;
 }
 
 .dv-raw {
@@ -167,6 +267,7 @@
   color: var(--mut);
   font-weight: 500;
   white-space: nowrap;
+  width: 34%;
 }
 
 .dv-raw tbody tr:nth-child(even) {
@@ -174,12 +275,7 @@
 }
 
 @media (max-width: 1320px) {
-  .dv-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .dv-caps-card,
-  .dv-raw-card {
-    grid-column: span 2;
+  .dv-spec-value {
+    font-size: var(--fs-body-lg);
   }
 }

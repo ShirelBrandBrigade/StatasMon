@@ -155,27 +155,35 @@ export const TAB_LIMIT = 4;
 export const ALL_TAB_ID = "all";
 
 /**
- * "All" · the top processes by line count · the app under test (when it has
- * logged anything, and not already among the top ones).
+ * "All" · the app under test (when it has logged) · running apps that have
+ * logged, most lines first (at most `limit`) · anything selected that is
+ * not already there. System daemons never get a tab of their own; the app
+ * picker reaches them.
  */
 export function appTabs(
   processes: readonly ProcessCount[],
   isMe: (process: string) => boolean,
+  selected: readonly string[] = [],
+  apps: readonly string[] = [],
   limit = TAB_LIMIT,
 ): AppTab[] {
   const tabs: AppTab[] = [{ id: ALL_TAB_ID, label: "All", processes: [] }];
-  const top = processes.slice(0, limit);
-  for (const p of top) {
-    tabs.push({
-      id: `p:${p.process}`,
-      label: p.process,
-      processes: [p.process],
-      me: isMe(p.process),
-    });
+  const seen = new Set<string>();
+  const add = (process: string, me: boolean) => {
+    if (seen.has(process)) return;
+    seen.add(process);
+    tabs.push({ id: `p:${process}`, label: process, processes: [process], me });
+  };
+  for (const p of processes) if (isMe(p.process)) add(p.process, true);
+  const appSet = new Set(apps);
+  let added = 0;
+  for (const p of processes) {
+    if (added >= limit) break;
+    if (!appSet.has(p.process) || seen.has(p.process)) continue;
+    add(p.process, false);
+    added += 1;
   }
-  const me = processes.find((p) => isMe(p.process) && !top.includes(p));
-  if (me)
-    tabs.push({ id: `p:${me.process}`, label: me.process, processes: [me.process], me: true });
+  for (const p of selected) add(p, isMe(p));
   return tabs;
 }
 

@@ -301,6 +301,91 @@ function drawEndpoints(u: uPlot, colors: string[], flags: boolean[], bg: string)
   }
 }
 
+/**
+ * Smooth, monotone (Fritsch–Carlson) cubic path through the visible points:
+ * no overshoot past a sample, so a CPU spike never dips below 0 % or rings
+ * above 100 %. Gaps (null samples) break the line. The fill closes to the
+ * zero line (or the bottom of the scale when zero is out of range).
+ */
+export function monotonePaths(): uPlot.Series.PathBuilder {
+  return (u, sidx, idx0, idx1) => {
+    const xs = u.data[0];
+    const ys = u.data[sidx];
+    const scaleY = u.series[sidx].scale ?? "y";
+    const yScale = u.scales[scaleY];
+    const zero = Math.min(Math.max(0, yScale.min ?? 0), yScale.max ?? 0);
+    const baseY = u.valToPos(zero, scaleY, true);
+    const stroke = new Path2D();
+    const fill = new Path2D();
+    let seg: number[] = [];
+
+    const flush = () => {
+      const n = seg.length / 2;
+      if (n === 0) return;
+      const px = (i: number) => seg[i * 2];
+      const py = (i: number) => seg[i * 2 + 1];
+      if (n === 1) {
+        stroke.moveTo(px(0), py(0));
+        stroke.lineTo(px(0), py(0));
+        seg = [];
+        return;
+      }
+      // Secants and tangents.
+      const d: number[] = [];
+      for (let i = 0; i < n - 1; i += 1) {
+        const h = px(i + 1) - px(i);
+        d.push(h === 0 ? 0 : (py(i + 1) - py(i)) / h);
+      }
+      const m: number[] = [d[0]];
+      for (let i = 1; i < n - 1; i += 1) {
+        m.push(d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2);
+      }
+      m.push(d[n - 2]);
+      for (let i = 0; i < n - 1; i += 1) {
+        if (d[i] === 0) {
+          m[i] = 0;
+          m[i + 1] = 0;
+          continue;
+        }
+        const a = m[i] / d[i];
+        const b = m[i + 1] / d[i];
+        const q = a * a + b * b;
+        if (q > 9) {
+          const t = 3 / Math.sqrt(q);
+          m[i] = t * a * d[i];
+          m[i + 1] = t * b * d[i];
+        }
+      }
+      stroke.moveTo(px(0), py(0));
+      fill.moveTo(px(0), baseY);
+      fill.lineTo(px(0), py(0));
+      for (let i = 0; i < n - 1; i += 1) {
+        const h = (px(i + 1) - px(i)) / 3;
+        const c1x = px(i) + h;
+        const c1y = py(i) + m[i] * h;
+        const c2x = px(i + 1) - h;
+        const c2y = py(i + 1) - m[i + 1] * h;
+        stroke.bezierCurveTo(c1x, c1y, c2x, c2y, px(i + 1), py(i + 1));
+        fill.bezierCurveTo(c1x, c1y, c2x, c2y, px(i + 1), py(i + 1));
+      }
+      fill.lineTo(px(n - 1), baseY);
+      fill.closePath();
+      seg = [];
+    };
+
+    for (let i = idx0; i <= idx1; i += 1) {
+      const y = ys[i];
+      if (y == null) {
+        flush();
+        continue;
+      }
+      seg.push(u.valToPos(xs[i] as number, "x", true), u.valToPos(y, scaleY, true));
+    }
+    flush();
+    return { stroke, fill, clip: null, flags: 0 };
+  };
+}
+
 function buildOptions(
   host: HTMLElement,
   height: number,
@@ -318,7 +403,9 @@ function buildOptions(
   const xfmt = (sec: number, withSeconds: boolean) => live.current.xFormat(sec, withSeconds);
   let ySize = Y_AXIS_MIN_SIZE;
   const gridLine = { show: true, stroke: theme.grid, width: 1 };
+  const gridDashed = { show: true, stroke: theme.grid, width: 1, dash: [3, 5] };
   const noLine = { show: false };
+  const smooth = monotonePaths();
 
   return {
     width: Math.max(1, Math.round(host.clientWidth) || 320),
@@ -375,7 +462,7 @@ function buildOptions(
         space: 64,
         ticks: noLine,
         border: noLine,
-        grid: gridLine,
+        grid: gridDashed,
         values: (_u, splits, _axisIdx, _foundSpace, foundIncr) =>
           splits.map((s) => xfmt(s, foundIncr < 60)),
       },
@@ -383,7 +470,7 @@ function buildOptions(
         stroke: theme.dim,
         font: theme.font,
         gap: Y_AXIS_GAP,
-        space: 26,
+        space: 32,
         ticks: noLine,
         border: noLine,
         grid: gridLine,
@@ -407,6 +494,7 @@ function buildOptions(
         stroke: colors[i],
         width: LINE_WIDTH,
         spanGaps: false,
+        paths: smooth,
         points: { show: false },
         fill: fills[i]
           ? (u: uPlot) => {
@@ -538,6 +626,8 @@ export function TimeSeriesChart({
     live.current.windowMs = windowMs;
     alignedRef.current = toAlignedData(data, alignedRef.current);
     u.setData(alignedRef.current);
+    const host = hostRef.current;
+    if (host) host.dataset.empty = alignedRef.current[0].length === 0 ? "true" : "false";
   }, [data, windowMs]);
 
   // Markers change rarely (a mark or an event); repaint without rebuilding paths.
@@ -556,6 +646,7 @@ export function TimeSeriesChart({
       className={className ? `sm-chart ${className}` : "sm-chart"}
       role="img"
       aria-label={label}
+      data-empty={data.t.length === 0 ? "true" : "false"}
       style={{ height, ...style }}
     />
   );

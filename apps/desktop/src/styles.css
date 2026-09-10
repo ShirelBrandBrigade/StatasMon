@@ -3,6 +3,35 @@
 @import "@fontsource-variable/manrope";
 @import "@fontsource-variable/jetbrains-mono";
 
+/* Scrollbars: thin, rounded, on the app palette everywhere (the log list,
+   tables, panels). Standard properties first, WebKit/WebView2 pseudo-elements
+   for the exact look. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-thumb-hover);
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -288,8 +317,10 @@ body,
 }
 
 /* Headline row */
+/* Tools wrap under the name in a narrow window; the range segment and Export are never clipped. */
 .hd {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   gap: var(--gap-card);
   flex-shrink: 0;

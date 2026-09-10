@@ -1,13 +1,15 @@
 import "./device.css";
-import type { CapabilityEntry } from "@statasmon/protocol";
+import { type CapabilityEntry, formatValue } from "@statasmon/protocol";
 import { Button, Card, Dash, Icon, KeyValue, type KeyValueRow, Pill } from "@statasmon/ui";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { commands } from "../../bridge/commands";
 import { useActiveDevice, useDevice } from "../../hooks/useDevice";
 import { deviceIcon, transportLabel } from "../../shell/format";
+import { TopBar } from "../../shell/TopBar";
 import {
   capabilityLabel,
   connectionRows,
+  formatUptime,
   hardwareRows,
   type InfoRow,
   identityRows,
@@ -22,6 +24,7 @@ import {
 const AGE_TICK_MS = 1000;
 /** How long "Copied" / "Refreshed" stay visible. */
 const STATUS_MS = 2000;
+const BYTES = { unit: "bytes" } as const;
 
 function useNow(tickMs: number): number {
   const [now, setNow] = useState(() => Date.now());
@@ -48,31 +51,51 @@ function describeError(e: unknown): string {
   return typeof e === "string" ? e : "Something went wrong";
 }
 
-/** One capability row: label left, `Available` pill or the honest reason right. */
-function CapabilityRow({ entry }: { entry: CapabilityEntry }) {
-  const a = entry.availability;
+/** One figure of the spec strip: small label, mono value, optional detail line. */
+function Spec({ label, value, sub }: { label: string; value: ReactNode; sub?: string | null }) {
   return (
-    <li
-      className="dv-cap"
-      data-capability={entry.capability}
-      data-available={a.status === "available"}
-    >
-      <span className="dv-cap-name">{capabilityLabel(entry.capability)}</span>
-      {a.status === "available" ? (
-        <Pill tone="ok" size="sm">
-          Available
-        </Pill>
-      ) : (
-        <span className="dv-cap-reason">{a.reason}</span>
-      )}
+    <div className="dv-spec">
+      <span className="dv-spec-label">{label}</span>
+      <span className="dv-spec-value mono">
+        {value === null || value === undefined ? <Dash reason={NOT_REPORTED} /> : value}
+      </span>
+      {sub ? <span className="dv-spec-sub">{sub}</span> : null}
+    </div>
+  );
+}
+
+function coresLine(cores: number | null, p: number | null, e: number | null): string | null {
+  if (cores === null) return null;
+  return p !== null && e !== null ? `${cores} (${p} P + ${e} E)` : String(cores);
+}
+
+/** An available capability as a chip. */
+function CapabilityChip({ entry }: { entry: CapabilityEntry }) {
+  return (
+    <li className="dv-chip" data-capability={entry.capability} data-available="true">
+      <i aria-hidden />
+      {capabilityLabel(entry.capability)}
+    </li>
+  );
+}
+
+/** A missing capability: its name and the honest reason. */
+function CapabilityMissing({ entry }: { entry: CapabilityEntry }) {
+  const reason = entry.availability.status === "available" ? "" : entry.availability.reason;
+  return (
+    <li className="dv-missing" data-capability={entry.capability} data-available="false">
+      <span className="dv-missing-name">{capabilityLabel(entry.capability)}</span>
+      <span className="dv-missing-reason">{reason}</span>
     </li>
   );
 }
 
 /**
- * Device sheet (docs/PLAN.md 6.5, docs/FEATURES.md §1): every DeviceInfo
- * field grouped, the capability list with reasons, and the raw platform
- * keys. Missing fields are dashes, never blanks or guesses.
+ * Device sheet (docs/PLAN.md 6.5, docs/FEATURES.md §1): the shared header
+ * (name, range, export), a hero card with the model and the headline specs,
+ * grouped KeyValue cards, the capabilities as chips with reasons for the
+ * missing ones, and the raw platform keys. Missing fields are dashes,
+ * never blanks or guesses.
  */
 export function DeviceScreen({ deviceId }: { deviceId?: string }) {
   const active = useActiveDevice();
@@ -105,6 +128,10 @@ export function DeviceScreen({ deviceId }: { deviceId?: string }) {
   const marketing = info?.identity.marketing_name ?? null;
   const raw = sortedRaw(info?.raw);
   const caps = capabilities?.entries ?? [];
+  const available = caps.filter((c) => c.availability.status === "available");
+  const missing = caps.filter((c) => c.availability.status !== "available");
+  const hw = info?.hardware;
+  const sw = info?.software;
 
   const refresh = async () => {
     setRefreshing(true);
@@ -129,41 +156,81 @@ export function DeviceScreen({ deviceId }: { deviceId?: string }) {
 
   return (
     <div className="dv" data-testid="device-screen" data-device-id={id}>
-      <header className="dv-head">
-        <span className="dv-head-ic" aria-hidden>
-          <Icon name={deviceIcon(summary)} size={22} />
-        </span>
-        <div className="dv-head-text">
-          <h1>{summary.model_name}</h1>
-          <p>
-            {marketing && marketing !== summary.model_name ? <span>{marketing}</span> : null}
-            <Pill tone="info" size="sm">
-              {PLATFORM_LABEL[summary.platform]}
-            </Pill>
-            <span>{transportLabel(summary.transport)}</span>
-            <code className="mono dv-id">{id}</code>
-          </p>
-        </div>
-        <div className="dv-head-tools">
-          {status ? (
-            <span
-              role="status"
-              className={status.tone === "bad" ? "dv-status is-bad" : "dv-status"}
-            >
-              {status.text}
-            </span>
-          ) : null}
-          <Button onClick={() => void refresh()} disabled={refreshing} aria-busy={refreshing}>
-            {refreshing ? "Refreshing…" : "Refresh"}
-          </Button>
-        </div>
-      </header>
+      <TopBar deviceId={id} />
 
-      {!info ? (
-        <p className="dv-pending" role="status">
-          Waiting for device information…
-        </p>
-      ) : null}
+      <Card className="dv-hero" data-testid="device-hero" aria-label="Device">
+        <div className="dv-hero-head">
+          <span className="dv-hero-ic" aria-hidden>
+            <Icon name={deviceIcon(summary)} size={28} />
+          </span>
+          <div className="dv-hero-text">
+            <h2>{summary.model_name}</h2>
+            <p>
+              {marketing && marketing !== summary.model_name ? <span>{marketing}</span> : null}
+              <Pill tone="info" size="sm">
+                {PLATFORM_LABEL[summary.platform]}
+              </Pill>
+              <span>{transportLabel(summary.transport)}</span>
+              <code className="mono dv-id">{id}</code>
+            </p>
+          </div>
+          <div className="dv-hero-tools">
+            {status ? (
+              <span
+                role="status"
+                className={status.tone === "bad" ? "dv-status is-bad" : "dv-status"}
+              >
+                {status.text}
+              </span>
+            ) : null}
+            <Button onClick={() => void refresh()} disabled={refreshing} aria-busy={refreshing}>
+              {refreshing ? "Refreshing…" : "Refresh"}
+            </Button>
+          </div>
+        </div>
+        {!info ? (
+          <p className="dv-pending" role="status">
+            Waiting for device information…
+          </p>
+        ) : null}
+        <div className="dv-specs" data-testid="device-specs">
+          <Spec
+            label="System"
+            value={sw?.os_version ? `${sw.os_name ? `${sw.os_name} ` : ""}${sw.os_version}` : null}
+            sub={sw?.os_build ? `build ${sw.os_build}` : null}
+          />
+          <Spec label="Chip" value={hw?.chip_name ?? null} sub={hw?.architecture ?? null} />
+          <Spec
+            label="Cores"
+            value={coresLine(
+              hw?.cpu_cores ?? null,
+              hw?.performance_cores ?? null,
+              hw?.efficiency_cores ?? null,
+            )}
+          />
+          <Spec
+            label="Memory"
+            value={hw?.ram_bytes != null ? formatValue(BYTES, hw.ram_bytes) : null}
+          />
+          <Spec
+            label="Storage"
+            value={hw?.storage_bytes != null ? formatValue(BYTES, hw.storage_bytes) : null}
+          />
+          <Spec
+            label="Battery"
+            value={
+              hw?.battery_design_mah != null
+                ? `${hw.battery_design_mah.toLocaleString("en-US").replace(/,/g, " ")} mAh`
+                : null
+            }
+            sub={hw?.battery_design_mah != null ? "design capacity" : null}
+          />
+          <Spec
+            label="Uptime"
+            value={info?.state.uptime_secs != null ? formatUptime(info.state.uptime_secs) : null}
+          />
+        </div>
+      </Card>
 
       <div className="dv-grid">
         <Card title="Identity" aria-label="Identity">
@@ -183,22 +250,31 @@ export function DeviceScreen({ deviceId }: { deviceId?: string }) {
         </Card>
         <Card
           title="Capabilities"
-          subtitle={
-            caps.length > 0
-              ? `${caps.filter((c) => c.availability.status === "available").length} of ${caps.length} available`
-              : undefined
-          }
+          subtitle={caps.length > 0 ? `${available.length} of ${caps.length} available` : undefined}
           aria-label="Capabilities"
           className="dv-caps-card"
+          data-count={caps.length}
         >
           {caps.length === 0 ? (
             <p className="dv-pending m-0">Waiting for the capability list…</p>
           ) : (
-            <ul className="dv-caps" aria-label="Capability list" data-count={caps.length}>
-              {caps.map((c) => (
-                <CapabilityRow key={c.capability} entry={c} />
-              ))}
-            </ul>
+            <>
+              <ul className="dv-chips" aria-label="Available capabilities">
+                {available.map((c) => (
+                  <CapabilityChip key={c.capability} entry={c} />
+                ))}
+              </ul>
+              {missing.length > 0 ? (
+                <>
+                  <p className="dv-caps-sub">Not on this device</p>
+                  <ul className="dv-missing-list" aria-label="Unavailable capabilities">
+                    {missing.map((c) => (
+                      <CapabilityMissing key={c.capability} entry={c} />
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+            </>
           )}
         </Card>
         <Card

@@ -178,6 +178,11 @@
   color: var(--dim);
 }
 
+.logs-picker {
+  align-self: center;
+  margin-left: 4px;
+}
+
 .logs-selected {
   display: inline-flex;
   align-items: center;

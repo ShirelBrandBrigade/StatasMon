@@ -78,8 +78,10 @@ Rules
 - **LogCard**: filter pills (apps, levels), rows [app tile · time · process ·
   level pill · message], fault rows highlighted `rgba(239,111,111,.1)` with a
   1px red outline, footer with counts and Export.
-- **Charts**: 2px lines, gradient area at .35→0 alpha, grid lines
-  `rgba(255,255,255,.06)`, no axis boxes, time labels in `--dim` mono 10.5px.
+- **Charts**: 2px lines drawn as monotone cubic curves (no overshoot),
+  gradient area at .35→0 alpha, horizontal grid lines `rgba(255,255,255,.06)`
+  and dashed vertical ones, no axis boxes, time labels in `--dim` mono
+  10.5px, "Waiting for samples…" while a chart has no data (ADR-017).
 
 ## Motion
 - One reveal on connect: cards fade/slide in over 240ms, staggered 30ms.

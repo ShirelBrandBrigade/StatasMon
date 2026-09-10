@@ -5,13 +5,12 @@ import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 import { openExportDialog } from "../../export/exportStore";
 import { useCapability } from "../../hooks/useDevice";
 import { ALL_LEVELS, useLogFilter, useLogFilterActions } from "../../store/logFilter";
+import { AppPicker } from "./AppPicker";
 import { formatCount, plural } from "./format";
 import { LogRow } from "./LogRow";
 import { useFilteredLog } from "./useFilteredLog";
 import "./LogCard.css";
 
-/** How many processes get their own pill (most lines first). */
-const TOP_PROCESSES = 4;
 /** Row height estimate for Virtuoso before it measures (5px padding + 16px line). */
 const ROW_HEIGHT = 26;
 /** How long the "Export arrives in Phase 5" note stays visible. */
@@ -94,10 +93,9 @@ export function LogCard({ deviceId, className, style, initialItemCount }: LogCar
     );
   }
 
-  // App pills: the top processes by line count plus any selected process
-  // that fell out of the top list (so a filter is never invisible).
-  const pillProcesses = processes.slice(0, TOP_PROCESSES).map((p) => p.process);
-  for (const p of filter.processes) if (!pillProcesses.includes(p)) pillProcesses.push(p);
+  // App pills: only what is selected (the picker adds apps), so the row
+  // never fills with the noisiest system daemons.
+  const pillProcesses = filter.processes;
   const allApps = filter.processes.length === 0;
   const levelToggles = warningsSeen ? ALL_LEVELS : ALL_LEVELS.filter((l) => l !== "warning");
   const searchVisible = searchOpen || filter.query !== "";
@@ -172,6 +170,7 @@ export function LogCard({ deviceId, className, style, initialItemCount }: LogCar
             {p}
           </button>
         ))}
+        <AppPicker deviceId={deviceId} processes={processes} />
         <button
           type="button"
           className="log-pill is-ghost"

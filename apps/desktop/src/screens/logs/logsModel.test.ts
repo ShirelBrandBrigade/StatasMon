@@ -87,36 +87,37 @@ test("datetime-local round-trips in local time", () => {
   expect(parseLocalDateTime("yesterday")).toBeUndefined();
 });
 
-test("app tabs: All, the top processes, and the app under test when it logged", () => {
+test("app tabs: All, the app under test, running apps that logged, and the selection", () => {
   const counts = [
     { process: "system_server", count: 40 },
     { process: "adbd", count: 9 },
     { process: "logd", count: 8 },
-    { process: "netd", count: 7 },
+    { process: "com.example.maps", count: 7 },
     { process: "surfaceflinger", count: 6 },
     { process: "com.example.fieldkit", count: 2 },
   ];
   const isMe = (p: string) => p.includes("fieldkit");
-  const tabs = appTabs(counts, isMe);
-  expect(tabs.map((t) => t.label)).toEqual([
+  const apps = ["com.example.maps", "com.example.fieldkit", "com.example.idle"];
+  // System daemons never get a tab; the app under test comes first.
+  const tabs = appTabs(counts, isMe, [], apps);
+  expect(tabs.map((t) => t.label)).toEqual(["All", "com.example.fieldkit", "com.example.maps"]);
+  expect(tabs[1].me).toBe(true);
+  expect(tabs[2].me).toBe(false);
+  // A selected daemon gets a tab while selected, once.
+  expect(appTabs(counts, isMe, ["adbd", "com.example.maps"], apps).map((t) => t.label)).toEqual([
     "All",
-    "system_server",
-    "adbd",
-    "logd",
-    "netd",
     "com.example.fieldkit",
+    "com.example.maps",
+    "adbd",
   ]);
-  expect(tabs[5].me).toBe(true);
-  expect(tabs[1].me).toBe(false);
-  // Not duplicated when already among the top ones.
-  expect(appTabs(counts.slice(0, 2).concat(counts[5]), isMe).map((t) => t.label)).toEqual([
+  // Without a process table only the app under test and the selection show.
+  expect(appTabs(counts, isMe, ["logd"]).map((t) => t.label)).toEqual([
     "All",
-    "system_server",
-    "adbd",
     "com.example.fieldkit",
+    "logd",
   ]);
   expect(activeTabId(tabs, [])).toBe("all");
-  expect(activeTabId(tabs, ["adbd"])).toBe("p:adbd");
+  expect(activeTabId(tabs, ["com.example.maps"])).toBe("p:com.example.maps");
   expect(activeTabId(tabs, ["adbd", "logd"])).toBeUndefined();
   expect(activeTabId(tabs, ["unknown"])).toBeUndefined();
 });

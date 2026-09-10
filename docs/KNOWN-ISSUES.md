@@ -13,6 +13,10 @@ entry when it is fixed; reference the commit.
   lines/s. Still to verify on a re-recorded session: every screen at
   1180 × 720, and the Notice-level log default keeps the app under test's
   own lines.
+- **Unverified locally (2026-09-10, same cause as below)**: the updated
+  Vitest suites for the header, Device sheet, log app picker and chart
+  markers were written against the new markup but could not be executed on
+  the QA Mac; run `pnpm check` on a machine with free memory or on CI.
 - **Unit tests cannot run on the 8 GB QA Mac while the desktop app, the
   Claude app and the browser are open**: Vitest workers are SIGKILLed by
   the kernel (out of memory), and even `git status` stalls for minutes

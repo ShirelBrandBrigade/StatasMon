@@ -14,8 +14,9 @@ import {
 import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 import { toProtocolFilter } from "../../export/exportModel";
 import { openExportDialog } from "../../export/exportStore";
-import { useCapability, useTelemetryValue } from "../../hooks/useDevice";
+import { useCapability, useProcesses, useTelemetryValue } from "../../hooks/useDevice";
 import { formatCount, isAppUnderTest, plural } from "../../overview/log";
+import { AppPicker } from "../../overview/log/AppPicker";
 import { LogRow } from "../../overview/log/LogRow";
 import { useFilteredLog } from "../../overview/log/useFilteredLog";
 import { TopBar } from "../../shell/TopBar";
@@ -140,7 +141,15 @@ export function LogsBody({ deviceId, initialItemCount }: LogsBodyProps) {
   }, [stored.state.entries, stored.state.offset, narrowed]);
   const storedCount = stored.state.entries.length;
 
-  const tabs = useMemo(() => appTabs(log.processes, meProcess), [log.processes]);
+  const running = useProcesses(deviceId);
+  const appNames = useMemo(
+    () => running.filter((r) => r.app_id !== null).map((r) => r.name),
+    [running],
+  );
+  const tabs = useMemo(
+    () => appTabs(log.processes, meProcess, filter.processes, appNames),
+    [log.processes, filter.processes, appNames],
+  );
   const activeTab = activeTabId(tabs, filter.processes);
 
   const jumpToLatest = useCallback(() => {
@@ -393,6 +402,7 @@ export function LogsBody({ deviceId, initialItemCount }: LogsBodyProps) {
               </button>
             );
           })}
+          <AppPicker deviceId={deviceId} processes={log.processes} className="logs-picker" />
           {activeTab === undefined ? (
             <span className="logs-selected" data-testid="custom-selection">
               {plural(filter.processes.length, "app")} selected

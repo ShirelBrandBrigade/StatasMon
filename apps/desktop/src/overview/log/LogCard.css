@@ -208,3 +208,137 @@
 .log-foot-export {
   margin-left: auto;
 }
+
+/* App picker: a popover under its "+ app" pill. */
+.log-picker {
+  position: relative;
+  display: inline-flex;
+}
+
+.log-picker-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 340px;
+  max-height: 420px;
+  padding: 10px;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-inner);
+  background: var(--bg);
+  box-shadow: var(--shadow-card);
+}
+
+.log-picker-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: var(--fs-subtitle);
+}
+
+.log-picker-search:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 1px;
+}
+
+.log-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.log-picker-group {
+  margin: 6px 0 2px;
+  padding: 0 6px;
+  color: var(--dim);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.log-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 30px;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: var(--r-inner);
+  background: transparent;
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.log-picker-item:hover {
+  background: var(--row-alt);
+}
+
+.log-picker-item[aria-selected="true"] {
+  background: var(--cyan-tint);
+  color: var(--cyan);
+}
+
+.log-picker-item:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: -2px;
+}
+
+.log-picker-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.log-picker-sub {
+  color: var(--dim);
+  font-size: var(--fs-label);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.log-picker-item > em {
+  flex-shrink: 0;
+  color: var(--dim);
+  font-size: var(--fs-label);
+  font-style: normal;
+}
+
+.log-picker-empty {
+  margin: 8px 6px;
+  color: var(--mut);
+  font-size: var(--fs-body);
+}
+
+.log-picker-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--edge);
+  color: var(--mut);
+  font-size: var(--fs-label);
+}
+
+.log-picker-hint {
+  margin-left: auto;
+  color: var(--dim);
+  white-space: nowrap;
+}

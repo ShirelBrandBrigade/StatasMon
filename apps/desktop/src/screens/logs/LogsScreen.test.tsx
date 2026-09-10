@@ -127,7 +127,7 @@ test("the time range narrows to lines between From and To; Live clears it", () =
   expect(list().dataset.narrowed).toBeUndefined();
 });
 
-test("per-app tabs select one app, Shift-click adds, the app under test is marked", () => {
+test("app tabs show the app under test and the selection; the picker selects or adds an app", () => {
   seedLog();
   render(<LogsBody deviceId={IPHONE} initialItemCount={7} />);
   const tabs = screen.getByRole("tablist", { name: "Apps" });
@@ -135,26 +135,47 @@ test("per-app tabs select one app, Shift-click adds, the app under test is marke
     within(tabs)
       .getAllByRole("tab")
       .map((t) => t.textContent);
-  expect(names()).toEqual(["All", "FieldKit4", "com.example.fieldkit1", "Safari1", "SpringBoard1"]);
+  // System processes (Safari, SpringBoard) get no tab of their own.
+  expect(names()).toEqual(["All", "FieldKit4", "com.example.fieldkit1"]);
   expect(within(tabs).getByRole("tab", { name: /^All/ })).toHaveAttribute("aria-selected", "true");
   expect(
     within(tabs)
       .getByRole("tab", { name: /FieldKit/ })
       .querySelector(".sm-tile"),
   ).toHaveAttribute("data-me", "true");
-  fireEvent.click(within(tabs).getByRole("tab", { name: /^SpringBoard/ }));
+
+  // The picker lists every process that logged; a click picks that app alone.
+  fireEvent.click(screen.getByRole("button", { name: "Filter by app" }));
+  const dialog = screen.getByRole("dialog", { name: "Filter by app" });
+  const options = () =>
+    within(dialog)
+      .getAllByRole("option")
+      .map((o) => o.getAttribute("data-process"));
+  expect(options()).toEqual(["FieldKit", "com.example.fieldkit", "Safari", "SpringBoard"]);
+  fireEvent.change(within(dialog).getByRole("searchbox", { name: "Find an app" }), {
+    target: { value: "spring" },
+  });
+  expect(options()).toEqual(["SpringBoard"]);
+  fireEvent.click(within(dialog).getByRole("option", { name: /SpringBoard/ }));
+  expect(screen.queryByRole("dialog", { name: "Filter by app" })).toBeNull();
   expect(useLogFilterStore.getState().byDevice[IPHONE]?.processes).toEqual(["SpringBoard"]);
+  expect(names()).toEqual(["All", "FieldKit4", "com.example.fieldkit1", "SpringBoard1"]);
   expect(within(tabs).getByRole("tab", { name: /^SpringBoard/ })).toHaveAttribute(
     "aria-selected",
     "true",
   );
   expect(list().dataset.count).toBe("1");
-  // Safari's only line is debug (hidden by default): the tab still counts it.
-  fireEvent.click(within(tabs).getByRole("tab", { name: /^Safari/ }), { shiftKey: true });
+
+  // Shift-click in the picker adds; Safari's only line is debug (hidden by default).
+  fireEvent.click(screen.getByRole("button", { name: "Filter by app" }));
+  fireEvent.click(screen.getByRole("option", { name: /Safari/ }), { shiftKey: true });
   expect(useLogFilterStore.getState().byDevice[IPHONE]?.processes).toEqual([
     "SpringBoard",
     "Safari",
   ]);
+  expect(screen.getByRole("dialog", { name: "Filter by app" })).toBeInTheDocument();
+  fireEvent.keyDown(document, { key: "Escape" });
+  expect(screen.queryByRole("dialog", { name: "Filter by app" })).toBeNull();
   expect(screen.getByTestId("custom-selection").textContent).toContain("2 apps selected");
   fireEvent.click(within(tabs).getByRole("tab", { name: /^All/ }));
   expect(list().dataset.count).toBe("7");
