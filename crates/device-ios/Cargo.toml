@@ -27,6 +27,7 @@ futures = "0.3"
 
 [dev-dependencies]
 statasmon-core = { workspace = true }
+statasmon-device-android = { workspace = true }
 
 [lints]
 workspace = true

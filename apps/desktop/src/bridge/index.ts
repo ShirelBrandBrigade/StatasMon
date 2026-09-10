@@ -12,7 +12,8 @@ export async function getStream(): Promise<DeviceStream> {
     const { createTauriStream } = await import("./tauriStream");
     current = createTauriStream();
   } else {
-    current = createReplayStream();
+    const fixture = new URLSearchParams(window.location.search).get("fixture") ?? undefined;
+    current = createReplayStream({ fixture });
   }
   useAppStore.getState().setStreamKind(current.kind);
   return current;

@@ -198,10 +198,15 @@ fn derive_memory(entry: &LogEntry) -> Option<Derived> {
     let lower = msg.to_ascii_lowercase();
     let first = msg.lines().next().unwrap_or("").trim();
 
-    let jetsam_kill = (lower.contains("memorystatus") && lower.contains("kill"))
-        || lower.contains("jetsam")
-        || (lower.contains("vm_pageshortage") || lower.contains("vm-pageshortage"))
-            && lower.contains("kill");
+    // runningboardd chatter ("… is not RunningBoard jetsam managed") and
+    // policy lines mention jetsam without any kill: require a kill verb.
+    let noise = lower.contains("jetsam managed") || lower.contains("not runningboard");
+    let kill_verb = lower.contains("kill") || lower.contains("terminat");
+    let jetsam_kill = !noise
+        && ((lower.contains("memorystatus") && kill_verb)
+            || (lower.contains("jetsam") && kill_verb)
+            || ((lower.contains("vm_pageshortage") || lower.contains("vm-pageshortage"))
+                && kill_verb));
     if jetsam_kill && !lower.contains("saved type") && !lower.contains(".ips") {
         let pid = after_key(first, "pid ").and_then(leading_u32);
         let process = between(first, "[", "]")
@@ -432,6 +437,21 @@ mod tests {
             d.observe(&entry("SpringBoard", "thermal state: Critical"))
                 .is_empty()
         );
+    }
+
+    #[test]
+    fn runningboard_jetsam_chatter_is_not_a_kill() {
+        let mut d = Derive::default();
+        let e = entry(
+            "runningboardd",
+            "[xpcservice<com.apple.MTLCompilerService([osservice<com.apple.mobile.cache_delete>:412])>:5123] is not RunningBoard jetsam managed.",
+        );
+        assert!(d.observe(&e).is_empty());
+        let e2 = entry(
+            "runningboardd",
+            "Applying jetsam policy to [app<com.apple.mobilesafari>:611]",
+        );
+        assert!(d.observe(&e2).is_empty());
     }
 
     #[test]

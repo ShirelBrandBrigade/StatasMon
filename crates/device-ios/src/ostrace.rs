@@ -165,12 +165,135 @@ struct StreamState {
     seq: u64,
     derive: Derive,
     recent_events: Vec<(EventKind, String, i64)>,
+    admit: Admission,
+}
+
+/// Lines below this level are hidden unless `STATASMON_IOS_LOG_MIN_LEVEL`
+/// says otherwise (`debug` shows everything). iPadOS emits ~4 000 lines/s
+/// of Debug chatter with all pids traced; the UI keeps 50 000 lines.
+pub const DEFAULT_MIN_LEVEL: LogLevel = LogLevel::Info;
+/// Per-second cap for lines at or above the minimum level (errors and
+/// faults always pass).
+pub const MAX_LINES_PER_SECOND: u32 = 500;
+/// How often a summary line reports what was dropped.
+pub const DROP_REPORT_SECS: i64 = 10;
+
+/// Rate limiting and level filtering for the raw relay stream.
+#[derive(Debug)]
+struct Admission {
+    min_level: LogLevel,
+    window_sec: i64,
+    window_count: u32,
+    dropped_low: u64,
+    dropped_rate: u64,
+    last_report_sec: i64,
+}
+
+impl Default for Admission {
+    fn default() -> Self {
+        Self::from_env()
+    }
+}
+
+impl Admission {
+    fn from_env() -> Self {
+        let min_level = match std::env::var("STATASMON_IOS_LOG_MIN_LEVEL").as_deref() {
+            Ok("debug") => LogLevel::Debug,
+            Ok("notice") => LogLevel::Notice,
+            Ok("warning") => LogLevel::Warning,
+            Ok("error") => LogLevel::Error,
+            _ => DEFAULT_MIN_LEVEL,
+        };
+        Self {
+            min_level,
+            window_sec: 0,
+            window_count: 0,
+            dropped_low: 0,
+            dropped_rate: 0,
+            last_report_sec: 0,
+        }
+    }
+
+    /// Whether `entry` is forwarded.
+    fn admit(&mut self, entry: &LogEntry) -> bool {
+        if entry.level < self.min_level {
+            self.dropped_low += 1;
+            return false;
+        }
+        let sec = entry.ts_ms.div_euclid(1000);
+        if sec != self.window_sec {
+            self.window_sec = sec;
+            self.window_count = 0;
+        }
+        if entry.level >= LogLevel::Error {
+            return true;
+        }
+        if self.window_count >= MAX_LINES_PER_SECOND {
+            self.dropped_rate += 1;
+            return false;
+        }
+        self.window_count += 1;
+        true
+    }
+
+    /// A synthetic summary entry every [`DROP_REPORT_SECS`] when something
+    /// was dropped, so the user knows the stream is thinned.
+    fn report(&mut self, now_ms: i64, seq: u64) -> Option<LogEntry> {
+        let sec = now_ms.div_euclid(1000);
+        if self.last_report_sec == 0 {
+            self.last_report_sec = sec;
+        }
+        if sec - self.last_report_sec < DROP_REPORT_SECS
+            || (self.dropped_low == 0 && self.dropped_rate == 0)
+        {
+            return None;
+        }
+        let msg = format!(
+            "StatasMon hid {} lines below {:?} and {} over the {}/s limit in the last {} s (set STATASMON_IOS_LOG_MIN_LEVEL=debug to keep everything)",
+            self.dropped_low,
+            self.min_level,
+            self.dropped_rate,
+            MAX_LINES_PER_SECOND,
+            sec - self.last_report_sec
+        );
+        self.last_report_sec = sec;
+        self.dropped_low = 0;
+        self.dropped_rate = 0;
+        Some(LogEntry {
+            seq,
+            ts_ms: now_ms,
+            pid: None,
+            process: "StatasMon".to_owned(),
+            tag: None,
+            subsystem: Some("app.statasmon".to_owned()),
+            category: Some("log-stream".to_owned()),
+            buffer: None,
+            level: LogLevel::Notice,
+            message: msg,
+        })
+    }
 }
 
 impl StreamState {
     fn next_entry(&mut self, log: &OsTraceLog) -> LogEntry {
         self.seq += 1;
         to_entry(self.seq, log)
+    }
+
+    /// Filter, and append a drop summary when due.
+    fn admit_into(&mut self, entry: LogEntry, pending: &mut Vec<LogEntry>) {
+        let ts = entry.ts_ms;
+        let admitted = self.admit.admit(&entry);
+        if admitted {
+            pending.push(entry);
+        }
+        self.seq += 1;
+        let seq = self.seq;
+        if let Some(report) = self.admit.report(ts, seq) {
+            pending.push(report);
+        } else {
+            self.seq -= 1;
+        }
     }
 
     /// One event per incident: same kind and the same process (or pid
@@ -225,7 +348,7 @@ async fn read_stream(
                             flush_after.as_mut().reset(tokio::time::Instant::now() + BATCH_LATENCY);
                         }
                         let entry = state.next_entry(&log);
-                        pending.push(entry);
+                        state.admit_into(entry, &mut pending);
                         pending.len() >= BATCH_MAX
                     }
                     Err(e) => {
