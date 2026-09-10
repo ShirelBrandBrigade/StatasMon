@@ -142,17 +142,30 @@
   text-overflow: ellipsis;
 }
 
-/* Grouped cards */
+/* Grouped cards: two balanced columns (a multi-column flow, so no card
+   leaves a hole under a shorter neighbour) and two fields per row. */
 .dv-grid {
   flex-shrink: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--gap-card);
-  align-items: start;
+  columns: 2;
+  column-gap: var(--gap-card);
+}
+
+.dv-grid > .sm-card {
+  break-inside: avoid;
+  margin-bottom: var(--gap-card);
 }
 
 .dv-grid .sm-kv {
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 28px;
+  row-gap: 7px;
+}
+
+.dv-grid .sm-kv > div {
+  min-width: 0;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--edge);
 }
 
 .dv-grid .sm-kv > div > span:first-child {
@@ -161,9 +174,11 @@
 
 .dv-grid .sm-kv-value {
   min-width: 0;
+  flex-shrink: 1;
   justify-content: flex-end;
   text-align: right;
-  word-break: break-all;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* Capabilities: available ones as chips, missing ones with their reason. */
@@ -206,9 +221,9 @@
 }
 
 .dv-missing-list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px 14px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -216,15 +231,15 @@
 
 .dv-missing {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  gap: 1px;
   padding: 4px 6px;
   border-radius: var(--r-inner);
   font-size: var(--fs-body);
 }
 
-.dv-missing:nth-child(odd) {
+.dv-missing:nth-child(4n + 1),
+.dv-missing:nth-child(4n + 2) {
   background: var(--row-alt);
 }
 
@@ -235,12 +250,12 @@
 
 .dv-missing-reason {
   color: var(--dim);
-  text-align: right;
+  font-size: var(--fs-label);
 }
 
 /* Raw keys */
 .dv-raw-card {
-  grid-column: span 2;
+  flex-shrink: 0;
 }
 
 .dv-raw {

@@ -277,50 +277,50 @@ export function DeviceScreen({ deviceId }: { deviceId?: string }) {
             </>
           )}
         </Card>
-        <Card
-          title="Raw"
-          subtitle={`${raw.length} keys`}
-          aria-label="Raw"
-          className="dv-raw-card"
-          footer={
-            <>
-              <Button size="sm" onClick={() => setRawOpen((o) => !o)} aria-expanded={rawOpen}>
-                {rawOpen ? "Hide keys" : "Show keys"}
-              </Button>
-              <Button size="sm" onClick={() => void copyRaw()} disabled={raw.length === 0}>
-                Copy as JSON
-              </Button>
-            </>
-          }
-        >
-          {rawOpen ? (
-            raw.length === 0 ? (
-              <p className="dv-pending m-0">No raw keys reported.</p>
-            ) : (
-              <table className="dv-raw mono" aria-label="Raw keys">
-                <thead>
-                  <tr>
-                    <th scope="col">Key</th>
-                    <th scope="col">Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {raw.map(([k, v]) => (
-                    <tr key={k}>
-                      <th scope="row">{k}</th>
-                      <td>{v}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )
-          ) : (
-            <p className="dv-pending m-0">
-              Platform keys exactly as the device reported them, sorted by name.
-            </p>
-          )}
-        </Card>
       </div>
+      <Card
+        title="Raw"
+        subtitle={`${raw.length} keys`}
+        aria-label="Raw"
+        className="dv-raw-card"
+        footer={
+          <>
+            <Button size="sm" onClick={() => setRawOpen((o) => !o)} aria-expanded={rawOpen}>
+              {rawOpen ? "Hide keys" : "Show keys"}
+            </Button>
+            <Button size="sm" onClick={() => void copyRaw()} disabled={raw.length === 0}>
+              Copy as JSON
+            </Button>
+          </>
+        }
+      >
+        {rawOpen ? (
+          raw.length === 0 ? (
+            <p className="dv-pending m-0">No raw keys reported.</p>
+          ) : (
+            <table className="dv-raw mono" aria-label="Raw keys">
+              <thead>
+                <tr>
+                  <th scope="col">Key</th>
+                  <th scope="col">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {raw.map(([k, v]) => (
+                  <tr key={k}>
+                    <th scope="row">{k}</th>
+                    <td>{v}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )
+        ) : (
+          <p className="dv-pending m-0">
+            Platform keys exactly as the device reported them, sorted by name.
+          </p>
+        )}
+      </Card>
     </div>
   );
 }

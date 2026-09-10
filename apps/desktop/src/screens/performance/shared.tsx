@@ -9,8 +9,8 @@ import { useMultiSeriesData } from "./useMultiSeries";
 /** Series colors in the fixed order of the design system; a fifth series is "Other". */
 export const SERIES_ORDER: readonly Series[] = ["cyan", "vio", "mint", "amber", "other"];
 
-export const CHART_HEIGHT = 150;
-export const SMALL_CHART_HEIGHT = 96;
+export const CHART_HEIGHT = 170;
+export const SMALL_CHART_HEIGHT = 110;
 
 export interface ChartMetric {
   id: MetricId;

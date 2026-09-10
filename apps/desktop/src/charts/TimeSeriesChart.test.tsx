@@ -75,9 +75,10 @@ test("mounts one uPlot instance, updates through setData and destroys on unmount
   await flush();
   expect(ref.current).toBe(u); // same instance: no re-create on data change
   expect(u.data[0].length).toBe(11);
-  // x scale follows the newest point: [newest − window, newest].
+  // x scale follows the newest point; with only 10 s of data the window is
+  // no wider than the data plus the MIN_SPAN_S floor (30 s), not the full 60 s.
   expect(u.scales.x.max).toBeCloseTo((T0 + 10_000) / 1000);
-  expect(u.scales.x.min).toBeCloseTo((T0 + 10_000 - 60_000) / 1000);
+  expect(u.scales.x.min).toBeCloseTo((T0 + 10_000 - 30_000) / 1000);
   // y scale starts at 0 with headroom above the max.
   expect(u.scales.y.min).toBe(0);
   expect(u.scales.y.max).toBeGreaterThan(1e6 + 10);

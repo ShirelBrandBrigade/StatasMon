@@ -54,7 +54,7 @@ export interface TimeSeriesChartProps {
 }
 
 const LINE_WIDTH = 2;
-const FILL_ALPHA_TOP = 0.35;
+const FILL_ALPHA_TOP = 0.42;
 const FILL_ALPHA_BOTTOM = 0;
 const DOT_RADIUS = 4;
 const DOT_STROKE = 2;
@@ -66,6 +66,18 @@ const Y_AXIS_MIN_SIZE = 32;
 const Y_AXIS_GAP = 6;
 const Y_HEADROOM = 1.15;
 const EMPTY_SPAN_S = 60;
+/**
+ * A window is not shown wider than the data it holds (plus this floor), so a
+ * fresh session fills the plot from the left instead of squeezing thirty
+ * seconds of samples into the right edge of a five-minute grid.
+ */
+export const MIN_SPAN_S = 30;
+/** A gap longer than this many typical sample intervals (and at least GAP_BREAK_MIN_S) breaks the curve. */
+const GAP_BREAK_FACTOR = 4;
+const GAP_BREAK_MIN_S = 5;
+/** Soft halo under every line (canvas px at 1×, alpha). */
+const GLOW_WIDTH = 7;
+const GLOW_ALPHA = 0.22;
 const TIP_GAP = 10;
 /** Markers drawn at most per chart (the newest ones inside the visible range). */
 export const MAX_MARKERS = 12;
@@ -304,8 +316,9 @@ function drawEndpoints(u: uPlot, colors: string[], flags: boolean[], bg: string)
 /**
  * Smooth, monotone (Fritsch–Carlson) cubic path through the visible points:
  * no overshoot past a sample, so a CPU spike never dips below 0 % or rings
- * above 100 %. Gaps (null samples) break the line. The fill closes to the
- * zero line (or the bottom of the scale when zero is out of range).
+ * above 100 %. Only a real outage breaks the line (see `GAP_BREAK_FACTOR`).
+ * The fill closes to the zero line (or the bottom of the scale when zero is
+ * out of range).
  */
 export function monotonePaths(): uPlot.Series.PathBuilder {
   return (u, sidx, idx0, idx1) => {
@@ -373,13 +386,28 @@ export function monotonePaths(): uPlot.Series.PathBuilder {
       seg = [];
     };
 
+    // Real points only: a missing value at one tick (another series' tick,
+    // a metric the provider skipped once) does not break the curve. A break
+    // happens where the time between two samples is far longer than usual:
+    // the device was gone, the session paused, or history is coarser.
+    const px: number[] = [];
+    const py: number[] = [];
+    const pt: number[] = [];
     for (let i = idx0; i <= idx1; i += 1) {
       const y = ys[i];
-      if (y == null) {
-        flush();
-        continue;
-      }
-      seg.push(u.valToPos(xs[i] as number, "x", true), u.valToPos(y, scaleY, true));
+      if (y == null) continue;
+      pt.push(xs[i] as number);
+      px.push(u.valToPos(xs[i] as number, "x", true));
+      py.push(u.valToPos(y, scaleY, true));
+    }
+    const gaps: number[] = [];
+    for (let i = 1; i < pt.length; i += 1) gaps.push(pt[i] - pt[i - 1]);
+    const sorted = gaps.slice().sort((a, b) => a - b);
+    const typical = sorted.length > 0 ? sorted[Math.floor(sorted.length / 2)] : 0;
+    const breakAfter = Math.max(typical * GAP_BREAK_FACTOR, GAP_BREAK_MIN_S);
+    for (let i = 0; i < pt.length; i += 1) {
+      if (i > 0 && pt[i] - pt[i - 1] > breakAfter) flush();
+      seg.push(px[i], py[i]);
     }
     flush();
     return { stroke, fill, clip: null, flags: 0 };
@@ -438,7 +466,10 @@ function buildOptions(
           if (w === undefined) {
             return Number.isFinite(min) && min < max ? [min, max] : [max - EMPTY_SPAN_S, max];
           }
-          return [max - w / 1000, max];
+          const full = w / 1000;
+          const have = Number.isFinite(min) ? max - min : 0;
+          const span = Math.min(full, Math.max(have, MIN_SPAN_S));
+          return [max - span, max];
         },
       },
       y: {
@@ -458,8 +489,8 @@ function buildOptions(
         stroke: theme.dim,
         font: theme.font,
         size: X_AXIS_SIZE,
-        gap: 4,
-        space: 64,
+        gap: 6,
+        space: 96,
         ticks: noLine,
         border: noLine,
         grid: gridDashed,
@@ -470,7 +501,7 @@ function buildOptions(
         stroke: theme.dim,
         font: theme.font,
         gap: Y_AXIS_GAP,
-        space: 32,
+        space: 40,
         ticks: noLine,
         border: noLine,
         grid: gridLine,
@@ -508,6 +539,25 @@ function buildOptions(
       })),
     ],
     hooks: {
+      // A soft halo under each line, drawn right after uPlot strokes it.
+      drawSeries: [
+        (u, sidx) => {
+          const paths = (u.series[sidx] as { _paths?: { stroke?: Path2D | null } | null })._paths;
+          const path = paths?.stroke;
+          if (!path) return;
+          const ctx = u.ctx;
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(u.bbox.left, u.bbox.top, u.bbox.width, u.bbox.height);
+          ctx.clip();
+          ctx.strokeStyle = withAlpha(colors[sidx - 1], GLOW_ALPHA);
+          ctx.lineWidth = GLOW_WIDTH * uPlot.pxRatio;
+          ctx.lineJoin = "round";
+          ctx.lineCap = "round";
+          ctx.stroke(path);
+          ctx.restore();
+        },
+      ],
       draw: [
         (u) => {
           drawEndpoints(u, colors, endpoints, theme.bg);

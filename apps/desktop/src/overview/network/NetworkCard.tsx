@@ -19,7 +19,7 @@ import {
 import { useSeriesData } from "../../charts/useSeriesData";
 import { useCapability, useDevice, useLatest, useRangeMs } from "../../hooks/useDevice";
 
-const CHART_HEIGHT = 90;
+const CHART_HEIGHT = 104;
 const BPS = { unit: "bits_per_sec" } as const;
 const DBM = { unit: "dbm" } as const;
 const MS = { unit: "milliseconds" } as const;

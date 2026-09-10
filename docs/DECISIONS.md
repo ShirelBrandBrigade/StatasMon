@@ -403,10 +403,15 @@ times, and for a cleaner Device page. Decisions:
 - **Charts draw monotone cubic curves** (Fritsch–Carlson, `monotonePaths`
   in `TimeSeriesChart.tsx`): smooth between samples, never overshooting a
   sample, so a bounded metric (CPU 0–100 %) never rings past its limits.
-  Gaps still break the line; the fill closes to the zero line. Vertical
-  grid lines are dashed and lighter than the horizontal ones, y ticks are
-  spaced at 32 px, and an empty chart says "Waiting for samples…" instead
-  of showing a bare grid. Data still arrives through `setData` only.
+  `null` still breaks the line (a real gap); `undefined` (another series'
+  tick) is run through. The fill closes to the zero line and each line
+  has a soft halo. **A window is never wider than its data plus a 30 s
+  floor** (`MIN_SPAN_S`): a fresh session fills the plot from the left
+  instead of squeezing thirty seconds into the right edge of a five-minute
+  grid, and grows until the window is full. Vertical grid lines are dashed
+  and lighter, ticks are spaced wider (x 96 px, y 40 px), Performance
+  charts are taller, and an empty chart says "Waiting for samples…"
+  instead of showing a bare grid. Data still arrives through `setData`.
 - **The range control is part of every per-device screen.** `TopBar`
   (device name, model · link, status pills, Live · 5 min · 15 min · 1 h ·
   Session, Export) now also heads the Device sheet, and the header wraps its
@@ -420,7 +425,9 @@ times, and for a cleaner Device page. Decisions:
   design capacity, uptime), then Identity / Software / Hardware / State /
   Connection / Capabilities in two columns and the raw keys last.
   Capabilities show as chips for what is available and as name + reason
-  rows for what is not. Every missing value is still a dash with the
+  rows for what is not. The two columns are a multi-column flow with two
+  fields per row inside each card, so no card leaves a hole under a
+  shorter neighbour. Every missing value is still a dash with the
   "Not reported by the device" reason.
 - **Log filtering by app.** The per-app tab row (Logs) and pill row
   (Overview) no longer list the noisiest processes: they show "All", the
@@ -429,10 +436,12 @@ times, and for a cleaner Device page. Decisions:
   (name, bundle id, lines logged) and the system processes after, with a
   search box; a click selects that one app alone, Shift-click adds it,
   Escape or a click outside closes. The filter store is unchanged.
-- **Scrollbars follow the palette**: thin, rounded, `--scroll-thumb` on a
-  transparent track, set once in `styles.css` for every scrollable area
-  (the standard `scrollbar-*` properties plus the WebKit/WebView2
-  pseudo-elements, so macOS and Windows match).
+- **Scrollbars follow the palette**: 8 px, rounded, `--scroll-thumb` on a
+  transparent track, set once in `styles.css` through the WebKit/WebView2
+  `::-webkit-scrollbar` pseudo-elements only. The standard
+  `scrollbar-width`/`scrollbar-color` properties are deliberately not
+  set: when they are, WebKit ignores the pseudo-elements and draws its own
+  flat bar, which is what looked out of place.
 Consequences: chart tests that compare pixel paths must expect curves;
 the Device tests target the hero (`device-hero`, `device-specs`) and the
 two capability lists; the `h1` on every device screen is the device name;
