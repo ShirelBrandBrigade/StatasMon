@@ -93,11 +93,13 @@ const ProcessRowView = memo(function ProcessRowView({
         <span className="pt-bar" aria-hidden>
           <i style={{ "--pt-share": `${share.toFixed(2)}%` } as CSSProperties} />
         </span>
-        {row.cpu_pct !== null ? (
-          formatValue(PERCENT, row.cpu_pct)
-        ) : (
-          <Dash reason="CPU is not reported for this process" />
-        )}
+        <span className="pt-cpu-val">
+          {row.cpu_pct !== null ? (
+            formatValue(PERCENT, row.cpu_pct)
+          ) : (
+            <Dash reason="CPU is not reported for this process" />
+          )}
+        </span>
       </td>
       <td className="mono is-num">
         {row.mem_bytes !== null ? (

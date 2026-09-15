@@ -215,14 +215,24 @@ button.pt-sort:hover,
   min-width: 120px;
 }
 
+/* Bar and value sit in fixed boxes so every row's bar starts on the same
+   x and the percentages line up on the right, whatever their width. */
 .pt-bar {
   display: inline-block;
   width: 56px;
   height: 5px;
   margin-right: 8px;
+  vertical-align: middle;
   overflow: hidden;
   border-radius: 3px;
   background: var(--bar-track);
+  vertical-align: middle;
+}
+
+.pt-cpu-val {
+  display: inline-block;
+  width: 52px;
+  text-align: right;
   vertical-align: middle;
 }
 
