@@ -2,11 +2,85 @@
 @import "@statasmon/ui/tokens.css";
 @import "@fontsource-variable/manrope";
 @import "@fontsource-variable/jetbrains-mono";
+@import "./motion.css";
 
-/* Scrollbars: thin, rounded, on the app palette everywhere (the log list,
-   tables, panels). Only the WebKit/WebView2 pseudo-elements: setting the
-   standard scrollbar-width/color makes WebKit ignore these and draw its own
-   flat bar instead. */
+/* Scrollbars: the app draws its own overlay bars (shell/overlayScrollbars.ts,
+   ADR-018). Native bars are hidden on the containers it manages; anything
+   else keeps a thin native bar on the palette as a fallback. */
+.sm-osb-host {
+  scrollbar-width: none;
+}
+
+.sm-osb-host::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.sm-osb {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 6;
+  height: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.sm-osb[data-mode="host"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+.sm-osb-thumb {
+  position: absolute;
+  border-radius: 999px;
+  background: var(--scroll-thumb);
+  opacity: 0;
+  transition:
+    opacity 220ms ease,
+    background-color 120ms ease;
+  pointer-events: auto;
+}
+
+.sm-osb-y {
+  top: 0;
+  right: 3px;
+  width: 6px;
+}
+
+.sm-osb-x {
+  left: 0;
+  bottom: 3px;
+  height: 6px;
+}
+
+/* Sticky mode: the bar box is 0 px tall, so the vertical thumb is placed
+   against the container's visible box through the measured size. */
+.sm-osb[data-mode="sticky"] .sm-osb-y {
+  top: 0;
+}
+
+.sm-osb[data-mode="sticky"] .sm-osb-x {
+  top: calc(var(--osb-h, 0px) - 9px);
+  bottom: auto;
+}
+
+.sm-osb[data-visible="true"] .sm-osb-thumb,
+.sm-osb[data-dragging="true"] .sm-osb-thumb {
+  opacity: 1;
+}
+
+.sm-osb-thumb:hover,
+.sm-osb[data-dragging="true"] .sm-osb-thumb {
+  background: var(--scroll-thumb-hover);
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -23,16 +97,6 @@
   background-clip: padding-box;
   border: 2px solid transparent;
   border-radius: 8px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: var(--scroll-thumb-hover);
-}
-
-::-webkit-scrollbar-button {
-  display: none;
-  width: 0;
-  height: 0;
 }
 
 body {

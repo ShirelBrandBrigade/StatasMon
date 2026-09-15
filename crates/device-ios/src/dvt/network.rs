@@ -324,14 +324,19 @@ pub async fn run(
     let mut interval = tokio::time::interval(period);
     interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
     interval.tick().await;
+    // Whatever ends this loop, sysmontap takes the device totals back so
+    // the network chart never goes blank after the service drops.
+    let release = || shared.write().net_from_networking = false;
     loop {
         tokio::select! {
             _ = cancel.cancelled() => {
                 let _ = client.stop_monitoring().await;
+                release();
                 return LoopEnd::Cancelled;
             }
             _ = interval.tick() => {
                 if sink.is_closed() {
+                    release();
                     return LoopEnd::SinkClosed;
                 }
                 let ts = now_ms();
@@ -344,12 +349,16 @@ pub async fn run(
                     }
                 }
                 if sink.samples(&device_id, ts, summary.metrics()).await.is_err() {
+                    release();
                     return LoopEnd::SinkClosed;
                 }
             }
             ev = client.next_event() => match ev {
                 Ok(ev) => agg.on_event(&ev, now_ms()),
-                Err(e) => return LoopEnd::from_error(&tunnel, "networking read", &e),
+                Err(e) => {
+                    release();
+                    return LoopEnd::from_error(&tunnel, "networking read", &e);
+                }
             }
         }
     }

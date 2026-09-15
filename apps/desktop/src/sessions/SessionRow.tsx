@@ -49,15 +49,16 @@ export function SessionRow({ session, selected, onOpen, onExport, onDelete }: Se
           <span>{formatElapsed(s.elapsed_ms)}</span>
         </div>
         <div className="sess-row-meta mono">
-          <span>{formatCount(s.sample_count)} samples</span>
-          <span>·</span>
-          <span>{formatCount(s.log_count)} logs</span>
-          <span>·</span>
-          <span>{formatCount(s.event_count)} events</span>
-          <span>·</span>
-          <span>{formatCount(s.mark_count)} marks</span>
-          <span>·</span>
-          <span>{formatValue({ unit: "bytes" }, s.size_bytes)}</span>
+          {[
+            `${formatCount(s.sample_count)} samples`,
+            `${formatCount(s.log_count)} logs`,
+            `${formatCount(s.event_count)} events`,
+            `${formatCount(s.mark_count)} marks`,
+            formatValue({ unit: "bytes" }, s.size_bytes),
+          ].map((part, i, all) => (
+            // The separator travels with its item so a line never starts with "·".
+            <span key={part}>{i < all.length - 1 ? `${part} ·` : part}</span>
+          ))}
         </div>
         <div className="sess-row-actions">
           <Button size="sm" onClick={() => onOpen(s.id)} aria-pressed={selected}>

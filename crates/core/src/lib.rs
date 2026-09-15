@@ -22,15 +22,14 @@
 //! ## Sessions and what is stored
 //! Each device has a [`Session`] (`Idle | Recording | Paused | Stopped`). A
 //! session starts recording automatically when a device attaches
-//! ([`EngineConfig::auto_record`]). While **Recording**, `Samples`, `Cores`,
-//! `Processes` and `Log` messages are stored in the ring buffers, counted,
-//! and forwarded to the bus. While **Paused** or **Stopped** the connection
-//! stays alive and the snapshot's `latest`, `cores` and `processes` still
-//! update (so the live view stays truthful), but nothing is stored,
-//! counted or forwarded to the bus. `Info`, `Capabilities`, `DeviceState`,
-//! `Event` and `Error` messages are always stored (events feed the
-//! headline) and always forwarded; so are the engine's own `Headline` and
-//! `Session` messages.
+//! ([`EngineConfig::auto_record`]). Every provider message is forwarded to
+//! the bus and kept in the in-memory rings whatever the session status:
+//! a connected device is always shown live, recording or not (ADR-018).
+//! While **Recording**, `Samples`, `Cores`, `Processes` and `Log` messages
+//! are additionally counted and written to the store; while **Paused** or
+//! **Stopped** they are not. `Info`, `Capabilities`, `DeviceState`, `Event`
+//! and `Error` messages feed the headline and are stored while a session
+//! is open; so are the engine's own `Headline` and `Session` messages.
 //!
 //! ## The store (Phase 5)
 //! With [`EngineConfig::store`] set, the engine opens a

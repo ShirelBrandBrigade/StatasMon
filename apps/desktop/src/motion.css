@@ -1,0 +1,199 @@
+/*
+ * Motion (ADR-018): short, eased, and only where it explains a change.
+ * Controls answer hover/press in 120 ms; values (rings, bars) glide to the
+ * next reading in 320 ms; popovers and screens fade-rise in 160–200 ms.
+ * Charts never ease (they append); numbers never animate (they are read).
+ * Everything here is off under prefers-reduced-motion.
+ */
+
+:root {
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-value: 320ms;
+}
+
+/* Controls: buttons, pills, segments, tabs, chips, nav items, rows. */
+.sm-btn,
+.sm-pill,
+.sm-seg > label,
+.nav-item,
+.dev-card,
+.logs-tab,
+.logs-chip,
+.log-pill,
+.log-lvl,
+.log-picker-item,
+.dv-chip,
+.pt-row,
+.sess-row,
+.sm-tile {
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.sm-btn:active:not(:disabled),
+.log-pill:active,
+.logs-tab:active,
+.log-picker-item:active,
+.sm-seg > label:active {
+  transform: scale(0.97);
+}
+
+.nav-item:active,
+.dev-card:active {
+  transform: scale(0.99);
+}
+
+/* Values glide: ring arc, core bars, stack segments, top-app bars. */
+.sm-ring circle {
+  transition: stroke-dasharray var(--dur-value) var(--ease-out);
+}
+
+.sm-cores-bars > i > b,
+.sm-stack > i,
+.ov-bar > i,
+.perf-core-bar > i,
+.pt-cpu i {
+  transition:
+    width var(--dur-value) var(--ease-out),
+    height var(--dur-value) var(--ease-out),
+    flex-basis var(--dur-value) var(--ease-out);
+}
+
+/* Screens fade-rise on entry; cards stagger in once on connect. */
+@keyframes sm-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sm-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes sm-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.view-enter {
+  animation: sm-rise var(--dur) var(--ease-out) both;
+}
+
+.view-enter > .glass,
+.view-enter > .ov-cards > .glass,
+.view-enter > .ov-row2 > .glass,
+.view-enter > .dv-grid > .glass {
+  animation: sm-rise 240ms var(--ease-out) both;
+}
+
+.view-enter > .ov-cards > .glass:nth-child(2),
+.view-enter > .ov-row2 > .glass:nth-child(2) {
+  animation-delay: 30ms;
+}
+
+.view-enter > .ov-cards > .glass:nth-child(3),
+.view-enter > .ov-row2 > .glass:nth-child(3) {
+  animation-delay: 60ms;
+}
+
+.view-enter > .ov-cards > .glass:nth-child(4) {
+  animation-delay: 90ms;
+}
+
+/* Popovers, dialogs, status pills, and the chart's empty-state note. */
+.log-picker-panel,
+[role="dialog"].glass,
+.sm-dialog,
+.dlg {
+  animation: sm-pop 160ms var(--ease-out) both;
+  transform-origin: top left;
+}
+
+.hd-pills > li,
+.log-note,
+.dv-status,
+.sm-chart[data-empty="true"]::after {
+  animation: sm-fade var(--dur) var(--ease-out) both;
+}
+
+/* The recording dot breathes while a session records. */
+@keyframes sm-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--mint-tint, rgba(111, 211, 154, 0.35));
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px transparent;
+  }
+}
+
+.rec[data-status="recording"] .sm-dot,
+.rec[data-status="recording"] .sm-status-dot {
+  animation: sm-breathe 2.4s var(--ease-in-out) infinite;
+}
+
+/* Overlay scrollbar thumbs already fade; the hover state answers faster. */
+.sm-osb-thumb {
+  transition:
+    opacity 220ms var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur: 0ms;
+    --dur-value: 0ms;
+  }
+
+  .view-enter,
+  .view-enter > .glass,
+  .view-enter > .ov-cards > .glass,
+  .view-enter > .ov-row2 > .glass,
+  .view-enter > .dv-grid > .glass,
+  .log-picker-panel,
+  [role="dialog"].glass,
+  .sm-dialog,
+  .dlg,
+  .log-jump,
+  .hd-pills > li,
+  .log-note,
+  .dv-status,
+  .sm-chart[data-empty="true"]::after,
+  .rec[data-status="recording"] .sm-dot,
+  .rec[data-status="recording"] .sm-status-dot {
+    animation: none;
+  }
+
+  .sm-osb-thumb {
+    transition: none;
+  }
+}

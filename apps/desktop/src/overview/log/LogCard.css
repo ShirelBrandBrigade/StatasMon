@@ -201,7 +201,10 @@
   position: absolute;
   right: 12px;
   bottom: 10px;
+  background: var(--bg);
+  border-color: var(--edge);
   box-shadow: var(--shadow-card);
+  animation: sm-pop 160ms var(--ease-out) both;
 }
 
 /* Footer */

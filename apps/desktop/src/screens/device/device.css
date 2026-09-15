@@ -293,4 +293,9 @@
   .dv-spec-value {
     font-size: var(--fs-body-lg);
   }
+
+  /* Narrow cards: one field per row so values do not wrap. */
+  .dv-grid .sm-kv {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

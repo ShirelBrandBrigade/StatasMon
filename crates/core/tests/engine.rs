@@ -208,11 +208,10 @@ async fn pause_stops_storing_and_forwarding_but_keeps_live_values() {
     let msgs = drain(&mut rx, 400).await;
     assert!(msgs.iter().any(|m| matches!(&**m, Message::Event { kind: EventKind::Connection, detail, .. } if detail == "Session paused")));
     assert!(msgs.iter().any(|m| matches!(&**m, Message::Session { session, .. } if session.status == SessionStatus::Paused)));
+    // The screen keeps updating while paused: samples still reach the bus.
     assert!(
-        !msgs
-            .iter()
-            .any(|m| matches!(&**m, Message::Samples { .. } | Message::Log { .. })),
-        "samples forwarded while paused"
+        msgs.iter().any(|m| matches!(&**m, Message::Samples { .. })),
+        "samples must still be forwarded while paused"
     );
     let during = engine.snapshot("fake:iphone").unwrap();
     assert_eq!(
@@ -277,12 +276,18 @@ async fn warm_scenario_drives_the_headline_through_events() {
         vec![EventKind::ThermalChange, EventKind::MemoryWarning]
     );
     let snap = engine.snapshot("fake:android").unwrap();
+    // ADR-016: the sentence names the device; the process is in the cause.
     assert!(
-        snap.headline
-            .sentence
-            .starts_with("com.example.fieldkit got a memory warning"),
+        snap.headline.sentence.ends_with("is low on memory"),
         "{}",
         snap.headline.sentence
+    );
+    assert!(
+        snap.headline
+            .cause
+            .starts_with("fieldkit received a memory warning"),
+        "{}",
+        snap.headline.cause
     );
     assert_eq!(snap.headline.rule, "memory_warning");
     assert!(

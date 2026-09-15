@@ -183,6 +183,12 @@
   margin-left: 4px;
 }
 
+/* Follow-tail lives at the end of the tab row, so the toolbar keeps two rows at 1180 px. */
+.logs-tabs > .logs-follow {
+  align-self: center;
+  margin-left: auto;
+}
+
 .logs-selected {
   display: inline-flex;
   align-items: center;

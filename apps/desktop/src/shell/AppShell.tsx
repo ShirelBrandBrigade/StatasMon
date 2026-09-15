@@ -47,7 +47,9 @@ export function AppShell({ view, children }: { view: ViewId; children: ReactNode
   return (
     <div className="app app-mesh">
       <Sidebar view={view} />
-      <main className="main">{children}</main>
+      <main key={view} className="main view-enter">
+        {children}
+      </main>
       <Notices />
     </div>
   );

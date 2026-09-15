@@ -364,16 +364,6 @@ export function LogsBody({ deviceId, initialItemCount }: LogsBodyProps) {
               </Button>
             ) : null}
           </fieldset>
-          <Button
-            size="sm"
-            icon={followTail ? "pause" : "chevron-down"}
-            className="logs-follow"
-            aria-pressed={followTail}
-            title="Space toggles follow-tail when the list has focus"
-            onClick={toggleFollow}
-          >
-            {followTail ? "Following" : "Follow tail"}
-          </Button>
         </div>
 
         <div className="logs-tabs" role="tablist" aria-label="Apps">
@@ -403,6 +393,16 @@ export function LogsBody({ deviceId, initialItemCount }: LogsBodyProps) {
             );
           })}
           <AppPicker deviceId={deviceId} processes={log.processes} className="logs-picker" />
+          <Button
+            size="sm"
+            icon={followTail ? "pause" : "chevron-down"}
+            className="logs-follow"
+            aria-pressed={followTail}
+            title="Space toggles follow-tail when the list has focus"
+            onClick={toggleFollow}
+          >
+            {followTail ? "Following" : "Follow tail"}
+          </Button>
           {activeTab === undefined ? (
             <span className="logs-selected" data-testid="custom-selection">
               {plural(filter.processes.length, "app")} selected

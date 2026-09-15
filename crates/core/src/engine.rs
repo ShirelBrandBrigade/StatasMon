@@ -968,42 +968,44 @@ impl Engine {
             let mut r = record.lock();
             let recording = r.session.is_recording();
             match &*message {
+                // Live data always reaches the screen and the in-memory
+                // rings; recording only decides what is counted and stored.
                 Message::Samples { ts_ms, values, .. } => {
                     for v in values {
                         r.latest.insert(v.id, v.value);
                     }
                     r.latest_ts_ms = Some(*ts_ms);
+                    r.metrics.push(*ts_ms, values);
                     if recording {
-                        r.metrics.push(*ts_ms, values);
                         r.session.count_samples(1);
                         self.store_write(&message);
                         split = self.maybe_split(&mut r, *ts_ms);
                     }
                     headline = r.evaluate(window, *ts_ms);
-                    recording
+                    true
                 }
                 Message::Cores { ts_ms, cores, .. } => {
                     r.latest_cores = cores.clone();
+                    r.cores.push(*ts_ms, cores.clone());
                     if recording {
-                        r.cores.push(*ts_ms, cores.clone());
                         self.store_write(&message);
                     }
-                    recording
+                    true
                 }
                 Message::Processes { rows, .. } => {
                     r.processes = rows.clone();
                     if recording {
                         self.store_write(&message);
                     }
-                    recording
+                    true
                 }
                 Message::Log { entries, .. } => {
+                    r.logs.push(entries.iter().cloned());
                     if recording {
-                        r.logs.push(entries.iter().cloned());
                         r.session.count_logs(entries.len() as u64);
                         self.store_write(&message);
                     }
-                    recording
+                    true
                 }
                 Message::Event {
                     ts_ms,

@@ -446,3 +446,34 @@ Consequences: chart tests that compare pixel paths must expect curves;
 the Device tests target the hero (`device-hero`, `device-specs`) and the
 two capability lists; the `h1` on every device screen is the device name;
 the log tests select apps through the picker.
+
+## ADR-018 · 2026-09-15 · Always live, app-drawn scrollbars, and motion
+Status: accepted. Context: the user wants the screen to show live data
+whenever a device is connected (recording only decides what is kept), the
+Network chart went blank after the networking service dropped, the native
+scrollbars looked foreign, and the UI had no motion at all. Decisions:
+- **Every provider message is forwarded and kept in memory whatever the
+  session status.** `Engine::handle` pushes `Samples`, `Cores`,
+  `Processes` and `Log` into the rings and to the bus while Idle, Paused or
+  Stopped; only counting and store writes require Recording. The only time
+  the app shows nothing is when nothing is connected.
+- **The networking loop releases the device totals** (`net_from_networking
+  = false`) on every exit, so sysmontap's totals resume and the Network
+  chart never goes blank after a service failure or a tunnel restart.
+- **Scrollbars are drawn by the app** (`shell/overlayScrollbars.ts`): the
+  native bars are hidden on every managed container and a 6 px rounded
+  thumb on `--scroll-thumb` is placed over it, visible while scrolling or
+  hovering, fading after 900 ms, draggable, both axes. One installer
+  watches the DOM, so the page, the log lists (Virtuoso), tables, the
+  picker and the session panels all get the same bar on macOS and Windows.
+  The `::-webkit-scrollbar` rules stay only as a fallback for containers
+  the installer does not know.
+- **Motion** (`motion.css`): controls answer hover and press in 120 ms
+  (`--ease-out`); rings, core bars, stack segments and top-app bars glide
+  to the next reading in 320 ms; screens fade-rise in 200 ms with cards
+  staggered 30 ms; popovers and dialogs pop in 160 ms; the recording dot
+  breathes. Charts still append without easing and numbers never animate.
+  Everything is off under `prefers-reduced-motion`.
+Consequences: the engine test asserts that samples are forwarded while
+paused; the log follow-tail control moved to the app tab row; the docs
+for `statasmon_core` describe the new policy.

@@ -24,6 +24,7 @@ import { SessionsScreen } from "./sessions/SessionsScreen";
 import { AppShell } from "./shell/AppShell";
 import { ComingSoon } from "./shell/ComingSoon";
 import { EmptyState } from "./shell/EmptyState";
+import { installOverlayScrollbars } from "./shell/overlayScrollbars";
 import { viewFromHash } from "./shell/routes";
 import { useAppStore } from "./store/app";
 import { telemetry } from "./store/telemetry";
@@ -80,6 +81,7 @@ function useBridge() {
 export function App() {
   const hash = useHash();
   useBridge();
+  useEffect(() => installOverlayScrollbars(), []);
   const hasDevice = useAppStore((s) => s.activeDeviceId !== undefined);
   if (hash === "#gallery") return <Gallery />;
   const view = viewFromHash(hash);
