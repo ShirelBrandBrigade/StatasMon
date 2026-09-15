@@ -82,8 +82,10 @@ const ProcessRowView = memo(function ProcessRowView({
       }}
     >
       <td className="pt-app">
-        <AppTile me={me || pinned} label={row.app_id ?? undefined} />
-        <b title={row.name}>{shortName(row.name)}</b>
+        <span className="pt-app-in">
+          <AppTile me={me || pinned} label={row.app_id ?? undefined} />
+          <b title={row.name}>{shortName(row.name)}</b>
+        </span>
       </td>
       <td className="pt-id mono">
         {row.app_id ?? <Dash reason="System process without an app id" />}

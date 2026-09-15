@@ -192,14 +192,21 @@ button.pt-sort:hover,
   outline-offset: -2px;
 }
 
+/* The cell stays a real table cell (a flex `td` stops stretching to the
+   row height, so its background band sat short of its neighbours and
+   drew a step at every row edge); the flex row is an inner span. */
 .pt-app {
-  display: flex;
-  align-items: center;
-  gap: 9px;
   min-width: 160px;
 }
 
-.pt-app > b {
+.pt-app-in {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.pt-app-in > b {
   overflow: hidden;
   font-weight: 600;
   text-overflow: ellipsis;
