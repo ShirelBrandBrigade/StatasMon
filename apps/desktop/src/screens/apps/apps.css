@@ -171,17 +171,20 @@ button.pt-sort:hover,
   background: var(--cyan-tint);
 }
 
+/* Selection is a filled row with a left accent, not a per-cell outline: an
+   outline drawn cell by cell breaks at every column edge and bends around
+   the rounded first cell. */
 .pt-row.is-selected > td {
-  box-shadow:
-    inset 0 -1px 0 var(--cyan),
-    inset 0 1px 0 var(--cyan);
+  background: var(--card);
+  color: var(--fg);
 }
 
 .pt-row.is-selected > td:first-child {
-  box-shadow:
-    inset 3px 0 0 var(--cyan),
-    inset 0 -1px 0 var(--cyan),
-    inset 0 1px 0 var(--cyan);
+  box-shadow: inset 3px 0 0 var(--cyan);
+}
+
+.pt-row.is-selected:hover > td {
+  background: var(--card);
 }
 
 .pt-row:focus-visible {
