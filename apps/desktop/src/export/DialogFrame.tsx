@@ -80,7 +80,7 @@ export function DialogFrame({
   return createPortal(
     // biome-ignore lint/a11y/noStaticElementInteractions: the scrim is a mouse-only "close" target; the keyboard path is Escape (handled on the dialog) and the Close button.
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-bg/70 p-6"
+      className="sm-scrim fixed inset-0 z-50 flex items-center justify-center bg-bg/70 p-6"
       data-testid={testId}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();

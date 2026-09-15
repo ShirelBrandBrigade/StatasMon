@@ -155,7 +155,12 @@ export function SessionsScreen() {
         className="sess-detail-card"
       >
         {detail ? (
-          <SessionDetailPanel detail={detail} others={others} onExport={exportSession} />
+          <SessionDetailPanel
+            key={detail.summary.id}
+            detail={detail}
+            others={others}
+            onExport={exportSession}
+          />
         ) : (
           <p className="sess-empty m-0">
             Open a session to see its device, marks, events and metrics.

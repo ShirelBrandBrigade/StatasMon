@@ -1,5 +1,5 @@
-import { Button, cx, Icon } from "@statasmon/ui";
-import { useState } from "react";
+import { Button, cx, Icon, positionThumb } from "@statasmon/ui";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { commands } from "../bridge/commands";
 import { useAppStore } from "../store/app";
@@ -11,6 +11,13 @@ import { RecordingCard } from "./RecordingCard";
 import { hashForView, VIEWS, type ViewId } from "./routes";
 
 export function Sidebar({ view }: { view: ViewId }) {
+  const navRef = useRef<HTMLDivElement>(null);
+  // The active-view highlight glides between nav items.
+  useLayoutEffect(() => {
+    const el = navRef.current;
+    positionThumb(el, el?.querySelector(".nav-item.is-on") ?? null);
+  }, [view]);
+
   const { order, devices, activeDeviceId, setActive } = useAppStore(
     useShallow((s) => ({
       order: s.order,
@@ -77,7 +84,7 @@ export function Sidebar({ view }: { view: ViewId }) {
 
       <nav className="side-group" aria-label="Views">
         <h2 className="section-label side-h">Views</h2>
-        <div className="nav-list">
+        <div className="nav-list" ref={navRef}>
           {VIEWS.map((v) => (
             <a
               key={v.id}

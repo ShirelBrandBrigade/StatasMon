@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 import { getStream, startBridge } from "./bridge";
 import { dispatchedCount } from "./bridge/dispatch";
 import { ExportDialog } from "./export/ExportDialog";
@@ -41,10 +42,28 @@ const OVERVIEW_SLOTS: OverviewSlots = {
   log: LogCard,
 };
 
+/** Page changes crossfade through the View Transitions API where the webview has it. */
 function useHash(): string {
   const [hash, setHash] = useState(() => window.location.hash);
   useEffect(() => {
-    const onHash = () => setHash(window.location.hash);
+    const onHash = () => {
+      const apply = () => flushSync(() => setHash(window.location.hash));
+      const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      if (
+        !reduced &&
+        document.visibilityState === "visible" &&
+        typeof document.startViewTransition === "function"
+      ) {
+        // A transition can be skipped by the browser (another one running,
+        // the window hidden); the update still happens, so swallow that.
+        const t = document.startViewTransition(apply);
+        t.ready.catch(() => undefined);
+        t.updateCallbackDone.catch(() => undefined);
+        t.finished.catch(() => undefined);
+      } else {
+        apply();
+      }
+    };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);

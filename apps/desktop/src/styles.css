@@ -283,9 +283,42 @@ body,
 }
 
 .nav-list {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+/* Sliding highlight behind the active view (positionThumb sets the variables). */
+.nav-list::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: var(--thumb-w, 0px);
+  height: var(--thumb-h, 0px);
+  border: 1px solid var(--edge);
+  border-radius: var(--r-ctl);
+  background: var(--card);
+  transform: translate(var(--thumb-x, 0px), var(--thumb-y, 0px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav-list[data-thumb="on"]::before {
+  opacity: 1;
+}
+
+.nav-list[data-thumb-ready="true"]::before {
+  transition:
+    transform 280ms var(--ease-out),
+    height 280ms var(--ease-out);
+}
+
+.nav-list > .nav-item {
+  position: relative;
+  z-index: 1;
 }
 
 .nav-item {
@@ -307,9 +340,12 @@ body,
 }
 
 .nav-item.is-on {
+  color: var(--fg);
+}
+
+.nav-list:not([data-thumb="on"]) > .nav-item.is-on {
   background: var(--card);
   border-color: var(--edge);
-  color: var(--fg);
 }
 
 .nav-item:focus-visible {

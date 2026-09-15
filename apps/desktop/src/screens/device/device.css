@@ -142,43 +142,48 @@
   text-overflow: ellipsis;
 }
 
-/* Grouped cards: two balanced columns (a multi-column flow, so no card
-   leaves a hole under a shorter neighbour) and two fields per row. */
+/* Grouped cards: packed by Masonry (shortest column first), so a short
+   card never leaves a hole beside a tall one. Inside a card the fields sit
+   on one grid (label · value · label · value) so labels and values line up
+   down the whole card, not just within their own row. */
 .dv-grid {
   flex-shrink: 0;
-  columns: 2;
-  column-gap: var(--gap-card);
-}
-
-.dv-grid > .sm-card {
-  break-inside: avoid;
-  margin-bottom: var(--gap-card);
 }
 
 .dv-grid .sm-kv {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 28px;
-  row-gap: 7px;
+  grid-template-columns: max-content minmax(0, 1fr) max-content minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 0;
+  align-items: baseline;
 }
 
 .dv-grid .sm-kv > div {
-  min-width: 0;
-  padding: 3px 0;
-  border-bottom: 1px solid var(--edge);
+  display: contents;
 }
 
-.dv-grid .sm-kv > div > span:first-child {
-  flex-shrink: 0;
+.dv-grid .sm-kv > div > span:first-child,
+.dv-grid .sm-kv-value {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--edge);
+  min-width: 0;
+}
+
+.dv-grid .sm-kv > div:nth-child(odd) > .sm-kv-value {
+  margin-right: 16px;
+}
+
+.dv-grid .sm-kv > div:nth-last-child(-n + 2) > span {
+  border-bottom: 0;
 }
 
 .dv-grid .sm-kv-value {
-  min-width: 0;
   flex-shrink: 1;
   justify-content: flex-end;
   text-align: right;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Capabilities: available ones as chips, missing ones with their reason. */
@@ -294,8 +299,20 @@
     font-size: var(--fs-body-lg);
   }
 
-  /* Narrow cards: one field per row so values do not wrap. */
+  /* Narrow cards: one field per row. */
   .dv-grid .sm-kv {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+
+  .dv-grid .sm-kv > div:nth-child(odd) > .sm-kv-value {
+    margin-right: 0;
+  }
+
+  .dv-grid .sm-kv > div:nth-last-child(-n + 2) > span {
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .dv-grid .sm-kv > div:last-child > span {
+    border-bottom: 0;
   }
 }

@@ -477,3 +477,28 @@ scrollbars looked foreign, and the UI had no motion at all. Decisions:
 Consequences: the engine test asserts that samples are forwarded while
 paused; the log follow-tail control moved to the app tab row; the docs
 for `statasmon_core` describe the new policy.
+
+## ADR-019 · 2026-09-15 · Packed card layouts and continuous motion
+Status: accepted. Context: the Device and Settings pages still left holes
+beside short cards and their fields did not line up; page and tab changes
+were cuts. Decisions:
+- **`Masonry` (`shell/Masonry.tsx`)** packs cards by placing each one under
+  the shortest column so far, in document order, on a 2 px CSS grid with
+  explicit column and row spans measured by a ResizeObserver; columns come
+  from the available width (`minColumnWidth`, `maxColumns`). The Device
+  sheet and Settings use it. Inside a Device card the fields sit on one
+  grid (label · value · label · value) so labels and values align down the
+  whole card; one field per row under 1320 px.
+- **Sliding highlights** (`positionThumb` in `packages/ui`): the range
+  segment, the sidebar nav and the log app tabs draw one thumb that glides
+  to the active item (260–280 ms) instead of restyling the item.
+- **Page changes crossfade** through the View Transitions API when the
+  webview has it (WKWebView on macOS 15+, WebView2): the old page fades up
+  and out in 140 ms, the new one fades in from 8 px below in 240 ms, the
+  sidebar is excluded. Without the API the page still fade-rises.
+- **Everything that appears or changes subject moves**: dialog scrims
+  fade under the popping dialog, the session and app detail panels re-enter
+  when their subject changes (keyed remounts), chart tooltips fade instead
+  of vanishing, the primary button lifts 1 px on hover.
+Consequences: all of it is off under `prefers-reduced-motion`; the
+Masonry container is `data-testid="masonry"` for tests.

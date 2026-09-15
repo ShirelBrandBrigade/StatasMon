@@ -113,6 +113,7 @@ export function AppsBody({ deviceId, initialItemCount }: AppsBodyProps) {
       {detailRow ? (
         <Card className="apps-card">
           <AppDetail
+            key={selectedPid ?? "none"}
             deviceId={deviceId}
             row={detailRow}
             exited={!live}

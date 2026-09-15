@@ -23,3 +23,4 @@ export {
   toneColor,
   toneTint,
 } from "./components/tokens";
+export { positionThumb } from "./slidingThumb";

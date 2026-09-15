@@ -1,12 +1,13 @@
 import "../../overview/log/LogCard.css";
 import "./logs.css";
 import type { LogEntry, LogLevel } from "@statasmon/protocol";
-import { AppTile, Button, Card, Dash, levelMeta, toneColor } from "@statasmon/ui";
+import { AppTile, Button, Card, Dash, levelMeta, positionThumb, toneColor } from "@statasmon/ui";
 import {
   type CSSProperties,
   type KeyboardEvent,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -151,6 +152,12 @@ export function LogsBody({ deviceId, initialItemCount }: LogsBodyProps) {
     [log.processes, filter.processes, appNames],
   );
   const activeTab = activeTabId(tabs, filter.processes);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  // The selected-tab highlight glides between tabs.
+  useLayoutEffect(() => {
+    const el = tabsRef.current;
+    positionThumb(el, el?.querySelector('.logs-tab[aria-selected="true"]') ?? null);
+  }, [activeTab, tabs]);
 
   const jumpToLatest = useCallback(() => {
     listRef.current?.scrollToIndex({ index: "LAST", align: "end" });
@@ -366,7 +373,7 @@ export function LogsBody({ deviceId, initialItemCount }: LogsBodyProps) {
           </fieldset>
         </div>
 
-        <div className="logs-tabs" role="tablist" aria-label="Apps">
+        <div className="logs-tabs" role="tablist" aria-label="Apps" ref={tabsRef}>
           {tabs.map((t) => {
             const on = t.id === activeTab;
             const count =

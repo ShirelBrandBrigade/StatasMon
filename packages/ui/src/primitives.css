@@ -301,6 +301,7 @@
 
 /* Segment: native radio inputs, visually covered by their labels. */
 .sm-seg {
+  position: relative;
   display: inline-flex;
   margin: 0;
   padding: 2px;
@@ -313,8 +314,35 @@
   font-family: var(--font-ui);
 }
 
+/* The sliding highlight (positionThumb sets the --thumb-* variables). */
+.sm-seg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--thumb-w, 0px);
+  height: var(--thumb-h, 0px);
+  border-radius: var(--r-inner);
+  background: var(--fg);
+  transform: translate(var(--thumb-x, 0px), var(--thumb-y, 0px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sm-seg[data-thumb="on"]::before {
+  opacity: 1;
+}
+
+.sm-seg[data-thumb-ready="true"]::before {
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    width 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    height 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
 .sm-seg > label {
   position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   min-height: 32px;
@@ -340,8 +368,12 @@
 }
 
 .sm-seg > label[data-checked="true"] {
-  background: var(--fg);
   color: var(--bg);
+}
+
+/* Without the thumb (no layout yet) the checked label still reads as selected. */
+.sm-seg:not([data-thumb="on"]) > label[data-checked="true"] {
+  background: var(--fg);
 }
 
 .sm-seg > label > input:focus-visible + span {

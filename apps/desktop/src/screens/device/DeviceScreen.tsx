@@ -5,6 +5,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { commands } from "../../bridge/commands";
 import { useActiveDevice, useDevice } from "../../hooks/useDevice";
 import { deviceIcon, transportLabel } from "../../shell/format";
+import { Masonry } from "../../shell/Masonry";
 import { TopBar } from "../../shell/TopBar";
 import {
   capabilityLabel,
@@ -232,7 +233,7 @@ export function DeviceScreen({ deviceId }: { deviceId?: string }) {
         </div>
       </Card>
 
-      <div className="dv-grid">
+      <Masonry className="dv-grid" minColumnWidth={400} maxColumns={3}>
         <Card title="Identity" aria-label="Identity">
           <KeyValue rows={toRows(identityRows(info))} />
         </Card>
@@ -277,7 +278,7 @@ export function DeviceScreen({ deviceId }: { deviceId?: string }) {
             </>
           )}
         </Card>
-      </div>
+      </Masonry>
       <Card
         title="Raw"
         subtitle={`${raw.length} keys`}

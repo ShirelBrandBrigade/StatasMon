@@ -132,11 +132,44 @@
 
 /* Per-app tabs. */
 .logs-tabs {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
   padding-bottom: 6px;
   border-bottom: 1px solid var(--edge);
+}
+
+/* Sliding highlight behind the selected tab. */
+.logs-tabs::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: var(--thumb-w, 0px);
+  height: var(--thumb-h, 0px);
+  border: 1px solid var(--edge);
+  border-radius: var(--r-ctl);
+  background: var(--card);
+  transform: translate(var(--thumb-x, 0px), var(--thumb-y, 0px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.logs-tabs[data-thumb="on"]::before {
+  opacity: 1;
+}
+
+.logs-tabs[data-thumb-ready="true"]::before {
+  transition:
+    transform 260ms var(--ease-out),
+    width 260ms var(--ease-out);
+}
+
+.logs-tabs > .logs-tab {
+  position: relative;
+  z-index: 1;
 }
 
 .logs-tab {
@@ -161,9 +194,12 @@
 }
 
 .logs-tab[aria-selected="true"] {
+  color: var(--fg);
+}
+
+.logs-tabs:not([data-thumb="on"]) > .logs-tab[aria-selected="true"] {
   background: var(--card);
   border-color: var(--edge);
-  color: var(--fg);
 }
 
 .logs-tab:focus-visible {

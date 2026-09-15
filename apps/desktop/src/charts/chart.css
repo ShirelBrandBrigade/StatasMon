@@ -62,8 +62,17 @@
   pointer-events: none;
 }
 
+/* Hidden tips fade instead of vanishing (the attribute stays for tests/a11y). */
+.sm-chart-tip {
+  transition:
+    opacity 120ms ease-out,
+    visibility 120ms;
+}
+
 .sm-chart-tip[hidden] {
-  display: none;
+  display: flex;
+  opacity: 0;
+  visibility: hidden;
 }
 
 .sm-chart-tip-time {

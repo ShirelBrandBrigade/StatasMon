@@ -1,4 +1,5 @@
-import { type FieldsetHTMLAttributes, useId } from "react";
+import { type FieldsetHTMLAttributes, useId, useLayoutEffect, useRef } from "react";
+import { positionThumb } from "../slidingThumb";
 import { cx } from "./tokens";
 
 export interface SegmentOption<T extends string> {
@@ -28,8 +29,19 @@ export function Segment<T extends string>({
   ...rest
 }: SegmentProps<T>) {
   const group = useId();
+  const ref = useRef<HTMLFieldSetElement>(null);
+  // The highlight glides to the checked option (and follows resizes).
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const place = () => positionThumb(el, el?.querySelector('[data-checked="true"]') ?? null);
+    place();
+    if (!el || typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(place);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [value, options]);
   return (
-    <fieldset className={cx("sm-seg", className)} aria-label={name} {...rest}>
+    <fieldset ref={ref} className={cx("sm-seg", className)} aria-label={name} {...rest}>
       {options.map((o) => {
         const checked = o.value === value;
         return (

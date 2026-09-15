@@ -160,6 +160,63 @@
   animation: sm-breathe 2.4s var(--ease-in-out) infinite;
 }
 
+/* Page crossfade (View Transitions): the sidebar stays put, the page slides. */
+.side {
+  view-transition-name: sidebar;
+}
+
+::view-transition-old(root) {
+  animation: sm-vt-out 140ms var(--ease-in-out) both;
+}
+
+::view-transition-new(root) {
+  animation: sm-vt-in 240ms var(--ease-out) both;
+}
+
+::view-transition-old(sidebar),
+::view-transition-new(sidebar) {
+  animation: none;
+}
+
+@keyframes sm-vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes sm-vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* Detail panels re-enter when their subject changes (keyed remounts). */
+.sess-detail,
+.ad {
+  animation: sm-rise var(--dur) var(--ease-out) both;
+}
+
+/* Dialog scrim fades under the popping dialog. */
+.sm-scrim {
+  animation: sm-fade 160ms var(--ease-out) both;
+}
+
+/* Masonry cards settle into place when the pack changes. */
+.sm-masonry {
+  display: grid;
+  align-items: start;
+}
+
+.sm-masonry > * {
+  transition: none;
+}
+
+.sm-btn.is-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
 /* Overlay scrollbar thumbs already fade; the hover state answers faster. */
 .sm-osb-thumb {
   transition:
@@ -193,7 +250,16 @@
     animation: none;
   }
 
-  .sm-osb-thumb {
+  .sm-osb-thumb,
+  .sm-chart-tip,
+  .sm-seg::before,
+  .nav-list::before,
+  .logs-tabs::before {
     transition: none;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
   }
 }

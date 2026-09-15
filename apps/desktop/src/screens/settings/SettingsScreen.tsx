@@ -1,3 +1,4 @@
+import { Masonry } from "../../shell/Masonry";
 import "./settings.css";
 import { formatValue, type Settings } from "@statasmon/protocol";
 import { Button, Card, Dash, KeyValue } from "@statasmon/ui";
@@ -230,7 +231,7 @@ export function SettingsScreen() {
         </p>
       ) : null}
 
-      <div className="st-grid">
+      <Masonry className="st-grid" minColumnWidth={400} maxColumns={3}>
         <Card title="Sampling" subtitle="applies at the next launch" aria-label="Sampling">
           <p className="st-note">
             Cadence handed to devices when they connect. Saved values are read when the app starts;
@@ -381,7 +382,7 @@ export function SettingsScreen() {
             docs/DESIGN-SYSTEM.md, docs/research (what each platform can report).
           </p>
         </Card>
-      </div>
+      </Masonry>
     </div>
   );
 }
