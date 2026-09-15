@@ -94,6 +94,15 @@
   color: var(--mut);
 }
 
+/* Units differ in width ("h", "days", "GB"): a fixed unit column keeps
+   every input on the same left and right edge down the card. */
+.st-field-control > span {
+  display: inline-block;
+  width: 34px;
+  font-size: var(--fs-subtitle);
+  white-space: nowrap;
+}
+
 .st-field-hint {
   grid-area: hint;
   color: var(--dim);
