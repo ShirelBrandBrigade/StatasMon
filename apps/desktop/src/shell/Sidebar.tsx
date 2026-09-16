@@ -13,6 +13,7 @@ import { hashForView, VIEWS, type ViewId } from "./routes";
 export function Sidebar({ view }: { view: ViewId }) {
   const navRef = useRef<HTMLDivElement>(null);
   // The active-view highlight glides between nav items.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the active item is read from the DOM; `view` says when to re-read it.
   useLayoutEffect(() => {
     const el = navRef.current;
     positionThumb(el, el?.querySelector(".nav-item.is-on") ?? null);

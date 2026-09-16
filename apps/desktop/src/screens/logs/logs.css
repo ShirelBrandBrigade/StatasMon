@@ -167,12 +167,9 @@
     width 260ms var(--ease-out);
 }
 
-.logs-tabs > .logs-tab {
+.logs-tab {
   position: relative;
   z-index: 1;
-}
-
-.logs-tab {
   display: inline-flex;
   align-items: center;
   gap: 7px;

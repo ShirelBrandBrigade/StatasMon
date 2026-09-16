@@ -167,6 +167,7 @@ export function LogsBody({ deviceId, initialItemCount }: LogsBodyProps) {
   const activeTab = activeTabId(tabs, filter.processes);
   const tabsRef = useRef<HTMLDivElement>(null);
   // The selected-tab highlight glides between tabs.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the selected tab is read from the DOM; `activeTab` and `tabs` say when to re-read it.
   useLayoutEffect(() => {
     const el = tabsRef.current;
     positionThumb(el, el?.querySelector('.logs-tab[aria-selected="true"]') ?? null);

@@ -173,7 +173,12 @@
   animation: sm-vt-in 240ms var(--ease-out) both;
 }
 
-::view-transition-old(sidebar),
+/* biome-ignore lint/correctness/noUnknownTypeSelector: a view-transition group name, not a type selector */
+::view-transition-old(sidebar) {
+  animation: none;
+}
+
+/* biome-ignore lint/correctness/noUnknownTypeSelector: a view-transition group name, not a type selector */
 ::view-transition-new(sidebar) {
   animation: none;
 }

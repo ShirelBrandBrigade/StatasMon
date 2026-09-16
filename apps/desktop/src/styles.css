@@ -316,12 +316,9 @@ body,
     height 280ms var(--ease-out);
 }
 
-.nav-list > .nav-item {
+.nav-item {
   position: relative;
   z-index: 1;
-}
-
-.nav-item {
   display: flex;
   align-items: center;
   gap: 10px;

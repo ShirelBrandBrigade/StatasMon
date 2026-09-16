@@ -169,14 +169,6 @@
   min-width: 0;
 }
 
-.dv-grid .sm-kv > div:nth-child(odd) > .sm-kv-value {
-  margin-right: 16px;
-}
-
-.dv-grid .sm-kv > div:nth-last-child(-n + 2) > span {
-  border-bottom: 0;
-}
-
 .dv-grid .sm-kv-value {
   flex-shrink: 1;
   justify-content: flex-end;
@@ -184,6 +176,14 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.dv-grid .sm-kv > div:nth-child(odd) > .sm-kv-value {
+  margin-right: 16px;
+}
+
+.dv-grid .sm-kv > div:nth-last-child(-n + 2) > span {
+  border-bottom: 0;
 }
 
 /* Capabilities: available ones as chips, missing ones with their reason. */

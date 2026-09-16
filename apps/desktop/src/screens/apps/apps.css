@@ -236,7 +236,6 @@ button.pt-sort:hover,
   overflow: hidden;
   border-radius: 3px;
   background: var(--bar-track);
-  vertical-align: middle;
 }
 
 .pt-cpu-val {

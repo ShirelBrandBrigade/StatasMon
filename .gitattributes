@@ -1,2 +1,14 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Keep LF in every checkout (Windows runners otherwise get CRLF and Biome's
+# formatter rejects every file). Binary assets are marked so git never
+# touches their bytes.
+* text=auto eol=lf
+*.sh text eol=lf
+*.png binary
+*.icns binary
+*.ico binary
+*.plist binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.dmg binary
+*.jsonl -text
