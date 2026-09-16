@@ -39,8 +39,10 @@ test("draws one line and one label chip per visible marker, at most MAX_MARKERS"
   const markers = [
     // Far enough apart that neither chip overlaps the other (an overlapping
     // chip is skipped on purpose; see drawMarkers).
-    { tsMs: T0 + 1000, label: "Mark 1", tone: "info" as const },
-    { tsMs: T0 + 8000, label: "Thermal", tone: "warn" as const },
+    // The window is 30 s ending at the newest sample (T0 + 9 s); one chip
+    // near the left, one near the right, so neither collides with the other.
+    { tsMs: T0 - 15_000, label: "Mark 1", tone: "info" as const },
+    { tsMs: T0 + 5000, label: "Thermal", tone: "warn" as const },
     { tsMs: T0 - 60_000, label: "Old", tone: "bad" as const }, // outside the window
   ];
   const props = {
