@@ -31,6 +31,7 @@ export function Segment<T extends string>({
   const group = useId();
   const ref = useRef<HTMLFieldSetElement>(null);
   // The highlight glides to the checked option (and follows resizes).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `value` and `options` are read through the DOM, but a change in either must re-place the thumb.
   useLayoutEffect(() => {
     const el = ref.current;
     const place = () => positionThumb(el, el?.querySelector('[data-checked="true"]') ?? null);

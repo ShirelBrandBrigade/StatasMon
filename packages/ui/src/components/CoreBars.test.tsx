@@ -17,6 +17,8 @@ test("CoreBars labels P/E cores, colors them and reports offline cores", () => {
   const e0 = screen.getByRole("img", { name: "E0 31%" });
   expect(e0.querySelector("b")?.style.background).toBe("var(--cyan-2)");
   expect(screen.getByRole("img", { name: "E1 offline" })).toHaveClass("is-offline");
-  expect(screen.getByText("P0 P1")).toBeInTheDocument();
-  expect(screen.getByText("E0 E1")).toBeInTheDocument();
+  // One label per bar, in core order, so each sits under its own bar.
+  expect(
+    Array.from(document.querySelectorAll(".sm-cores-labels > span")).map((s) => s.textContent),
+  ).toEqual(["E0", "E1", "P0", "P1"]);
 });

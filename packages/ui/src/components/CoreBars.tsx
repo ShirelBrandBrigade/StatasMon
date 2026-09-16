@@ -1,5 +1,5 @@
 import type { CoreKind } from "@statasmon/protocol";
-import type { HTMLAttributes } from "react";
+import type { CSSProperties, HTMLAttributes } from "react";
 import { clamp, cx, seriesColor } from "./tokens";
 
 export interface CoreBar {
@@ -25,14 +25,12 @@ export function coreLabel(core: CoreBar, cores: CoreBar[]): string {
 /** One 44px bar per core: performance in cyan, efficiency in cyan-2, labelled P0… / E0…. */
 export function CoreBars({ cores, className, ...rest }: CoreBarsProps) {
   const sorted = [...cores].sort((a, b) => a.index - b.index);
-  const groups = new Map<CoreKind, string[]>();
-  for (const c of sorted) {
-    const list = groups.get(c.kind) ?? [];
-    list.push(coreLabel(c, sorted));
-    groups.set(c.kind, list);
-  }
   return (
-    <div className={cx("sm-cores", className)} {...rest}>
+    <div
+      className={cx("sm-cores", className)}
+      style={{ "--cores": sorted.length } as CSSProperties}
+      {...rest}
+    >
       <div className="sm-cores-bars">
         {sorted.map((c) => {
           const label = coreLabel(c, sorted);
@@ -56,9 +54,9 @@ export function CoreBars({ cores, className, ...rest }: CoreBarsProps) {
           );
         })}
       </div>
-      <div className="sm-cores-labels mono">
-        {[...groups.entries()].map(([kind, labels]) => (
-          <span key={kind}>{labels.join(" ")}</span>
+      <div className="sm-cores-labels mono" aria-hidden>
+        {sorted.map((c) => (
+          <span key={c.index}>{coreLabel(c, sorted)}</span>
         ))}
       </div>
     </div>

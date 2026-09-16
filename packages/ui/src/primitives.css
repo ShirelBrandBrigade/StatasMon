@@ -113,15 +113,17 @@
   min-width: 0;
 }
 
+/* Bars and labels share one grid (one column per core) so each label sits
+   exactly under its bar. */
 .sm-cores-bars {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(var(--cores, 6), minmax(0, 1fr));
   gap: 5px;
-  align-items: flex-end;
+  align-items: end;
   height: 44px;
 }
 
 .sm-cores-bars > i {
-  flex: 1;
   position: relative;
   height: 100%;
   overflow: hidden;
@@ -142,11 +144,10 @@
 }
 
 .sm-cores-labels {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(var(--cores, 6), minmax(0, 1fr));
+  gap: 5px;
   min-width: 0;
-  flex-wrap: nowrap;
   white-space: nowrap;
   font-size: var(--fs-axis);
   color: var(--dim);
@@ -155,7 +156,7 @@
 .sm-cores-labels > * {
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-align: center;
 }
 
 /* KeyValue */
