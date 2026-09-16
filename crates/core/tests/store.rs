@@ -80,7 +80,17 @@ async fn records_three_seconds_and_lists_one_session_per_device() {
         "{ids:?}"
     );
 
-    // While live: listed as live with the in-memory counters.
+    // While live: listed as live with the in-memory counters. The index is
+    // written by the store's thread, so let it catch up first (Windows
+    // runners are slow enough to list nothing otherwise).
+    let store = engine.store().unwrap();
+    tokio::task::spawn_blocking({
+        let store = Arc::clone(&store);
+        move || store.flush()
+    })
+    .await
+    .unwrap()
+    .unwrap();
     let live = engine.session_summaries().unwrap();
     assert_eq!(live.len(), 3, "{live:?}");
     assert!(live.iter().all(|s| s.live && s.ended_at_ms.is_none()));
@@ -219,12 +229,32 @@ async fn splits_the_session_at_the_recording_cap() {
     .await
     .unwrap()
     .unwrap();
-    let sessions = engine.session_summaries().unwrap();
+    // The split-off session is ended by the store thread; give it up to 5 s.
+    let mut sessions = engine.session_summaries().unwrap();
+    for _ in 0..50 {
+        let ended_all = sessions.iter().filter(|s| !s.live).count() >= 1
+            && sessions
+                .iter()
+                .filter(|s| !s.live)
+                .all(|s| s.ended_at_ms.is_some());
+        if ended_all {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(100)).await;
+        tokio::task::spawn_blocking({
+            let store = Arc::clone(&store);
+            move || store.flush()
+        })
+        .await
+        .unwrap()
+        .unwrap();
+        sessions = engine.session_summaries().unwrap();
+    }
     assert!(sessions.len() >= 2, "{sessions:?}");
     let ended: Vec<_> = sessions.iter().filter(|s| !s.live).collect();
     assert!(!ended.is_empty());
     for s in &ended {
-        assert!(s.ended_at_ms.is_some());
+        assert!(s.ended_at_ms.is_some(), "{s:?}");
         assert!(
             s.elapsed_ms >= 2000 && s.elapsed_ms < 3500,
             "{} elapsed {}",
