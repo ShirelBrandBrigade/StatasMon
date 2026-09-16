@@ -83,7 +83,6 @@ async fn records_three_seconds_and_lists_one_session_per_device() {
     // While live: listed as live with the in-memory counters. The index is
     // written by the store's thread, so let it catch up first (Windows
     // runners are slow enough to list nothing otherwise).
-    let store = engine.store().unwrap();
     tokio::task::spawn_blocking({
         let store = Arc::clone(&store);
         move || store.flush()
