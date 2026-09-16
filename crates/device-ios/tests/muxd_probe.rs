@@ -14,7 +14,13 @@ async fn unreachable_usbmuxd_is_driver_missing() {
     let err = disc.probe().await.unwrap_err();
     assert!(matches!(err, IosError::MuxdUnavailable(_)));
     assert_eq!(err.code(), ErrorCode::DriverMissing);
-    assert!(err.hint().unwrap().contains("iTunes"));
+    // The hint names what this OS needs (ADR-021): the Apple Devices app or
+    // iTunes on Windows, usbmuxd on Linux, a reconnect on macOS.
+    assert_eq!(
+        err.hint().as_deref(),
+        Some(statasmon_device_ios::error::muxd_hint())
+    );
+    assert!(err.hint().unwrap().contains("reconnect"));
 }
 
 #[tokio::test]
