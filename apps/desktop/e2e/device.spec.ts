@@ -61,7 +61,8 @@ test("shows the fake iPhone's identity, software, hardware, state and connection
   await expect(connection).toContainText(/ago|just now/);
   await expect(connection).toContainText("statasmon-device-fake 0.1.0");
 
-  const caps = page.getByRole("list", { name: "Capability list" });
+  // Capabilities: available ones as chips, missing ones with their reason (ADR-017).
+  const caps = page.getByRole("region", { name: "Capabilities" });
   await expect(caps).toHaveAttribute("data-count", "27");
   await expect(caps.locator('[data-capability="cpu_frequency"]')).toContainText(
     "iOS does not report core frequencies to the host",
@@ -84,17 +85,18 @@ test("switching to the fake iPad shows its capability reasons and raw keys copy 
   );
   await expect(page.getByTestId("device-screen")).toHaveAttribute("data-device-id", "fake:ipad");
 
-  const caps = page.getByRole("list", { name: "Capability list" });
+  const caps = page.getByRole("region", { name: "Capabilities" });
   await expect(caps).toHaveAttribute("data-count", "27", { timeout: 15_000 });
   await expect(caps.locator('[data-available="false"]')).toHaveCount(15);
   await expect(caps.locator('[data-available="true"]')).toHaveCount(12);
-  await expect(page.getByRole("region", { name: "Capabilities" })).toContainText(
-    "12 of 27 available",
-  );
+  await expect(caps).toContainText("12 of 27 available");
   const cpu = caps.locator('[data-capability="cpu_total"]');
   await expect(cpu).toHaveAttribute("data-available", "false");
   await expect(cpu).toContainText("Developer Mode is off on this iPad");
-  await expect(caps.locator('[data-capability="logs"]')).toContainText("Available");
+  // Available capabilities are chips inside the "Available capabilities" list.
+  await expect(
+    caps.getByRole("list", { name: "Available capabilities" }).locator('[data-capability="logs"]'),
+  ).toContainText("Logs");
 
   const stateGroup = page.getByRole("region", { name: "State" });
   await expect(stateGroup.getByText("No")).toBeVisible(); // Developer Mode off
