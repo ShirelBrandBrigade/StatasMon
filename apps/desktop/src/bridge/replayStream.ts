@@ -396,7 +396,16 @@ class ReplayState {
   }
 
   private storedSessions(): SessionSummary[] {
-    if (!this.stored) this.stored = syntheticStoredSessions(Date.now());
+    if (!this.stored) {
+      // "Yesterday" relative to the replayed sessions' own clock, not the
+      // wall clock: a fixture recorded weeks ago must still list its live
+      // sessions above the stored ones.
+      let now = 0;
+      for (const s of this.sessions.values()) {
+        if (s.started_at_ms !== null) now = Math.max(now, s.started_at_ms);
+      }
+      this.stored = syntheticStoredSessions(now || Date.now());
+    }
     return this.stored;
   }
 

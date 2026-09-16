@@ -16,7 +16,7 @@ test.beforeEach(async ({ page }) => {
 test("lists three devices and shows the active headline", async ({ page }) => {
   const devices = page.getByRole("list", { name: "Devices" }).getByRole("button");
   await expect(devices).toHaveCount(3);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(/iPhone 16 Pro|iPad|Galaxy/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(/iPhone|iPad|Galaxy/);
   await expect(page.getByRole("region", { name: "Recording" })).toContainText(
     /Recording|Paused|Idle/,
   );

@@ -27,7 +27,9 @@ test("shows the fake iPhone's identity, software, hardware, state and connection
 
   // The shared header names the device; the hero names the model (ADR-016/017).
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Elia's iPhone");
-  await expect(page.getByRole("heading", { level: 2 })).toHaveText("iPhone 16 Pro");
+  await expect(page.getByTestId("device-hero").getByRole("heading", { level: 2 })).toHaveText(
+    "iPhone 16 Pro",
+  );
   await expect(page.getByTestId("device-screen")).toHaveAttribute("data-device-id", "fake:iphone");
 
   const identity = page.getByRole("region", { name: "Identity" });
@@ -77,7 +79,9 @@ test("switching to the fake iPad shows its capability reasons and raw keys copy 
     .getByRole("button", { name: /Elia's iPad/ })
     .click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Elia's iPad");
-  await expect(page.getByRole("heading", { level: 2 })).toHaveText("iPad (10th generation)");
+  await expect(page.getByTestId("device-hero").getByRole("heading", { level: 2 })).toHaveText(
+    "iPad (10th generation)",
+  );
   await expect(page.getByTestId("device-screen")).toHaveAttribute("data-device-id", "fake:ipad");
 
   const caps = page.getByRole("list", { name: "Capability list" });
@@ -123,5 +127,5 @@ test("Refresh asks the fake device for fresh information", async ({ page }) => {
   await page.getByRole("button", { name: "Refresh" }).click();
   // The replay answers device_action with null (no error), so the sheet reports success.
   await expect(page.getByRole("status")).toHaveText("Refreshed");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("iPhone 16 Pro");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Elia's iPhone");
 });
