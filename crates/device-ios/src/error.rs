@@ -50,17 +50,29 @@ impl IosError {
     /// A user-facing next step, when there is one.
     pub fn hint(&self) -> Option<String> {
         match self {
-            IosError::MuxdUnavailable(_) => Some(
-                "On Windows install iTunes or the Apple Devices app (Apple Mobile Device Support); on macOS usbmuxd is built in."
-                    .to_owned(),
-            ),
+            IosError::MuxdUnavailable(_) => Some(muxd_hint().to_owned()),
             IosError::NotPaired(_) => {
                 Some("Unlock the device and tap Trust when asked about this computer.".to_owned())
             }
             IosError::DeveloperModeOff => Some(
-                "Settings → Privacy & Security → Developer Mode, then restart the device.".to_owned(),
+                "Settings → Privacy & Security → Developer Mode, then restart the device."
+                    .to_owned(),
             ),
             _ => None,
         }
+    }
+}
+
+/// What this computer needs before iPhones and iPads can be seen. The Apple
+/// USB layer (usbmuxd) cannot ship inside the app: on macOS it is part of the
+/// system, on Windows it comes with Apple's free Apple Devices app or iTunes,
+/// on Linux it is the `usbmuxd` package (ADR-021).
+pub fn muxd_hint() -> &'static str {
+    if cfg!(target_os = "windows") {
+        "iPhones and iPads need Apple's USB driver on Windows: install the free Apple Devices app from the Microsoft Store (or iTunes from apple.com), then reconnect the device."
+    } else if cfg!(target_os = "linux") {
+        "iPhones and iPads need the usbmuxd service on Linux: run `sudo apt install usbmuxd` (Debian/Ubuntu) or `sudo dnf install usbmuxd` (Fedora), then reconnect the device."
+    } else {
+        "macOS provides the Apple USB service itself; if it stays unreachable, unplug and reconnect the device or restart the Mac."
     }
 }

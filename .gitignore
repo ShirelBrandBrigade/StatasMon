@@ -15,3 +15,6 @@ packages/protocol/generated/*.ts
 !packages/protocol/generated/.gitkeep
 ci-overrides.json
 fixtures/fake/live-*.jsonl
+
+# Downloaded at build time by scripts/fetch-platform-tools.sh (ADR-021)
+src-tauri/resources/platform-tools/

@@ -6,7 +6,7 @@
   "build": {
     "beforeDevCommand": "pnpm --filter @statasmon/desktop dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm --filter @statasmon/desktop build",
+    "beforeBuildCommand": "bash scripts/prebuild.sh",
     "frontendDist": "../apps/desktop/dist"
   },
   "app": {
@@ -24,7 +24,8 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["app", "dmg", "nsis", "msi"],
+    "targets": "all",
+    "resources": { "resources/platform-tools/": "platform-tools/" },
     "createUpdaterArtifacts": true,
     "publisher": "StatasMon",
     "homepage": "https://github.com/ShirelBrandBrigade/StatasMon",
@@ -41,6 +42,10 @@
     ],
     "macOS": {
       "minimumSystemVersion": "12.0"
+    },
+    "linux": {
+      "deb": { "depends": ["usbmuxd"] },
+      "appimage": { "bundleMediaFramework": false }
     },
     "windows": {
       "webviewInstallMode": { "type": "downloadBootstrapper", "silent": true },

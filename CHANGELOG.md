@@ -9,6 +9,14 @@ listed first; a release moves them under a dated version heading
 ## [Unreleased]
 
 ### Added
+- adb (Android platform-tools) ships inside every build on every OS; nothing to download for Android (ADR-021).
+- Linux x86_64 installers (.AppImage and .deb); the .deb pulls in usbmuxd for iPhone/iPad.
+- Per-OS instructions the moment Apple's USB service is missing (Apple Devices app on Windows, usbmuxd on Linux).
+- Simple mode for the log: plain-language stories with a Raw toggle (ADR-020).
+- Explanation of every data source and of the log in docs/DATA-SOURCES.md; docs/GETTING-STARTED.md to send with the installer.
+
+
+### Added
 - **Several devices at once.** iPhones, iPads and Android phones and
   tablets connect over USB (Android also over wireless ADB) and each gets
   its own live session; the sidebar switches between them without

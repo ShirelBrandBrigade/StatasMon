@@ -1,26 +1,27 @@
 //! Finding the `adb` binary (docs/PLAN.md step 2.1).
 //!
 //! Search order:
-//! 1. `STATASMON_ADB` (explicit override; the Settings screen writes it later)
-//! 2. the app's own managed copy under the app-data folder (downloaded on
-//!    first run after the user accepts Google's terms — the download itself
-//!    is a later step; today a missing copy yields exact instructions)
-//! 3. `adb` on `PATH`
-//! 4. `~/Downloads/platform-tools/adb` (developer convenience)
-//! 5. the Android SDK default location
+//! 1. `STATASMON_ADB` (explicit override; the Settings screen writes it)
+//! 2. the copy bundled inside the app (`STATASMON_ADB_BUNDLED_DIR`, set by
+//!    the Tauri shell from its resource folder; ADR-021)
+//! 3. the app's own managed copy under the app-data folder
+//! 4. `adb` on `PATH`
+//! 5. `~/Downloads/platform-tools/adb` (developer convenience)
+//! 6. the Android SDK default location
 //!
 //! Platform-specific paths live behind [`HostOs`]; nothing else in the
 //! crate branches on the OS.
 
 use std::path::{Path, PathBuf};
+use std::sync::OnceLock;
 use std::time::Duration;
 
 use statasmon_protocol::ToolVersion;
 
 use super::server::parse_version;
 
-/// Google's platform-tools download page (the zip is SDK-licensed; we
-/// never redistribute it, the user fetches it).
+/// Google's platform-tools download page, for the hint when no adb is
+/// found at all (builds made with `STATASMON_SKIP_ADB_BUNDLE=1`).
 pub const PLATFORM_TOOLS_URL: &str = "https://developer.android.com/tools/releases/platform-tools";
 
 /// Timeout for `adb version` while locating.
@@ -70,6 +71,8 @@ impl HostOs {
 pub struct LocatorEnv {
     /// `STATASMON_ADB`.
     pub override_path: Option<PathBuf>,
+    /// `STATASMON_ADB_BUNDLED_DIR`: the platform-tools folder shipped inside the app.
+    pub bundled_dir: Option<PathBuf>,
     /// `HOME` (macOS/Linux) or `USERPROFILE` (Windows).
     pub home: Option<PathBuf>,
     /// `%LOCALAPPDATA%` on Windows.
@@ -78,11 +81,24 @@ pub struct LocatorEnv {
     pub path: Option<String>,
 }
 
+/// The platform-tools folder shipped inside the app, registered once by the
+/// shell at startup (`set_bundled_dir`); `STATASMON_ADB_BUNDLED_DIR` wins
+/// when set (tests, dev runs).
+static BUNDLED_DIR: OnceLock<PathBuf> = OnceLock::new();
+
+/// Register the bundled platform-tools folder for every later search.
+pub fn set_bundled_dir(dir: PathBuf) {
+    let _ = BUNDLED_DIR.set(dir);
+}
+
 impl LocatorEnv {
     /// Read the real environment.
     pub fn from_process() -> Self {
         Self {
             override_path: std::env::var_os("STATASMON_ADB").map(PathBuf::from),
+            bundled_dir: std::env::var_os("STATASMON_ADB_BUNDLED_DIR")
+                .map(PathBuf::from)
+                .or_else(|| BUNDLED_DIR.get().cloned()),
             home: std::env::home_dir(),
             local_app_data: std::env::var_os("LOCALAPPDATA").map(PathBuf::from),
             path: std::env::var("PATH").ok(),
@@ -95,6 +111,8 @@ impl LocatorEnv {
 pub enum AdbSource {
     /// `STATASMON_ADB`.
     Env,
+    /// Shipped inside the app bundle.
+    Bundled,
     /// The app-managed copy under the app-data folder.
     Managed,
     /// Found on `PATH`.
@@ -156,6 +174,9 @@ pub fn candidates(os: HostOs, env: &LocatorEnv) -> Vec<(AdbSource, PathBuf)> {
     let mut out = Vec::new();
     if let Some(p) = &env.override_path {
         out.push((AdbSource::Env, p.clone()));
+    }
+    if let Some(dir) = &env.bundled_dir {
+        out.push((AdbSource::Bundled, dir.join(name)));
     }
     if let Some(dir) = managed_dir(os, env) {
         out.push((AdbSource::Managed, dir.join(name)));
@@ -240,10 +261,35 @@ mod tests {
     fn env() -> LocatorEnv {
         LocatorEnv {
             override_path: None,
+            bundled_dir: None,
             home: Some(PathBuf::from("/Users/dev")),
             local_app_data: Some(PathBuf::from("C:\\Users\\dev\\AppData\\Local")),
             path: Some("/usr/bin:/opt/homebrew/bin".to_owned()),
         }
+    }
+
+    #[test]
+    fn bundled_copy_comes_right_after_the_explicit_override() {
+        let mut e = env();
+        e.override_path = Some(PathBuf::from("/x/adb"));
+        e.bundled_dir = Some(PathBuf::from(
+            "/Applications/StatasMon.app/Contents/Resources/platform-tools",
+        ));
+        let c = candidates(HostOs::MacOs, &e);
+        assert_eq!(c[0].0, AdbSource::Env);
+        assert_eq!(c[1].0, AdbSource::Bundled);
+        assert_eq!(
+            c[1].1.display().to_string(),
+            "/Applications/StatasMon.app/Contents/Resources/platform-tools/adb"
+        );
+        assert_eq!(c[2].0, AdbSource::Managed);
+        let mut w = env();
+        w.bundled_dir = Some(PathBuf::from(
+            "C:\\Program Files\\StatasMon\\platform-tools",
+        ));
+        let c = candidates(HostOs::Windows, &w);
+        assert_eq!(c[0].0, AdbSource::Bundled);
+        assert!(c[0].1.display().to_string().ends_with("adb.exe"));
     }
 
     #[test]
@@ -310,6 +356,7 @@ mod tests {
         }
         let e = LocatorEnv {
             override_path: Some(fake.clone()),
+            bundled_dir: None,
             home: None,
             local_app_data: None,
             path: None,
@@ -337,6 +384,7 @@ mod tests {
     async fn nothing_found_gives_hint() {
         let e = LocatorEnv {
             override_path: Some(PathBuf::from("/definitely/not/here/adb")),
+            bundled_dir: None,
             home: Some(PathBuf::from("/definitely/not/here")),
             local_app_data: None,
             path: Some("/definitely/not/here/bin".to_owned()),

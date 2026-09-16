@@ -6,21 +6,18 @@ how those installers update themselves. Decisions behind this: ADR-003
 the network except the explicit update check the user opts into.
 
 ## 0. What ships
-
-| Platform | Installer | Updater artifact | Minimum OS |
-|---|---|---|---|
-| macOS (Apple Silicon `aarch64`, Intel `x86_64`) | `StatasMon_<v>_<arch>.dmg` (+ the `.app` inside) | `StatasMon.app.tar.gz` + `.sig` | macOS 12 |
-| Windows x64 | `StatasMon_<v>_x64-setup.exe` (NSIS, per-user, no admin) and `StatasMon_<v>_x64_en-US.msi` (WiX) | the NSIS `.exe` + `.sig` (updater prefers NSIS) | Windows 10 1809+ (WebView2 bootstrapper downloaded when missing) |
-
-Bundle identifier `com.statasmon.app`, publisher "StatasMon", category
-Developer Tool. The window is opaque (`transparent: false`); never change
-that (docs/research/stack.md §1).
-
-Configuration lives in `src-tauri/tauri.conf.json`:
-`bundle.targets`, `bundle.createUpdaterArtifacts: true`,
-`bundle.macOS.minimumSystemVersion`, `bundle.windows.nsis.installMode:
-"currentUser"`, `bundle.windows.webviewInstallMode: downloadBootstrapper`,
-`plugins.updater.{endpoints, pubkey, windows.installMode: "passive"}`.
+One self-contained file per operating system (ADR-021):
+- macOS: `.dmg` for Apple Silicon and Intel (the `.app` inside carries
+  adb under `Contents/Resources/platform-tools/`).
+- Windows: per-user NSIS `.exe` and `.msi` (adb.exe and its DLLs under
+  the install folder's `platform-tools/`). iPhone/iPad support needs the
+  free Apple Devices app or iTunes on the machine; the app says so.
+- Linux x86_64: `.AppImage` and `.deb` (the `.deb` depends on `usbmuxd`
+  for iPhone/iPad; the AppImage tells the user to install it).
+- Updater artifacts and `latest.json` when the signing key is present.
+`scripts/fetch-platform-tools.sh` runs before every build (locally through
+`beforeBuildCommand`, in CI as its own step) and needs `curl` + `unzip`.
+Send `docs/GETTING-STARTED.md` along with the file.
 
 ## 1. Version bump
 

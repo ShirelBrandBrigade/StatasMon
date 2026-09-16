@@ -31,6 +31,32 @@ fn source_mode() -> SourceMode {
 /// re-running the locator, so the device appears once platform-tools is
 /// installed; the hint is logged here (surfacing it on the bus needs an
 /// engine-side notice API, see the step 2.2 report).
+/// The platform-tools folder shipped inside the app (ADR-021), registered
+/// with the locator. On Unix the copy is made executable in case the
+/// packager dropped the mode bit.
+fn export_bundled_adb(resource_dir: Option<PathBuf>) {
+    let Some(dir) = resource_dir.map(|d| d.join("platform-tools")) else {
+        return;
+    };
+    let adb = dir.join(if cfg!(windows) { "adb.exe" } else { "adb" });
+    if !adb.is_file() {
+        tracing::info!(dir = %dir.display(), "android: no bundled adb in this build");
+        return;
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        if let Ok(meta) = std::fs::metadata(&adb)
+            && meta.permissions().mode() & 0o111 == 0
+            && let Err(e) = std::fs::set_permissions(&adb, std::fs::Permissions::from_mode(0o755))
+        {
+            tracing::warn!(error = %e, "android: bundled adb is not executable");
+        }
+    }
+    statasmon_device_android::adb::locator::set_bundled_dir(dir.clone());
+    tracing::info!(dir = %dir.display(), "android: bundled adb available");
+}
+
 fn attach_android(engine: &Engine, adb_path: Option<PathBuf>) {
     let engine = engine.clone();
     tauri::async_runtime::spawn(async move {
@@ -110,6 +136,7 @@ pub fn run() {
             let mode = source_mode();
             // Store root: `STATASMON_STORE_DIR` (dev) or the app data folder
             // (`~/Library/Application Support/com.statasmon.app` on macOS).
+            export_bundled_adb(app.path().resource_dir().ok());
             let app_data_dir = match app.path().app_data_dir() {
                 Ok(dir) => Some(dir),
                 Err(e) => {

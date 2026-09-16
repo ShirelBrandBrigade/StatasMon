@@ -535,3 +535,33 @@ break the no-network rule and would leak device logs. Decisions:
 Consequences: the rules need a fixture line for every wording they claim
 (`logExplain.test.ts`); new device behaviours are added as rules, never
 by hiding lines. Export always writes raw lines.
+
+## ADR-021 · 2026-09-16 · One self-contained installer per OS: adb inside, Apple driver explained, Linux added
+Status: accepted. Context: the user wants to hand coworkers one file per
+system (macOS, Windows, Linux) with nothing else to install. Xcode is not
+needed: the iOS side is the app's own Rust implementation of Apple's
+protocols (ADR-004). What is needed is adb for Android and, on Windows and
+Linux, Apple's USB service (usbmuxd), which has no redistributable form.
+Decisions:
+- **adb ships inside the app.** `scripts/fetch-platform-tools.sh` downloads
+  Google's platform-tools zip for the build host at build time (never
+  committed), keeps `adb` (+ its two DLLs on Windows), `NOTICE.txt` and
+  `source.properties`, and `tauri.conf.json` bundles that folder as a
+  resource. The locator (`crates/device-android/src/adb/locator.rs`) tries
+  it right after the explicit override, before the managed copy, `PATH`,
+  Downloads and the SDK. Supersedes the "never redistribute" clause of
+  ADR-005. The prebuilt zip is covered by Google's SDK terms; the decision
+  to bundle it, as scrcpy and others do, is the project owner's.
+  `STATASMON_SKIP_ADB_BUNDLE=1` builds without it and the old first-run
+  instructions apply.
+- **The Apple USB layer is not bundled** (Apple's Windows driver is
+  proprietary; Linux's usbmuxd is a system service with udev rules). The
+  app tells the user exactly what to install, per OS, the moment usbmuxd is
+  unreachable (`muxd_hint` in `crates/device-ios/src/error.rs`); the
+  Linux `.deb` declares `usbmuxd` as a dependency so `apt` installs it.
+- **Linux is a release target**: the release workflow gains an
+  `ubuntu-22.04` job producing `.AppImage` and `.deb`; bundle targets are
+  "all" (Tauri builds those valid for the host).
+Consequences: installers grow by ~19 MB (macOS) / ~7 MB (Windows/Linux);
+`docs/GETTING-STARTED.md` is the page to send with the file; building
+locally now needs `curl` and `unzip` (or the skip variable).
