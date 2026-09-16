@@ -28,7 +28,7 @@ beforeEach(() => {
   caps(IPHONE, { logs: true });
 });
 
-const list = () => screen.getByRole("listbox");
+const list = () => screen.getByRole("listbox", { name: /Log entries/ });
 const toolbar = () => screen.getByRole("toolbar", { name: "Log filters" });
 const seedLog = () =>
   act(() => dispatch({ type: "log", device_id: IPHONE, entries: mockupEntries() }));

@@ -27,7 +27,7 @@ test("shows the device name, model · link, the pills, and changes the range", (
   render(<TopBar deviceId="fake:iphone" />);
   // The synthetic iPhone is named after its model.
   expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("iPhone 16 Pro");
-  expect(screen.getByText("iPhone 16 Pro · Fake")).toBeInTheDocument();
+  expect(screen.getByText("iPhone 16 Pro · USB")).toBeInTheDocument();
   expect(screen.getByText("Synthetic")).toHaveAttribute("data-tone", "info");
   expect(screen.queryByTestId("headline-pill")).not.toBeInTheDocument();
 

@@ -105,6 +105,11 @@ export function AppPicker({ deviceId, processes, label = "+ app", className }: A
   const running = useProcesses(deviceId);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  // Closing forgets the search, so the next open lists everything again.
+  const close = () => {
+    setOpen(false);
+    setQuery("");
+  };
   const rootRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const rows = useMemo(() => pickerRows(processes, running, query), [processes, running, query]);
@@ -112,10 +117,10 @@ export function AppPicker({ deviceId, processes, label = "+ app", className }: A
   useEffect(() => {
     if (!open) return undefined;
     const onDown = (e: globalThis.MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) close();
     };
     const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") close();
     };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
@@ -131,7 +136,7 @@ export function AppPicker({ deviceId, processes, label = "+ app", className }: A
       return;
     }
     actions.setProcesses([process]);
-    setOpen(false);
+    close();
   };
 
   const item = (r: PickerRow) => {
@@ -169,7 +174,7 @@ export function AppPicker({ deviceId, processes, label = "+ app", className }: A
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => (open ? close() : setOpen(true))}
       >
         {label}
       </button>

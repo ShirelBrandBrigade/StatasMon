@@ -37,8 +37,10 @@ const count = (name: string) => canvas.calls.filter((c) => c === name).length;
 test("draws one line and one label chip per visible marker, at most MAX_MARKERS", async () => {
   const ref: { current: uPlot | null } = { current: null };
   const markers = [
-    { tsMs: T0 + 2000, label: "Mark 1", tone: "info" as const },
-    { tsMs: T0 + 5000, label: "Thermal", tone: "warn" as const },
+    // Far enough apart that neither chip overlaps the other (an overlapping
+    // chip is skipped on purpose; see drawMarkers).
+    { tsMs: T0 + 1000, label: "Mark 1", tone: "info" as const },
+    { tsMs: T0 + 8000, label: "Thermal", tone: "warn" as const },
     { tsMs: T0 - 60_000, label: "Old", tone: "bad" as const }, // outside the window
   ];
   const props = {

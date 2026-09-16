@@ -33,7 +33,7 @@ function seed() {
   act(() => dispatch({ type: "log", device_id: ID, entries: mockupEntries() }));
 }
 
-const list = () => screen.getByRole("listbox");
+const list = () => screen.getByRole("listbox", { name: /Log entries/ });
 const rows = () => Array.from(document.querySelectorAll<HTMLElement>(".log-row"));
 const button = (name: string) => screen.getByRole("button", { name });
 
