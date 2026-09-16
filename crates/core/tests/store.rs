@@ -22,6 +22,19 @@ fn fast_config() -> EngineConfig {
     })
 }
 
+/// Store errors are logged, not returned: print them so a failing runner
+/// (Windows, for one) says what went wrong.
+fn init_tracing() {
+    let _ = tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+                tracing_subscriber::EnvFilter::new("warn,statasmon_store=debug")
+            }),
+        )
+        .with_test_writer()
+        .try_init();
+}
+
 async fn drain(
     rx: &mut tokio::sync::broadcast::Receiver<Arc<Message>>,
     for_ms: u64,
@@ -43,6 +56,7 @@ async fn drain(
 
 #[tokio::test]
 async fn records_three_seconds_and_lists_one_session_per_device() {
+    init_tracing();
     let dir = tempfile::tempdir().unwrap();
     let engine = Engine::new(fast_config().with_store(StoreConfig::new(dir.path())));
     let store = engine.store().expect("store opened");
@@ -170,6 +184,7 @@ async fn records_three_seconds_and_lists_one_session_per_device() {
 
 #[tokio::test]
 async fn splits_the_session_at_the_recording_cap() {
+    init_tracing();
     let dir = tempfile::tempdir().unwrap();
     let engine = Engine::new(
         fast_config().with_store(StoreConfig::new(dir.path()).with_max_session_ms(2000)),
@@ -224,6 +239,7 @@ async fn splits_the_session_at_the_recording_cap() {
 
 #[tokio::test]
 async fn unopenable_store_degrades_with_a_notice() {
+    init_tracing();
     let file = tempfile::NamedTempFile::new().unwrap();
     // The root is an existing file: the directories cannot be created.
     let engine = Engine::new(fast_config().with_store(StoreConfig::new(file.path())));
