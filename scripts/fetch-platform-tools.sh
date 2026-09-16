@@ -40,15 +40,11 @@ trap 'rm -rf "$tmp"' EXIT
 echo "fetch-platform-tools: downloading $url"
 curl -fsSL --retry 3 -o "$tmp/pt.zip" "$url"
 unzip -q "$tmp/pt.zip" -d "$tmp"
-rm -rf "$dest"; mkdir -p "$dest"
+# Replace everything except the tracked README.md.
+mkdir -p "$dest"
+find "$dest" -mindepth 1 ! -name README.md -exec rm -rf {} + 2>/dev/null || true
 for f in "$adb" AdbWinApi.dll AdbWinUsbApi.dll NOTICE.txt source.properties; do
   [[ -f "$tmp/platform-tools/$f" ]] && cp "$tmp/platform-tools/$f" "$dest/$f"
 done
 [[ "$os" != "windows" ]] && chmod 755 "$dest/$adb"
-cat > "$dest/README.txt" <<'TXT'
-adb from Google's Android SDK platform-tools, bundled so StatasMon needs
-no separate download. Google's terms for the SDK platform-tools apply
-(https://developer.android.com/studio/terms); NOTICE.txt lists the
-open-source licences of the components. source.properties has the version.
-TXT
 echo "fetch-platform-tools: bundled $(grep -m1 Pkg.Revision "$dest/source.properties" || echo 'unknown version') into $dest"

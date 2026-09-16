@@ -17,4 +17,5 @@ ci-overrides.json
 fixtures/fake/live-*.jsonl
 
 # Downloaded at build time by scripts/fetch-platform-tools.sh (ADR-021)
-src-tauri/resources/platform-tools/
+src-tauri/resources/platform-tools/*
+!src-tauri/resources/platform-tools/README.md
