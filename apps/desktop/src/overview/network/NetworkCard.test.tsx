@@ -96,9 +96,10 @@ test("shows dashes with the reason when network_throughput is unavailable", () =
   });
   const { container } = render(<NetworkCard deviceId={DEVICE} />);
 
-  // Down, up, two totals, latency and the chart placeholder all carry the reason.
+  // Down, up, two totals and the chart placeholder carry the throughput
+  // reason; the subtitle's dash carries the Wi-Fi reason instead.
   const dashes = screen.getAllByLabelText(`Unavailable: ${reason}`);
-  expect(dashes.length).toBe(6);
+  expect(dashes.length).toBe(5);
   expect(within(screen.getByTestId("net-down")).getByText("down")).toBeInTheDocument();
   expect(screen.getByTestId("net-chart-off")).toHaveTextContent(reason);
   expect(container.querySelector(".uplot")).toBeNull();

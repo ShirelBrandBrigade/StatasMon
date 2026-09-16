@@ -104,7 +104,7 @@ test("app pills: only the selection gets a pill; the picker selects, adds and cl
     within(dialog)
       .getAllByRole("option")
       .map((o) => o.getAttribute("data-process")),
-  ).toEqual(["FieldKit", "com.example.fieldkit", "Safari", "SpringBoard"]);
+  ).toEqual(["FieldKit", "com.example.fieldkit", "Safari", "SpringBoard", "thermalmonitord"]);
   fireEvent.click(within(dialog).getByRole("option", { name: /SpringBoard/ }));
   expect(button("All apps")).toHaveAttribute("aria-pressed", "false");
   expect(pills()).toEqual(["All apps", "SpringBoard", "+ app", "+ filter"]);

@@ -42,8 +42,11 @@ class Path2DStub {
   addPath(): void {}
   moveTo(): void {}
   lineTo(): void {}
+  bezierCurveTo(): void {}
+  quadraticCurveTo(): void {}
   rect(): void {}
   arc(): void {}
+  arcTo(): void {}
   closePath(): void {}
 }
 

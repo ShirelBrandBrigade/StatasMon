@@ -151,7 +151,13 @@ test("app tabs show the app under test and the selection; the picker selects or 
     within(dialog)
       .getAllByRole("option")
       .map((o) => o.getAttribute("data-process"));
-  expect(options()).toEqual(["FieldKit", "com.example.fieldkit", "Safari", "SpringBoard"]);
+  expect(options()).toEqual([
+    "FieldKit",
+    "com.example.fieldkit",
+    "Safari",
+    "SpringBoard",
+    "thermalmonitord",
+  ]);
   fireEvent.change(within(dialog).getByRole("searchbox", { name: "Find an app" }), {
     target: { value: "spring" },
   });
