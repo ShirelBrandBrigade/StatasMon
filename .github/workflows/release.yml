@@ -1,11 +1,15 @@
 name: release
-# Builds the installers for macOS (arm64 + x86_64) and Windows.
+# Builds the installers for macOS (arm64 + x86_64), Windows and Linux.
 #
-# - On a tag `v*`: signed + notarized when the secrets exist, updater
-#   artifacts included, uploaded to a DRAFT GitHub release (publish by hand,
-#   docs/RELEASE.md).
-# - On workflow_dispatch: an unsigned test build (no release is created;
-#   the installers are attached to the workflow run as artifacts).
+# - On every push to `main`: a versioned release. The version is
+#   <major>.<minor> from tauri.conf.json plus the commit count on main as
+#   the patch number (0.1.57, 0.1.58, …); the commit is tagged `v<version>`
+#   and a published (non-draft) GitHub release gets all installers, so
+#   coworkers always find the newest build under Releases. Signed and
+#   notarized when the secrets exist; the updater's `latest.json` follows.
+# - On a hand-made tag `v*`: the same build, but as a DRAFT release for a
+#   curated version (publish by hand, docs/RELEASE.md).
+# - On workflow_dispatch: an unsigned test build attached to the run only.
 #
 # Secrets (all optional until they exist; the workflow degrades to unsigned):
 #   TAURI_SIGNING_PRIVATE_KEY, TAURI_SIGNING_PRIVATE_KEY_PASSWORD  updater signature
@@ -17,6 +21,7 @@ name: release
 #   WINDOWS_CERTIFICATE, WINDOWS_CERTIFICATE_PASSWORD                Windows: OV/EV .pfx (alternative)
 on:
   push:
+    branches: ["main"]
     tags: ["v*"]
   workflow_dispatch:
     inputs:
@@ -33,7 +38,50 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # The version for this build and, on main, the tag that names the release.
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      tag: ${{ steps.v.outputs.tag }}
+      mode: ${{ steps.v.outputs.mode }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - id: v
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            tag="${GITHUB_REF#refs/tags/}"
+            echo "mode=tag" >> "$GITHUB_OUTPUT"
+            echo "tag=$tag" >> "$GITHUB_OUTPUT"
+            echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_EVENT_NAME" == "push" && "$GITHUB_REF" == "refs/heads/main" ]]; then
+            base=$(node -p 'require("./src-tauri/tauri.conf.json").version.split(".").slice(0,2).join(".")')
+            version="$base.$(git rev-list --count HEAD)"
+            tag="v$version"
+            echo "mode=main" >> "$GITHUB_OUTPUT"
+            echo "tag=$tag" >> "$GITHUB_OUTPUT"
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+            # Name the commit; a tag pushed with GITHUB_TOKEN starts no other workflow.
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+              echo "::notice::tag $tag already exists; the release is updated in place"
+            else
+              git tag -a "$tag" -m "StatasMon $version (automatic build of main)"
+              git push origin "refs/tags/$tag"
+            fi
+            echo "::notice::building version $version"
+          else
+            echo "mode=manual" >> "$GITHUB_OUTPUT"
+            echo "tag=" >> "$GITHUB_OUTPUT"
+            echo "version=$(node -p 'require("./src-tauri/tauri.conf.json").version')" >> "$GITHUB_OUTPUT"
+          fi
+
   build:
+    needs: version
     strategy:
       fail-fast: false
       matrix:
@@ -92,9 +140,18 @@ jobs:
           AZURE_ACCOUNT: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
           AZURE_PROFILE: ${{ secrets.AZURE_SIGNING_PROFILE }}
           WIN_CERT: ${{ secrets.WINDOWS_CERTIFICATE }}
+          BUILD_MODE: ${{ needs.version.outputs.mode }}
+          BUILD_VERSION: ${{ needs.version.outputs.version }}
         run: |
           overrides='{}'
           updater=true
+          # Main builds carry the computed version (0.1.<commit count>).
+          if [ "$BUILD_MODE" = "main" ]; then
+            overrides=$(printf '%s' "$overrides" | node -e '
+              const o = JSON.parse(require("fs").readFileSync(0, "utf8"));
+              o.version = process.argv[1];
+              process.stdout.write(JSON.stringify(o));' "$BUILD_VERSION")
+          fi
           if [ "$UNSIGNED" = "true" ] || [ -z "$TAURI_KEY" ]; then
             updater=false
             echo "::notice::updater artifacts are OFF (no TAURI_SIGNING_PRIVATE_KEY or unsigned build)"
@@ -208,8 +265,26 @@ jobs:
             put AZURE_CLIENT_SECRET "$S_AZURE_SECRET"
           fi
 
-      - name: Build and upload to the draft release
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Build and publish the versioned release (every push to main)
+        if: needs.version.outputs.mode == 'main'
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ needs.version.outputs.tag }}
+          releaseName: "StatasMon ${{ needs.version.outputs.version }}"
+          releaseBody: |
+            Automatic build of `main` at ${{ github.sha }} (${{ github.event.head_commit.message }}).
+
+            One file per computer, adb included: `.dmg` (macOS 12+, Apple Silicon `aarch64` and Intel `x64`), `.exe` / `.msi` (Windows 10/11), `.AppImage` / `.deb` (Linux x86_64). Windows and Linux need Apple's USB service for iPhone/iPad, see docs/GETTING-STARTED.md. Changes: CHANGELOG.md.
+          releaseDraft: false
+          prerelease: false
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
+          args: ${{ matrix.args }} --config ci-overrides.json
+
+      - name: Build and upload to the draft release (hand-made tag)
+        if: needs.version.outputs.mode == 'tag'
         uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -224,7 +299,7 @@ jobs:
           args: ${{ matrix.args }} --config ci-overrides.json
 
       - name: Build (test artifacts, no release)
-        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        if: needs.version.outputs.mode == 'manual'
         uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -232,7 +307,7 @@ jobs:
           args: ${{ matrix.args }} --config ci-overrides.json
 
       - name: Attach installers to the workflow run
-        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        if: needs.version.outputs.mode == 'manual'
         uses: actions/upload-artifact@v4
         with:
           name: statasmon-${{ matrix.target }}

@@ -9,6 +9,7 @@ listed first; a release moves them under a dated version heading
 ## [Unreleased]
 
 ### Added
+- Every push to main publishes a versioned GitHub release (0.1.<commit count>) with installers for macOS (arm64, x86_64), Windows and Linux.
 - adb (Android platform-tools) ships inside every build on every OS; nothing to download for Android (ADR-021).
 - Linux x86_64 installers (.AppImage and .deb); the .deb pulls in usbmuxd for iPhone/iPad.
 - Per-OS instructions the moment Apple's USB service is missing (Apple Devices app on Windows, usbmuxd on Linux).

@@ -45,33 +45,21 @@ as a pre-release on GitHub and is ignored by the updater's `latest.json`
 unless you publish it as the latest release.
 
 ## 2. What CI produces (`.github/workflows/release.yml`)
-
-Matrix: `macos-latest` × {`aarch64-apple-darwin`, `x86_64-apple-darwin`}
-and `windows-latest`. Two entry points:
-
-- **Tag `v*`** → `tauri-apps/tauri-action` builds, signs (when the secrets
-  exist), notarizes (macOS, when the secrets exist), produces the updater
-  artifacts and uploads everything to a **draft** GitHub release named
-  `StatasMon v0.2.0`, together with `latest.json` (the updater manifest;
-  `updaterJsonPreferNsis` makes Windows point at the `.exe`). Nothing is
-  visible to users until the draft is published by hand.
-- **workflow_dispatch** (Actions → release → Run workflow, `unsigned`
-  ticked by default) → an unsigned test build with the updater artifacts
-  off; the installers are attached to the workflow run as artifacts
-  (`statasmon-<target>`), no release is created. Use it to check that the
-  build still works on all three targets before tagging.
-
-How the workflow degrades: every signing step is a no-op when its secrets
-are missing, and it prints a `::warning::` saying what was skipped. The
-updater artifacts are turned off automatically when
-`TAURI_SIGNING_PRIVATE_KEY` is absent (they cannot be produced unsigned);
-a release without them cannot be picked up by the in-app updater. The
-merge point for all of this is a generated `ci-overrides.json` passed to
-`tauri build --config`.
-
-CI stays green today with **zero** secrets configured; it just yields
-unsigned installers. Adding the secrets below is the only remaining step
-to signed, notarized, self-updating releases.
+Three ways a build starts:
+- **Every push to `main`** → a published release. The `version` job
+  computes `<major>.<minor>` from `tauri.conf.json` plus the number of
+  commits on `main` as the patch (`0.1.57`, `0.1.58`, …), tags the commit
+  `v<version>`, and the four build jobs (macOS arm64, macOS x86_64,
+  Windows, Linux) upload their installers to that release with
+  `--config ci-overrides.json` carrying the version. `latest.json` is
+  attached when the updater key exists, so installed apps update to the
+  newest push. Coworkers always take the top entry under Releases.
+- **A hand-made tag `v*`** → the same build as a **draft** release, for a
+  curated version you publish by hand after a smoke test.
+- **Run workflow (Actions tab)** → an unsigned test build attached to the
+  run as artifacts; no release.
+Runs on the same ref queue behind each other (concurrency group), so two
+pushes in a row produce two releases in order.
 
 ## 3. Secrets to add (GitHub → Settings → Secrets and variables → Actions)
 
