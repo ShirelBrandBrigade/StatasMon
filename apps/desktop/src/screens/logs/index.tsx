@@ -1,7 +1,16 @@
 import "../../overview/log/LogCard.css";
 import "./logs.css";
 import type { LogEntry, LogLevel } from "@statasmon/protocol";
-import { AppTile, Button, Card, Dash, levelMeta, positionThumb, toneColor } from "@statasmon/ui";
+import {
+  AppTile,
+  Button,
+  Card,
+  Dash,
+  levelMeta,
+  positionThumb,
+  Segment,
+  toneColor,
+} from "@statasmon/ui";
 import {
   type CSSProperties,
   type KeyboardEvent,
@@ -19,10 +28,12 @@ import { useCapability, useProcesses, useTelemetryValue } from "../../hooks/useD
 import { formatCount, isAppUnderTest, plural } from "../../overview/log";
 import { AppPicker } from "../../overview/log/AppPicker";
 import { LogRow } from "../../overview/log/LogRow";
+import { SimpleLog } from "../../overview/log/SimpleLog";
 import { useFilteredLog } from "../../overview/log/useFilteredLog";
 import { TopBar } from "../../shell/TopBar";
 import { useAppStore } from "../../store/app";
 import { ALL_LEVELS, useLogFilter, useLogFilterActions } from "../../store/logFilter";
+import { LOG_VIEW_OPTIONS, useLogViewStore } from "../../store/logView";
 import { telemetry } from "../../store/telemetry";
 import { AROUND_MS, CrashStrip } from "./CrashStrip";
 import {
@@ -98,6 +109,8 @@ export interface LogsBodyProps {
 export function LogsBody({ deviceId, initialItemCount }: LogsBodyProps) {
   const logsCap = useCapability(deviceId, "logs");
   const filter = useLogFilter(deviceId);
+  const viewMode = useLogViewStore((s) => s.mode);
+  const setViewMode = useLogViewStore((s) => s.setMode);
   const actions = useLogFilterActions(deviceId);
   const log = useFilteredLog(deviceId);
   const facts = useRingFacts(deviceId);
@@ -400,6 +413,13 @@ export function LogsBody({ deviceId, initialItemCount }: LogsBodyProps) {
             );
           })}
           <AppPicker deviceId={deviceId} processes={log.processes} className="logs-picker" />
+          <Segment
+            name="Log view"
+            className="logs-view-seg"
+            options={LOG_VIEW_OPTIONS}
+            value={viewMode}
+            onChange={setViewMode}
+          />
           <Button
             size="sm"
             icon={followTail ? "pause" : "chevron-down"}
@@ -439,6 +459,13 @@ export function LogsBody({ deviceId, initialItemCount }: LogsBodyProps) {
             <div className="log-empty">
               {log.total === 0 ? "No log lines yet" : "No entries match the filter"}
             </div>
+          ) : viewMode === "simple" ? (
+            <SimpleLog
+              entries={entries}
+              keys={keys}
+              followTail={followTail}
+              initialItemCount={initialItemCount}
+            />
           ) : (
             <Virtuoso<LogEntry>
               ref={listRef}

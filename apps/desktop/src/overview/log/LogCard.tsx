@@ -1,13 +1,15 @@
 import type { LogEntry, LogLevel } from "@statasmon/protocol";
-import { Button, Card, cx, Dash, levelMeta, toneColor } from "@statasmon/ui";
+import { Button, Card, cx, Dash, levelMeta, Segment, toneColor } from "@statasmon/ui";
 import { type CSSProperties, type KeyboardEvent, useCallback, useRef, useState } from "react";
 import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 import { openExportDialog } from "../../export/exportStore";
 import { useCapability } from "../../hooks/useDevice";
 import { ALL_LEVELS, useLogFilter, useLogFilterActions } from "../../store/logFilter";
+import { LOG_VIEW_OPTIONS, useLogViewStore } from "../../store/logView";
 import { AppPicker } from "./AppPicker";
 import { formatCount, plural } from "./format";
 import { LogRow } from "./LogRow";
+import { SimpleLog } from "./SimpleLog";
 import { useFilteredLog } from "./useFilteredLog";
 import "./LogCard.css";
 
@@ -46,6 +48,8 @@ function isEditable(target: EventTarget | null): boolean {
 export function LogCard({ deviceId, className, style, initialItemCount }: LogCardProps) {
   const logsCap = useCapability(deviceId, "logs");
   const filter = useLogFilter(deviceId);
+  const viewMode = useLogViewStore((s) => s.mode);
+  const setViewMode = useLogViewStore((s) => s.setMode);
   const actions = useLogFilterActions(deviceId);
   const log = useFilteredLog(deviceId);
   const { entries, keys, total, shown, errors, faults, invalid, processes, warningsSeen } = log;
@@ -229,6 +233,13 @@ export function LogCard({ deviceId, className, style, initialItemCount }: LogCar
             );
           })}
         </fieldset>
+        <Segment
+          name="Log view"
+          className="log-view-seg"
+          options={LOG_VIEW_OPTIONS}
+          value={viewMode}
+          onChange={setViewMode}
+        />
       </div>
 
       <div
@@ -245,6 +256,13 @@ export function LogCard({ deviceId, className, style, initialItemCount }: LogCar
           <div className="log-empty">
             {total === 0 ? "No log lines yet" : "No entries match the filter"}
           </div>
+        ) : viewMode === "simple" ? (
+          <SimpleLog
+            entries={entries}
+            keys={keys}
+            followTail={followTail}
+            initialItemCount={initialItemCount}
+          />
         ) : (
           <Virtuoso<LogEntry>
             ref={listRef}

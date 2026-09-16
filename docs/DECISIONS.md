@@ -502,3 +502,36 @@ were cuts. Decisions:
   of vanishing, the primary button lifts 1 px on hover.
 Consequences: all of it is off under `prefers-reduced-motion`; the
 Masonry container is `data-testid="masonry"` for tests.
+
+## ADR-020 · 2026-09-16 · Simple mode for the log: plain-language stories, on the device
+Status: accepted. Context: the raw log is thousands of lines of system
+chatter a person cannot read; the user asked for a mode that explains
+what is happening in plain words. Sending lines to a cloud model would
+break the no-network rule and would leak device logs. Decisions:
+- **A local rule table** (`overview/log/logExplain.ts`) maps each line to
+  a sentence, a tone (fine / information / worth a look / a problem) and
+  a `routine` flag: thermal state changes, memory pressure, memory kills,
+  crash reports, app open/close, interface up/down, network configuration
+  changes, and the Android equivalents (Start proc, Displayed, am_kill,
+  ANR, FATAL EXCEPTION, low memory). Housekeeping from runningboardd,
+  lockdownd, trustd, containermanagerd, locationd, bluetoothd, apsd,
+  networking daemons, SpringBoard and the kernel is routine. Unmatched
+  lines fall back on their level (fault → serious problem, error → ran
+  into an error, warning → worth a look, else routine).
+- **Wording is for a non-technical reader**: no "XPC", "jetsam", "kernel",
+  "daemon" or bundle ids in a title; process names are shortened; the
+  device's `<private>` becomes "[redacted by the device]". The raw
+  message stays available as the story's detail and behind a Raw toggle.
+- **Stories fold lines**: consecutive lines with the same rule and process
+  within 5 s become one story with a count; consecutive routine lines
+  from any process become one grey "Normal background activity" row until
+  something notable interrupts. Up to 25 raw lines are kept per story.
+- **Raw · Simple** is a segment on both log panels (Overview card and Logs
+  page), remembered in `localStorage` (`store/logView.ts`). Simple mode
+  starts with a one-line summary ("3 things worth knowing about; 1 204
+  routine lines folded away") and a colour legend. Filters (levels, apps,
+  search, time range) apply before folding, so Simple mode explains
+  exactly what Raw mode would list.
+Consequences: the rules need a fixture line for every wording they claim
+(`logExplain.test.ts`); new device behaviours are added as rules, never
+by hiding lines. Export always writes raw lines.

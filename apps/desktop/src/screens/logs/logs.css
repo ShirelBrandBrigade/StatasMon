@@ -219,10 +219,15 @@
   margin-left: 4px;
 }
 
-/* Follow-tail lives at the end of the tab row, so the toolbar keeps two rows at 1180 px. */
-.logs-tabs > .logs-follow {
+/* Follow-tail and the Raw/Simple switch live at the end of the tab row. */
+.logs-tabs > .logs-view-seg {
   align-self: center;
   margin-left: auto;
+}
+
+.logs-tabs > .logs-follow {
+  align-self: center;
+  margin-left: 8px;
 }
 
 .logs-selected {

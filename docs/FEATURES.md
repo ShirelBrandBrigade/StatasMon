@@ -77,6 +77,19 @@ faults. Crash reports, tombstones and ANRs appear as events with the report
 attached. Per-app log = the same stream pre-filtered, plus that app's
 metrics.
 
+### Simple mode (2026-09-16, ADR-020)
+A **Raw · Simple** switch on both log panels. Simple mode rewrites each
+line as a plain sentence for a non-technical reader ("Memory is running
+critically low", "The device is running hot and slowing itself down",
+"Opened Maps", "FieldKit crashed; a crash report was saved"), colours it
+fine / information / worth a look / a problem, folds repeats into one
+row with a count, and collapses routine housekeeping into a grey
+"Normal background activity" row. A one-line summary and a legend sit
+at the top; every row has a Raw toggle showing the original lines. The
+rules run on the device only; nothing is sent anywhere. Filters apply
+before folding; export always writes raw lines.
+
+
 ## 10. Export
 Formats: `.log` (plain text, one line per entry), `.jsonl` (one JSON object
 per line, full fields), `.csv` (metrics samples), session bundle `.zip`
