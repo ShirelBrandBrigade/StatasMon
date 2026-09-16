@@ -25,7 +25,9 @@ test("shows the fake iPhone's identity, software, hardware, state and connection
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
 
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("iPhone 16 Pro");
+  // The shared header names the device; the hero names the model (ADR-016/017).
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Elia's iPhone");
+  await expect(page.getByRole("heading", { level: 2 })).toHaveText("iPhone 16 Pro");
   await expect(page.getByTestId("device-screen")).toHaveAttribute("data-device-id", "fake:iphone");
 
   const identity = page.getByRole("region", { name: "Identity" });
@@ -74,7 +76,8 @@ test("switching to the fake iPad shows its capability reasons and raw keys copy 
     .getByRole("list", { name: "Devices" })
     .getByRole("button", { name: /Elia's iPad/ })
     .click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("iPad (10th generation)");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Elia's iPad");
+  await expect(page.getByRole("heading", { level: 2 })).toHaveText("iPad (10th generation)");
   await expect(page.getByTestId("device-screen")).toHaveAttribute("data-device-id", "fake:ipad");
 
   const caps = page.getByRole("list", { name: "Capability list" });

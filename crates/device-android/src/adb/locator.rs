@@ -258,6 +258,11 @@ pub async fn locate_with(os: HostOs, env: &LocatorEnv) -> AdbLocation {
 mod tests {
     use super::*;
 
+    /// Paths as strings with forward slashes, whatever the host joins with.
+    fn shown(p: &Path) -> String {
+        p.display().to_string().replace('\\', "/")
+    }
+
     fn env() -> LocatorEnv {
         LocatorEnv {
             override_path: None,
@@ -279,7 +284,7 @@ mod tests {
         assert_eq!(c[0].0, AdbSource::Env);
         assert_eq!(c[1].0, AdbSource::Bundled);
         assert_eq!(
-            c[1].1.display().to_string(),
+            shown(&c[1].1),
             "/Applications/StatasMon.app/Contents/Resources/platform-tools/adb"
         );
         assert_eq!(c[2].0, AdbSource::Managed);
@@ -289,7 +294,7 @@ mod tests {
         ));
         let c = candidates(HostOs::Windows, &w);
         assert_eq!(c[0].0, AdbSource::Bundled);
-        assert!(c[0].1.display().to_string().ends_with("adb.exe"));
+        assert!(shown(&c[0].1).ends_with("adb.exe"));
     }
 
     #[test]
@@ -297,7 +302,7 @@ mod tests {
         let mut e = env();
         e.override_path = Some(PathBuf::from("/x/adb"));
         let c = candidates(HostOs::MacOs, &e);
-        let paths: Vec<String> = c.iter().map(|(_, p)| p.display().to_string()).collect();
+        let paths: Vec<String> = c.iter().map(|(_, p)| shown(p)).collect();
         assert_eq!(
             paths,
             vec![
@@ -321,12 +326,12 @@ mod tests {
         let mut e = env();
         e.path = Some("C:\\tools;D:\\bin".to_owned());
         let c = candidates(HostOs::Windows, &e);
-        let paths: Vec<String> = c.iter().map(|(_, p)| p.display().to_string()).collect();
+        let paths: Vec<String> = c.iter().map(|(_, p)| shown(p)).collect();
         assert!(paths[0].ends_with("StatasMon/platform-tools/adb.exe"));
-        assert!(paths[0].starts_with("C:\\Users\\dev\\AppData\\Local"));
+        assert!(paths[0].starts_with("C:/Users/dev/AppData/Local"));
         assert!(paths[1].ends_with("adb.exe"));
-        assert!(paths[1].starts_with("C:\\tools"));
-        assert!(paths[2].starts_with("D:\\bin"));
+        assert!(paths[1].starts_with("C:/tools"));
+        assert!(paths[2].starts_with("D:/bin"));
         assert!(paths.last().unwrap().contains("Android"));
         assert!(paths.last().unwrap().contains("Sdk"));
     }
@@ -335,7 +340,10 @@ mod tests {
     fn missing_hint_names_the_managed_folder_and_url() {
         let hint = missing_hint(HostOs::MacOs, &env());
         assert!(hint.contains(PLATFORM_TOOLS_URL));
-        assert!(hint.contains("/Users/dev/Library/Application Support/StatasMon/platform-tools"));
+        assert!(
+            hint.replace('\\', "/")
+                .contains("/Users/dev/Library/Application Support/StatasMon/platform-tools")
+        );
         assert!(hint.contains("STATASMON_ADB"));
     }
 
