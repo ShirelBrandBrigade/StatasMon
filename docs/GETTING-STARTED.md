@@ -32,3 +32,14 @@ the tooltip of every dashed value; nothing is ever guessed.
   macOS.
 - Nothing is sent anywhere. The only network access is the device
   connection and the optional update check you can turn on in Settings.
+
+## If macOS refuses to open the app
+The builds are not yet signed with an Apple Developer ID, so macOS asks
+before the first launch:
+1. Open StatasMon once (it will be refused).
+2. Open System Settings → Privacy & Security, scroll to the message about
+   StatasMon and click **Open Anyway**, then confirm.
+On macOS 14 and older, right-click the app and choose Open instead.
+If a build older than 0.1.61 says the app "is damaged", that build was not
+sealed; take the newest release, or run once in Terminal:
+`xattr -cr /Applications/StatasMon.app`.

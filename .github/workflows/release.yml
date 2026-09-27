@@ -176,7 +176,14 @@ jobs:
                 echo "::warning::macOS build is signed but NOT notarized (no APPLE_API_* or APPLE_ID secrets)"
               fi
             else
-              echo "::warning::macOS build is UNSIGNED (no APPLE_CERTIFICATE / APPLE_SIGNING_IDENTITY, or unsigned build)"
+              # No Developer ID: seal the bundle with an ad-hoc signature. An
+              # unsealed bundle is reported as "damaged" once downloaded; an
+              # ad-hoc one opens after the user allows it in Privacy & Security.
+              overrides=$(printf '%s' "$overrides" | node -e '
+                const o = JSON.parse(require("fs").readFileSync(0, "utf8"));
+                o.bundle.macOS = { signingIdentity: "-" };
+                process.stdout.write(JSON.stringify(o));')
+              echo "::warning::macOS build is AD-HOC signed only (no APPLE_CERTIFICATE / APPLE_SIGNING_IDENTITY, or unsigned build)"
             fi
           fi
 
