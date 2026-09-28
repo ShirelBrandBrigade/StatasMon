@@ -589,3 +589,33 @@ for the root password. Decisions:
 Consequences: the discovery already retries every 5 s, so the device
 appears shortly after the install; the `.deb` keeps declaring `usbmuxd`
 as a dependency, so this mostly serves AppImage and `.rpm` users.
+
+## ADR-023 · 2026-09-28 · Every installer can be built on one Mac
+Status: accepted. Context: GitHub Actions stopped running (account
+billing) and the owner uploads releases by hand, so the Mac must produce
+the Windows and Linux installers too. Decisions:
+- **`scripts/build-all.sh`** builds into `dist/`, flat, every file named
+  with its version (commit count, or `STATASMON_VERSION` to pin it):
+  macOS arm64 and x86_64 `.dmg` (ad-hoc sealed), Windows x64 `.exe`,
+  Linux x86_64 `.deb` and `.rpm`.
+- **Windows** is cross-compiled with `cargo-xwin` (MSVC target, Microsoft's
+  CRT and SDK fetched by xwin under their licence). Homebrew's `makensis`
+  crashes with `bad_alloc` on Apple Silicon, so Tauri writes
+  `installer.nsi` and `makensis` runs in a Linux container that mounts the
+  same absolute paths. Only the NSIS `.exe` is produced; an `.msi` needs a
+  Windows host.
+- **Linux** compiles in an `ubuntu:22.04` `linux/amd64` container under
+  Colima (Rosetta), with toolchains and the target directory on a named
+  volume. The web part is built on the Mac (it is platform-independent and
+  pnpm crashes under x86 emulation); the container gets the Tauri CLI
+  through npm. The VM has 4 GB, so it gets an 8 GB swap file and two build
+  jobs; a cold build takes about 45 minutes, a warm one about 15.
+- **No `.AppImage` from the Mac**: the AppImage tools read
+  `/proc/self/exe`, which neither Rosetta nor QEMU exposes here. It stays
+  a product of GitHub's runners or a real x86_64 Linux machine.
+- Installers built this way are unsigned on Windows and ad-hoc signed on
+  macOS, exactly like CI without secrets.
+Consequences: one-time setup is `brew install nsis llvm colima docker`,
+two rustup targets and `cargo install cargo-xwin`; the Windows and Linux
+results compile and package but are not run here, so a hands-on check on
+each system remains the release gate.

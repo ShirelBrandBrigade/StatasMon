@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Builds every installer on one Mac and collects them in dist/ (ADR-023):
 #   macOS arm64 + x86_64 (.dmg, ad-hoc sealed), Windows x64 (.exe, NSIS,
-#   cross-compiled with cargo-xwin), Linux x86_64 (.AppImage + .deb, built
-#   in an Ubuntu 22.04 container through Colima/Docker).
+#   cross-compiled with cargo-xwin), Linux x86_64 (.deb + .rpm, built in an
+#   Ubuntu 22.04 container through Colima/Docker). The .AppImage needs a real
+#   x86_64 Linux host or GitHub's runners (STATASMON_APPIMAGE=1 tries anyway).
 #
 #   scripts/build-all.sh                 # everything
 #   scripts/build-all.sh mac windows     # a subset: mac | windows | linux
@@ -31,6 +32,8 @@ echo "== StatasMon $version → $dist (${what[*]})"
 
 start_docker() {
   docker info >/dev/null 2>&1 || colima start --arch aarch64 --vm-type vz --vz-rosetta --cpu 4 --memory 4 --disk 40
+  # The final crate needs more memory than a 4 GB VM has; swap makes up for it.
+  colima ssh -- sh -c 'swapon --show | grep -q /swapfile || { sudo fallocate -l 8G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile >/dev/null && sudo swapon /swapfile; }' || true
 }
 
 want() { local x; for x in "${what[@]}"; do [[ "$x" == "$1" ]] && return 0; done; return 1; }
@@ -79,9 +82,11 @@ if want linux; then
   cli="$(node -p 'require("./package.json").devDependencies["@tauri-apps/cli"].replace(/^[^0-9]*/, "")')"
   docker run --rm --platform linux/amd64 \
     -v "$here":/src:ro -v statasmon-linux-build:/build -v "$dist":/out \
-    -e VERSION="$version" -e TAURI_CLI_VERSION="$cli" ubuntu:22.04 bash /src/scripts/build-linux-in-container.sh
+    -e VERSION="$version" -e TAURI_CLI_VERSION="$cli" -e CARGO_BUILD_JOBS=2 -e STATASMON_APPIMAGE="${STATASMON_APPIMAGE:-0}" ubuntu:22.04 bash /src/scripts/build-linux-in-container.sh
 fi
 
 # Whatever was built last, leave the Mac's own adb in the resource folder.
 STATASMON_ADB_OS=darwin bash scripts/fetch-platform-tools.sh >/dev/null
+# The VM holds 4 GB of this Mac's memory; give it back.
+colima status >/dev/null 2>&1 && colima stop >/dev/null 2>&1 || true
 echo "== done"; ls -lh "$dist"

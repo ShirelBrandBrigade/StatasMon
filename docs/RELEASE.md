@@ -139,24 +139,19 @@ SmartScreen shows "unknown publisher" for a new OV identity until it
 earns reputation; EV and Trusted Signing skip that.
 
 ## 4. Building locally
-
+Everything from one Mac (ADR-023):
 ```bash
-export TAURI_SIGNING_PRIVATE_KEY=~/.tauri/statasmon.key   # path or contents
-export TAURI_SIGNING_PRIVATE_KEY_PASSWORD=""               # this key has none
-pnpm tauri build                                           # unsigned .app + .dmg on macOS
+scripts/build-all.sh                       # mac + windows + linux into dist/
+scripts/build-all.sh mac windows           # a subset
+STATASMON_VERSION=0.1.62 scripts/build-all.sh   # pin the version
 ```
-
-Output under `target/release/bundle/`: `macos/StatasMon.app`,
-`dmg/StatasMon_<v>_aarch64.dmg`, `macos/StatasMon.app.tar.gz` (+ `.sig`).
-On Windows: `nsis/*.exe`, `msi/*.msi` (+ `.sig` for the NSIS installer).
-Without `TAURI_SIGNING_PRIVATE_KEY` the build stops with "A public key
-has been found, but no private key"; pass
-`--config '{"bundle":{"createUpdaterArtifacts":false}}'` for a quick
-unsigned installer. Unsigned macOS builds are ad-hoc signed by the linker
-and launch on the building machine; on another Mac they need
-"Open anyway" in System Settings → Privacy & Security. A signed build:
-`APPLE_SIGNING_IDENTITY="Developer ID Application: …" pnpm tauri build`
-(notarization needs the `APPLE_*` variables from §3 as well).
+One-time setup: `brew install nsis llvm colima docker`,
+`rustup target add x86_64-apple-darwin x86_64-pc-windows-msvc`,
+`cargo install --locked cargo-xwin`. Results land flat in `dist/`:
+two `.dmg`, the Windows `-setup.exe`, a `.deb` and an `.rpm`. The
+`.AppImage` and the `.msi` only come from GitHub's runners (or a real
+Linux / Windows machine). A single platform the usual way:
+`pnpm tauri build --bundles app` on macOS.
 
 ## 5. The updater
 

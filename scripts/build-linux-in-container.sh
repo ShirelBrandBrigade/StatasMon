@@ -50,6 +50,22 @@ export CARGO_TARGET_DIR=/build/target CI=true APPIMAGE_EXTRACT_AND_RUN=1
 STATASMON_ADB_OS=linux bash scripts/fetch-platform-tools.sh
 echo "{\"version\":\"$VERSION\",\"build\":{\"beforeBuildCommand\":\"\"},\"bundle\":{\"createUpdaterArtifacts\":false}}" > /build/overrides.json
 cd src-tauri
-"$TOOLS/cli/node_modules/.bin/tauri" build --bundles appimage,deb --config /build/overrides.json
-cp /build/target/release/bundle/appimage/*.AppImage /build/target/release/bundle/deb/*.deb /out/
+export XDG_CACHE_HOME=/build/cache
+tauri="$TOOLS/cli/node_modules/.bin/tauri"
+# The .deb and .rpm first: they need no helper tools. The AppImage packer
+# (linuxdeploy) is itself an AppImage and can fail under emulation; a failure
+# there must not cost the other two.
+"$tauri" build --bundles deb,rpm --config /build/overrides.json
+cp /build/target/release/bundle/deb/*.deb /build/target/release/bundle/rpm/*.rpm /out/
+# Opt-in: on an Apple Silicon Mac the packer cannot read /proc/self/exe
+# through Rosetta or QEMU, so it fails there. It works on a real x86_64
+# Linux host and on GitHub's runners.
+if [[ "${STATASMON_APPIMAGE:-0}" == "1" ]]; then
+  if "$tauri" build --verbose --bundles appimage --config /build/overrides.json > /build/appimage.log 2>&1; then
+    cp /build/target/release/bundle/appimage/*.AppImage /out/
+  else
+    echo "== AppImage packing failed; the .deb and .rpm are in /out. Last lines:" >&2
+    grep -vE "jemalloc|^\s*$" /build/appimage.log | tail -25 >&2
+  fi
+fi
 ls -lh /out
