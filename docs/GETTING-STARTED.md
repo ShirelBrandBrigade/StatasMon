@@ -9,7 +9,7 @@ per system is below.
 | --- | --- | --- | --- |
 | **macOS 12 or newer** (Apple Silicon or Intel) | open `StatasMon-<version>-<arch>.dmg`, drag StatasMon to Applications | works out of the box | works out of the box (macOS ships the USB service) |
 | **Windows 10 / 11** | run `StatasMon_<version>_x64-setup.exe` (installs for your user, no admin) or the `.msi` | works out of the box; if a phone is not seen, enable USB debugging on it and accept the prompt | install the free **Apple Devices** app from the Microsoft Store (or iTunes from apple.com) once, then plug in the device |
-| **Linux x86_64** (Ubuntu 22.04+, Fedora 39+ or similar) | `StatasMon_<version>_amd64.AppImage` (make it executable, run) or the `.deb` (`sudo apt install ./StatasMon_<version>_amd64.deb`) | works out of the box; some distributions need your user in the `plugdev` group for USB access | `sudo apt install usbmuxd` (the `.deb` pulls it in automatically), then plug in the device |
+| **Linux x86_64** (Ubuntu 22.04+, Fedora 39+ or similar) | `StatasMon_<version>_amd64.AppImage` (make it executable, run) or the `.deb` (`sudo apt install ./StatasMon_<version>_amd64.deb`) | works out of the box; some distributions need your user in the `plugdev` group for USB access | the app offers to install `usbmuxd` for you the first time it is missing (your system asks for the password); the `.deb` pulls it in automatically |
 
 ## First connection
 1. Plug the device in over USB.

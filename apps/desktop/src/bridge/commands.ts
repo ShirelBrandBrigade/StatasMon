@@ -28,6 +28,17 @@ export interface UpdateStatus {
   notes?: string;
 }
 
+/** `apple_support_status` (ADR-022): what iPhones and iPads need on this computer. */
+export interface AppleSupportStatus {
+  os: "macos" | "windows" | "linux";
+  /** True when the app can install it (Linux with a known package manager and polkit). */
+  installable: boolean;
+  package_manager: string | null;
+  /** The command that would run as root, shown before it runs. */
+  command: string | null;
+  reason: string | null;
+}
+
 import { getStream } from "./index";
 
 /** Typed wrappers over the core commands (names are the contract with src-tauri). */
@@ -80,4 +91,12 @@ export const commands = {
    * messages with `task_id: "update"`. Resolves only on failure (the app restarts).
    */
   installUpdate: async () => (await getStream()).invoke<void>("install_update"),
+  /** What iPhones and iPads need here, and whether the app can install it. */
+  appleSupportStatus: async () =>
+    (await getStream()).invoke<AppleSupportStatus | null>("apple_support_status"),
+  /**
+   * Installs usbmuxd through the system's password dialog (Linux). Resolves
+   * with the installer's last lines; rejects with `{ code, message, hint }`.
+   */
+  installAppleSupport: async () => (await getStream()).invoke<string>("install_apple_support"),
 };

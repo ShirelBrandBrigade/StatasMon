@@ -565,3 +565,27 @@ Decisions:
 Consequences: installers grow by ~19 MB (macOS) / ~7 MB (Windows/Linux);
 `docs/GETTING-STARTED.md` is the page to send with the file; building
 locally now needs `curl` and `unzip` (or the skip variable).
+
+## ADR-022 · 2026-09-28 · Linux: the app offers to install usbmuxd, through the system's own password dialog
+Status: accepted. Context: on Linux, iPhones and iPads need the `usbmuxd`
+system package; the AppImage cannot carry it and coworkers should not have
+to open a terminal. The user asked for the app to run the install and ask
+for the root password. Decisions:
+- **The app never asks for, sees or stores a password.** The install runs
+  through `pkexec` (polkit): the desktop's own authentication dialog asks,
+  exactly as a software centre does. Without polkit the app shows the
+  command to run with `sudo` and offers no button.
+- **Only on the user's click.** When usbmuxd is unreachable the
+  driver-missing notice shows the offer, the exact command that will run as
+  root, and an Install button. Nothing is installed at startup or silently.
+- **Known package managers**: apt, dnf, pacman, zypper
+  (`crates/device-ios/src/setup.rs`), each with a non-interactive install
+  of `usbmuxd` followed by starting the service. Exit 126/127 from pkexec
+  read as "prompt dismissed" / "not authorised"; any other failure shows
+  the installer's last lines. A five-minute timeout bounds it.
+- **Windows stays manual**: Apple's driver comes only with the Apple
+  Devices app or iTunes, whose installers cannot be driven or
+  redistributed. macOS needs nothing.
+Consequences: the discovery already retries every 5 s, so the device
+appears shortly after the install; the `.deb` keeps declaring `usbmuxd`
+as a dependency, so this mostly serves AppImage and `.rpm` users.

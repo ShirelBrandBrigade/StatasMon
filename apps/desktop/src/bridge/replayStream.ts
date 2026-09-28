@@ -382,6 +382,14 @@ class ReplayState {
         this.settings = next;
         return structuredClone(next);
       }
+      case "apple_support_status":
+        return {
+          os: "macos",
+          installable: false,
+          package_manager: null,
+          command: null,
+          reason: "macOS provides the Apple USB service itself.",
+        };
       case "store_stats": {
         const stored = this.storedSessions();
         return {

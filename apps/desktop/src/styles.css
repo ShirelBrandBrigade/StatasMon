@@ -588,3 +588,21 @@ body,
     padding: 7px 10px;
   }
 }
+
+/* Notice: the offer to install Apple device support (ADR-022). */
+.notice-install {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.notice-install-cmd {
+  padding: 6px 8px;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-inner);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: var(--fs-log);
+  overflow-wrap: anywhere;
+}

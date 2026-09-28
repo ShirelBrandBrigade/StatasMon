@@ -221,6 +221,8 @@ pub fn run() {
             commands::ui_report,
             commands::check_for_update,
             commands::install_update,
+            commands::apple_support_status,
+            commands::install_apple_support,
         ])
         .run(tauri::generate_context!())
         .unwrap_or_else(|e| panic!("error while running StatasMon: {e}"));

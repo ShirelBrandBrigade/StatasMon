@@ -26,6 +26,7 @@ pub mod lockdown;
 pub mod muxd;
 pub mod ostrace;
 pub mod pcap;
+pub mod setup;
 pub mod source;
 pub mod storage;
 pub mod thermal;

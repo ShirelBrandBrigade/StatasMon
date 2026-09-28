@@ -6,6 +6,7 @@
 #
 #   scripts/fetch-platform-tools.sh            # host OS
 #   scripts/fetch-platform-tools.sh windows    # darwin | windows | linux
+#   STATASMON_ADB_OS=windows                   # same, for cross builds (prebuild.sh passes no argument)
 #   STATASMON_SKIP_ADB_BUNDLE=1                # build without adb inside
 set -euo pipefail
 
@@ -18,7 +19,7 @@ if [[ "${STATASMON_SKIP_ADB_BUNDLE:-}" == "1" ]]; then
   exit 0
 fi
 
-os="${1:-}"
+os="${1:-${STATASMON_ADB_OS:-}}"
 if [[ -z "$os" ]]; then
   case "$(uname -s)" in
     Darwin) os=darwin ;;
@@ -29,7 +30,7 @@ if [[ -z "$os" ]]; then
 fi
 
 adb="adb"; [[ "$os" == "windows" ]] && adb="adb.exe"
-if [[ -f "$dest/$adb" && -f "$dest/source.properties" ]]; then
+if [[ -f "$dest/$adb" && -f "$dest/source.properties" && "$(cat "$dest/.os" 2>/dev/null)" == "$os" ]]; then
   echo "fetch-platform-tools: $dest/$adb present ($(grep -m1 Pkg.Revision "$dest/source.properties" || true))"
   exit 0
 fi
@@ -47,4 +48,5 @@ for f in "$adb" AdbWinApi.dll AdbWinUsbApi.dll NOTICE.txt source.properties; do
   [[ -f "$tmp/platform-tools/$f" ]] && cp "$tmp/platform-tools/$f" "$dest/$f"
 done
 [[ "$os" != "windows" ]] && chmod 755 "$dest/$adb"
+echo "$os" > "$dest/.os"
 echo "fetch-platform-tools: bundled $(grep -m1 Pkg.Revision "$dest/source.properties" || echo 'unknown version') into $dest"

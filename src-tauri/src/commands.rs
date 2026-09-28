@@ -640,3 +640,35 @@ mod update_tests {
         assert!(s.ends_with('…'));
     }
 }
+
+/// What this computer needs for iPhones and iPads, and whether the app can
+/// install it (Linux with a known package manager and polkit; ADR-022).
+#[tauri::command]
+pub fn apple_support_status() -> statasmon_device_ios::setup::AppleSupportStatus {
+    statasmon_device_ios::setup::apple_support_status()
+}
+
+/// Install usbmuxd through the system's own password dialog. Only reachable
+/// from the user's click on the notice; the password never enters the app.
+#[tauri::command]
+pub async fn install_apple_support() -> CmdResult<String> {
+    use statasmon_device_ios::setup::SetupError;
+    statasmon_device_ios::setup::install_apple_support()
+        .await
+        .map_err(|e| CommandError {
+            code: match e {
+                SetupError::NotInstallable(_) => ErrorCode::Unsupported,
+                _ => ErrorCode::Io,
+            },
+            hint: match &e {
+                SetupError::Dismissed | SetupError::NotAuthorised => Some(
+                    "Press Install again and enter the password of an administrator.".to_owned(),
+                ),
+                SetupError::Failed { .. } | SetupError::TimedOut(_) | SetupError::Spawn(_) => {
+                    Some(statasmon_device_ios::error::muxd_hint().to_owned())
+                }
+                SetupError::NotInstallable(_) => None,
+            },
+            message: e.to_string(),
+        })
+}

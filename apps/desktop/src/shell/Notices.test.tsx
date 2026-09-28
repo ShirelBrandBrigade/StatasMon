@@ -90,3 +90,76 @@ test("EmptyState repeats persistent notices with their hint, not transient ones"
   expect(block).toHaveTextContent("Install the OEM driver.");
   expect(block).not.toHaveTextContent("transient");
 });
+
+test("driver missing on Linux offers the install, shows the command, and reports the outcome", async () => {
+  vi.useRealTimers();
+  vi.spyOn(console, "warn").mockImplementation(() => {});
+  const { commands } = await import("../bridge/commands");
+  const status = vi.spyOn(commands, "appleSupportStatus").mockResolvedValue({
+    os: "linux",
+    installable: true,
+    package_manager: "apt",
+    command: "apt-get update && apt-get install -y usbmuxd",
+    reason: null,
+  });
+  const install = vi
+    .spyOn(commands, "installAppleSupport")
+    .mockRejectedValueOnce({
+      code: "io",
+      message: "The password prompt was dismissed; nothing was installed.",
+      hint: "Press Install again and enter the password of an administrator.",
+    })
+    .mockResolvedValueOnce("Setting up usbmuxd");
+  render(<Notices />);
+  act(() => {
+    dispatch({
+      type: "error",
+      device_id: null,
+      code: "driver_missing",
+      message: "usbmuxd is unreachable",
+      hint: "iPhones and iPads need the usbmuxd service on Linux.",
+    });
+  });
+  const offer = await screen.findByTestId("apple-support-install");
+  expect(status).toHaveBeenCalledTimes(1);
+  expect(within(offer).getByText("apt-get update && apt-get install -y usbmuxd")).toHaveClass(
+    "mono",
+  );
+  expect(offer).toHaveTextContent("StatasMon never sees it");
+
+  const button = within(offer).getByRole("button", { name: "Install Apple device support" });
+  await act(async () => {
+    fireEvent.click(button);
+  });
+  expect(within(offer).getByRole("alert")).toHaveTextContent("The password prompt was dismissed");
+  await act(async () => {
+    fireEvent.click(button);
+  });
+  expect(install).toHaveBeenCalledTimes(2);
+  expect(within(offer).getByRole("status")).toHaveTextContent("Installed. Reconnect the device.");
+});
+
+test("no install offer where the app cannot do it (macOS, Windows)", async () => {
+  vi.useRealTimers();
+  vi.spyOn(console, "warn").mockImplementation(() => {});
+  const { commands } = await import("../bridge/commands");
+  vi.spyOn(commands, "appleSupportStatus").mockResolvedValue({
+    os: "windows",
+    installable: false,
+    package_manager: null,
+    command: null,
+    reason: "Install the free Apple Devices app from the Microsoft Store.",
+  });
+  render(<Notices />);
+  act(() => {
+    dispatch({
+      type: "error",
+      device_id: null,
+      code: "driver_missing",
+      message: "usbmuxd is unreachable",
+      hint: "Install the free Apple Devices app.",
+    });
+  });
+  await screen.findByText("usbmuxd is unreachable");
+  expect(screen.queryByTestId("apple-support-install")).toBeNull();
+});
