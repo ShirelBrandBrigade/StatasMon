@@ -218,12 +218,8 @@ pub fn first_existing(os: HostOs, env: &LocatorEnv) -> Option<(AdbSource, PathBu
 
 /// Run `<adb> version` and parse the `Version` line.
 pub async fn tool_version(adb: &Path) -> Option<ToolVersion> {
-    let mut cmd = tokio::process::Command::new(adb);
-    cmd.arg("version")
-        .stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped());
-    cmd.kill_on_drop(true);
+    let mut cmd = super::process::adb_command(adb);
+    cmd.arg("version");
     let out = tokio::time::timeout(VERSION_TIMEOUT, cmd.output())
         .await
         .ok()?

@@ -42,7 +42,6 @@ pub mod process {
     //! every tick batches its commands into one `sh -c` invocation.
 
     use std::path::{Path, PathBuf};
-    use std::process::Stdio;
     use std::sync::Arc;
     use std::time::Duration;
 
@@ -70,23 +69,15 @@ pub mod process {
         }
 
         fn command(&self, args: &[&str]) -> Command {
-            let mut c = Command::new(&*self.adb);
+            let mut c = crate::adb::process::adb_command(&self.adb);
             c.arg("-s").arg(&self.serial).args(args);
-            c.stdin(Stdio::null())
-                .stdout(Stdio::piped())
-                .stderr(Stdio::piped());
-            c.kill_on_drop(true);
             c
         }
 
         /// Run a non-shell adb subcommand (`pair`, `connect`, `bugreport`…).
         pub async fn adb(&self, args: &[&str], timeout_ms: u64) -> Result<String, ShellError> {
-            let mut c = Command::new(&*self.adb);
-            c.args(args)
-                .stdin(Stdio::null())
-                .stdout(Stdio::piped())
-                .stderr(Stdio::piped());
-            c.kill_on_drop(true);
+            let mut c = crate::adb::process::adb_command(&self.adb);
+            c.args(args);
             let out = tokio::time::timeout(Duration::from_millis(timeout_ms), c.output())
                 .await
                 .map_err(|_| ShellError::Timeout(timeout_ms))??;

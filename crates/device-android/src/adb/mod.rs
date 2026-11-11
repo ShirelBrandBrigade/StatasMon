@@ -8,6 +8,7 @@
 
 pub mod discovery;
 pub mod locator;
+pub mod process;
 pub mod server;
 
 pub use discovery::{AdbDiscovery, AdbHandle, DEFAULT_POLL};

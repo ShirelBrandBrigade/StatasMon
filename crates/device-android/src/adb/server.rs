@@ -6,12 +6,10 @@
 //! port only sets that variable.
 
 use std::path::{Path, PathBuf};
-use std::process::Stdio;
 use std::sync::Arc;
 use std::time::Duration;
 
 use statasmon_protocol::ToolVersion;
-use tokio::process::Command;
 
 use crate::shell::ShellError;
 use crate::shell::process::ProcessShell;
@@ -203,12 +201,8 @@ impl AdbServer {
 
     /// Run `adb <args>` and return stdout followed by stderr.
     pub async fn run(&self, args: &[&str], timeout_ms: u64) -> Result<String, ShellError> {
-        let mut c = Command::new(&*self.adb);
-        c.args(args)
-            .stdin(Stdio::null())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped());
-        c.kill_on_drop(true);
+        let mut c = super::process::adb_command(&self.adb);
+        c.args(args);
         let out = tokio::time::timeout(Duration::from_millis(timeout_ms), c.output())
             .await
             .map_err(|_| ShellError::Timeout(timeout_ms))?
